@@ -63,8 +63,9 @@ figcaption{color:#8e897f}figcaption b{color:#7df9ff;text-shadow:0 0 8px rgba(125
 .copy{border-top-color:rgba(255,255,255,.12)}body.side .copy{border-left-color:rgba(255,255,255,.12)}body.side .copy .side{border-bottom-color:rgba(255,255,255,.12)}
 #txt{color:#e8eef0;text-shadow:0 0 5px rgba(125,249,255,.16)}
 #txt .end{color:#7df9ff;text-shadow:0 0 8px rgba(125,249,255,.55)}
-:root{--thought:#2e2eff;--thought-glow:0 0 6px rgba(50,50,255,.8),0 0 18px rgba(50,50,255,.8)}
-#txt .end.pw{color:var(--thought);text-shadow:var(--thought-glow)}
+/* Electric-blue POWER/THOUGHT accent. Swap here only: canvas JS reads these too (6-digit hex for the two colors). */
+:root{--thought-text:#2e2eff;--thought-text-glow:0 0 6px rgba(50,50,255,.8),0 0 18px rgba(50,50,255,.8);--thought-line:#1414ff;--thought-line-glow:rgba(30,30,255,.85)}
+#txt .end.pw{color:var(--thought-text);text-shadow:var(--thought-text-glow)}
 #note{color:#9c968a}
 #nav{border-top-color:rgba(255,255,255,.12)}
 .btn{background:transparent;color:#7df9ff;border-color:rgba(125,249,255,.38);text-shadow:0 0 5px rgba(125,249,255,.35)}
@@ -150,8 +151,11 @@ function belugaBig(x,y,a,t){const b=a*0.65;ctx.save();ctx.translate(x,y);
  ctx.fillStyle='rgba(255,255,255,0.9)';ctx.beginPath();ctx.ellipse(-a*0.42,-b*0.52,a*0.2,b*0.1,-0.3,0,TAU);ctx.fill();
  ctx.restore();}
 /* Labels are always clamped fully inside the canvas. y = baseline of first line. */
-/* THOUGHT = electric-blue accent for power/thought on the canvas. It reads the CSS var --thought (set in :root above, 6-digit hex), so one edit there recolors text and canvas. */
-const THOUGHT=(getComputedStyle(document.documentElement).getPropertyValue('--thought').trim()||'#2e2eff').toLowerCase();function thA(a){const n=parseInt(THOUGHT.slice(1),16);return `rgba(${n>>16},${n>>8&255},${n&255},${a})`;}
+/* Blue accent for canvas: values come from the CSS vars in :root (--thought-text, --thought-line, --thought-line-glow). */
+const CSSV=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const THOUGHT_TEXT=(CSSV('--thought-text')||'#2e2eff').toLowerCase(),THOUGHT_LINE=(CSSV('--thought-line')||'#1414ff').toLowerCase(),THOUGHT_LINE_GLOW=CSSV('--thought-line-glow')||'rgba(30,30,255,.85)';
+function hexA(h,a){const n=parseInt(h.slice(1),16);return `rgba(${n>>16},${n>>8&255},${n&255},${a})`;}
+const lineA=a=>hexA(THOUGHT_LINE,a);
 function label(txt,x,y,o={}){const size=o.size||14,pad=5;ctx.save();
  const lines=String(txt).split('\n'),lh=size*1.28;
  const fontOf=i=>(o.bold||(o.boldFirst&&i===0))?`500 ${size-1}px 'JetBrains Mono',ui-monospace,'DejaVu Sans Mono',monospace`:`${o.weight||400} ${size}px 'Courier Prime','Courier New',ui-monospace,monospace`;
@@ -159,7 +163,7 @@ function label(txt,x,y,o={}){const size=o.size||14,pad=5;ctx.save();
  let x0=o.align==='center'?x-w/2:o.align==='right'?x-w:x;x0=clamp(x0,pad+3,LW-w-pad-3);
  let y0=y-size*1.05;y0=clamp(y0,pad+3,LH-h-pad-3);
  if(o.box!==false){ctx.fillStyle=o.bg||'rgba(18,20,22,0.86)';rr(x0-pad,y0-pad+1,w+2*pad,h+2*pad-2,2);ctx.fill();if(o.border){ctx.strokeStyle=o.border;ctx.lineWidth=1;ctx.stroke();}}
- ctx.textBaseline='top';lines.forEach((l,i)=>{ctx.font=fontOf(i);const fc=(o.colors&&o.colors[i])||o.color||((o.bold||(o.boldFirst&&i===0))?'#7df9ff':'#f2f3ed');ctx.fillStyle=fc;if(fc===THOUGHT){ctx.shadowColor=thA(0.8);ctx.shadowBlur=12*SC*DPR;}else if(fc[0]==='#'&&fc.length===7){ctx.shadowColor=fc+'5c';ctx.shadowBlur=(size>=16?6:4)*SC*DPR;}else ctx.shadowBlur=0;
+ ctx.textBaseline='top';lines.forEach((l,i)=>{ctx.font=fontOf(i);const fc=(o.colors&&o.colors[i])||o.color||((o.bold||(o.boldFirst&&i===0))?'#7df9ff':'#f2f3ed');ctx.fillStyle=fc;if(fc===THOUGHT_TEXT){ctx.shadowColor=hexA(THOUGHT_TEXT,0.8);ctx.shadowBlur=12*SC*DPR;}else if(fc[0]==='#'&&fc.length===7){ctx.shadowColor=fc+'5c';ctx.shadowBlur=(size>=16?6:4)*SC*DPR;}else ctx.shadowBlur=0;
   let lx=x0;if(o.align==='center')lx=x0+(w-ws[i])/2;else if(o.align==='right')lx=x0+w-ws[i];ctx.fillText(l,lx,y0+i*lh+(lh-size)/2);});
  ctx.restore();return{x:x0,y:y0,w,h};}
 function leader(x1,y1,x2,y2,col){ctx.save();ctx.strokeStyle=col||'rgba(230,230,220,0.55)';ctx.lineWidth=1.2;ctx.setLineDash([3,3]);ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();ctx.setLineDash([]);ctx.fillStyle=col||'rgba(230,230,220,0.8)';ctx.beginPath();ctx.arc(x2,y2,2.5,0,TAU);ctx.fill();ctx.restore();}
@@ -231,7 +235,7 @@ const STEPS=[
   leader(150,392,305-108*0.3,by-14+70*1.38,'rgba(230,230,220,0.6)');label('carriage\n(motors, electronics)',22,392,{size:12,colors:['#f2f3ed','#9c9d98']});
   label('(drawn huge here)',305,by+150,{align:'center',size:12,color:'#9c9d98',box:false});
   label('sunlight in',140,215,{align:'center',color:'#e5c9a6'});
-  label('power out',485,by+5,{color:THOUGHT});
+  label('power out',485,by+5,{color:THOUGHT_TEXT});
   label('Sun',22,330,{color:'#e5c9a6',bold:true});
   ctx.strokeStyle='rgba(255,255,255,0.14)';ctx.setLineDash([4,6]);ctx.beginPath();ctx.moveTo(588,40);ctx.lineTo(588,500);ctx.stroke();ctx.setLineDash([]);
   const cx=795,cy=280;sun(cx,cy,15,4);
@@ -290,7 +294,7 @@ const STEPS=[
    for(let j=0;j<n;j++)beluga(x0+50+(j-(n-1)/2)*27,y+4,10,{view:'side',T});
    label(rw[0],x0+108,y-22,{size:14,bold:true,box:false});
    label(rw[1],x0+108,y,{size:13,color:'#e5c9a6',box:false});
-   label(rw[2],x0+108,y+24,{size:15,bold:true,color:THOUGHT,box:false});
+   label(rw[2],x0+108,y+24,{size:15,bold:true,color:THOUGHT_TEXT,box:false});
    const bx=x0+108,bw=262,bh=11,byy=y+40;ctx.fillStyle='#2a2c2f';ctx.fillRect(bx,byy,bw,bh);
    for(let j=0;j<n;j++){const s0=j/n,s1=(j+1)/n,fe=clamp((fill-s0)/(s1-s0),0,1);if(fe<=0)continue;ctx.fillStyle=j%2?'#e5c9a6':'#f7f1e9';ctx.fillRect(bx+bw*s0+1,byy,(bw/n-2)*fe,bh);}});}},
 {title:'Sharing light: side by side, not single file',kick:'Shading',
@@ -311,7 +315,7 @@ const STEPS=[
   label('In a line (single file)',750,40,{align:'center',bold:true,size:16});
   label('sunlight ↓',40,82,{size:13,color:'#e5c9a6'});label('sunlight ↓',960,82,{align:'right',size:13,color:'#e5c9a6'});
   const ph=smooth(((t*0.3)%1.3)/0.7);
-  [[70,1.0,'#b7d3a8','Pod power: 100%'],[570,0.25,'#e8a27a','Pod power: about 25%']].forEach(([x,v,c,txt])=>{label(txt,x,452,{size:15,bold:true,color:THOUGHT,box:false});ctx.fillStyle='#2a2c2f';ctx.fillRect(x,466,360,16);ctx.fillStyle=c;ctx.fillRect(x,466,360*v*ph,16);});
+  [[70,1.0,'#b7d3a8','Pod power: 100%'],[570,0.25,'#e8a27a','Pod power: about 25%']].forEach(([x,v,c,txt])=>{label(txt,x,452,{size:15,bold:true,color:THOUGHT_TEXT,box:false});ctx.fillStyle='#2a2c2f';ctx.fillRect(x,466,360,16);ctx.fillStyle=c;ctx.fillRect(x,466,360*v*ph,16);});
   label('Space has no air to “draft” on like geese do. Only shadows matter.',500,522,{align:'center',size:13,color:'#9c9d98'});}},
 {title:'The conveyor',kick:'The conveyor',
  text:'Pods slowly drift inward, from the outer ring toward the inner ring. On the way they drop the Belugas they no longer need (3 → 2 → 1), so each pod keeps making the same power. The spare Belugas sail back out on sunlight and join new pods on the outer ring, like an escalator loop.',
@@ -346,12 +350,12 @@ const STEPS=[
   [['315 K (42 °C)',315],['349 K (76 °C)',349],['415 K (142 °C)',415]].forEach((l,i)=>label(l[0],cx,cy-RINGS[i].r*S-4,{align:'center',size:13,color:glowCol(l[1],1)}));
   const cards=[['10,000','Belugas\nin total'],['≈ 20.4 MW','total\npower'],['≈ 1.4','soccer fields\nof area'],['~500 kg','membrane film\n(50 g/m²)']];
   cards.forEach((c,i)=>{const x=448+i*136;ctx.save();ctx.fillStyle='rgba(255,255,255,0.035)';ctx.strokeStyle='rgba(255,255,255,0.16)';rr(x,22,128,92,2);ctx.fill();ctx.stroke();ctx.restore();
-   label(c[0],x+64,52,{align:'center',bold:true,size:21,color:c[0].includes('MW')?THOUGHT:'#7df9ff',box:false});label(c[1],x+64,80,{align:'center',size:12,color:'#9c9d98',box:false});});
+   label(c[0],x+64,52,{align:'center',bold:true,size:21,color:c[0].includes('MW')?THOUGHT_TEXT:'#7df9ff',box:false});label(c[1],x+64,80,{align:'center',size:12,color:'#9c9d98',box:false});});
   label('Distance is a dial: power vs heat',448,148,{bold:true,size:15,box:false});
   const g=smooth(t/2.5),bars=[['All 10,000 at 1 AU',13.6,'13.6 MW · 315 K',['#c9d3ff','#c9d3ff']],['Three rings (this design)',20.4,'20.4 MW · 315–415 K',['#c9d3ff','#e8a27a']],['All 10,000 on the inner ring',40.8,'40.8 MW · 415 K (hot)',['#e8a27a','#d98a62']]];
   bars.forEach((b,i)=>{const y=180+i*62,w=b[1]/40.8*350*g*(0.985+0.015*Math.sin(t*2+i));label(b[0],448,y,{size:13,color:'#c4c3bb',box:false});
    const gr=ctx.createLinearGradient(448,0,448+350,0);gr.addColorStop(0,b[3][0]);gr.addColorStop(1,b[3][1]);ctx.fillStyle='#2a2c2f';ctx.fillRect(448,y+8,350,20);ctx.fillStyle=gr;ctx.fillRect(448,y+8,w,20);
-   label(b[2],448+350+10,y+23,{size:13,bold:true,color:i===2?'#e8a27a':THOUGHT,box:false});});
+   label(b[2],448+350+10,y+23,{size:13,bold:true,color:i===2?'#e8a27a':THOUGHT_TEXT,box:false});});
   label('Random start → this pattern (simulated)',448,392,{bold:true,size:15,box:false});
   const X=y=>448+y/12*520,ay=448;ctx.fillStyle='rgba(159,240,184,0.18)';ctx.fillRect(X(6),ay-14,X(11)-X(6),28);
   ctx.strokeStyle='rgba(230,230,220,0.6)';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(X(0),ay);ctx.lineTo(X(12),ay);ctx.stroke();
@@ -367,7 +371,7 @@ const STEPS=[
   sun(cx,cy,16,3.2);
   RINGS.forEach((R,i)=>{const n=Math.round(14+24*K[i]);for(let j=0;j<n;j++){const ph=(t*0.8+j*0.618)%1,a=j/n*TAU+j*0.37+W0*0.35*OM(R.r)*t,rr2=R.r*S+Math.sin(j*7.1)*6,al=Math.sin(Math.PI*ph)*(0.35+0.65*K[i]/2.28);ctx.fillStyle=`rgba(200,252,255,${al})`;ctx.beginPath();ctx.arc(cx+rr2*Math.cos(a),cy+rr2*Math.sin(a),1.1+K[i]*0.5,0,TAU);ctx.fill();}});
   RINGS.forEach((R,i)=>{for(let k=0;k<6;k++)pod(cx,cy,S,R.r,k/6*TAU+i*0.5+W0*0.35*OM(R.r)*t,R.n,{s:4.5,gap:12});});
-  for(let j=0;j<7;j++){const a=j/7*TAU+0.25+t*0.04,r0=RINGS[2].r*S+8,r1=RINGS[0].r*S-8;ctx.save();ctx.setLineDash([2,5]);ctx.strokeStyle=thA(0.55);ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(cx+r0*Math.cos(a),cy+r0*Math.sin(a));ctx.lineTo(cx+r1*Math.cos(a),cy+r1*Math.sin(a));ctx.stroke();ctx.restore();
+  for(let j=0;j<7;j++){const a=j/7*TAU+0.25+t*0.04,r0=RINGS[2].r*S+8,r1=RINGS[0].r*S-8;ctx.save();ctx.setLineDash([2,5]);ctx.strokeStyle=lineA(0.55);ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(cx+r0*Math.cos(a),cy+r0*Math.sin(a));ctx.lineTo(cx+r1*Math.cos(a),cy+r1*Math.sin(a));ctx.stroke();ctx.restore();
    for(let m=0;m<2;m++){const q=(t*0.32+j*0.29+m*0.5)%1,rr2=lerp(r0,r1,j%2?q:1-q);ctx.save();ctx.shadowColor='rgba(159,178,255,1)';ctx.shadowBlur=7*SC*DPR;ctx.fillStyle=`rgba(190,205,255,${Math.sin(Math.PI*q)})`;ctx.translate(cx+rr2*Math.cos(a),cy+rr2*Math.sin(a));ctx.rotate(a);ctx.fillRect(-4,-1.5,8,3);ctx.restore();}}
   const L=[['Outer ring · thinks 1×','also the voice home',3.75,92],['Middle ring · 1.36×','',Math.PI,262],['Inner ring · 2.28×','hot: needs radiators',2.5,420]];
   L.forEach((l,i)=>{const Rr=RINGS[i].r*S;leader(150,l[3]-4,cx+Rr*Math.cos(l[2]),cy+Rr*Math.sin(l[2]));label(l[1]?l[0]+'\n'+l[1]:l[0],14,l[3],{size:13,boldFirst:true,colors:[cols[i],'#c4c3bb'],border:'rgba(255,255,255,0.16)'});});
@@ -399,18 +403,18 @@ const STEPS=[
   const wrap=a=>{a%=TAU;return a<0?a+TAU:a;};
   // cross-ring links (slow): each pod on an inner ring to the nearest pod on the next ring out
   for(let i=2;i>=1;i--)P[i].forEach((a,k)=>{let best=0,bd=9;P[i-1].forEach((b,m)=>{let d=Math.abs(((b-a)%TAU+TAU+Math.PI)%TAU-Math.PI);if(d<bd){bd=d;best=m;}});const b=P[i-1][best],r0=RINGS[i].r*S,r1=RINGS[i-1].r*S,x0=cx+r0*Math.cos(a),y0=cy+r0*Math.sin(a),x1=cx+r1*Math.cos(b),y1=cy+r1*Math.sin(b);
-   ctx.save();ctx.setLineDash([3,4]);ctx.strokeStyle=thA(0.7);ctx.lineWidth=1.2;ctx.shadowColor=thA(0.75);ctx.shadowBlur=4*SC*DPR;ctx.beginPath();ctx.moveTo(x0,y0);ctx.lineTo(x1,y1);ctx.stroke();ctx.restore();
+   ctx.save();ctx.setLineDash([3,4]);ctx.strokeStyle=lineA(0.7);ctx.lineWidth=1.2;ctx.shadowColor=THOUGHT_LINE_GLOW;ctx.shadowBlur=4*SC*DPR;ctx.beginPath();ctx.moveTo(x0,y0);ctx.lineTo(x1,y1);ctx.stroke();ctx.restore();
    const q=(t*0.16+k*0.23+i*0.4)%1;ctx.save();ctx.shadowColor='rgba(159,178,255,1)';ctx.shadowBlur=6*SC*DPR;ctx.fillStyle=`rgba(190,205,255,${0.3+0.7*Math.sin(Math.PI*q)})`;ctx.beginPath();ctx.arc(lerp(x0,x1,q),lerp(y0,y1,q),2,0,TAU);ctx.fill();ctx.restore();});
   // along-ring links (fast)
-  P.forEach((arr,i)=>{const Rr=RINGS[i].r*S;arr.forEach((a,k)=>{const b=arr[(k+1)%N],da=wrap(b-a);ctx.save();ctx.strokeStyle=THOUGHT;ctx.lineWidth=2.4;ctx.shadowColor=thA(0.9);ctx.shadowBlur=5*SC*DPR;ctx.beginPath();ctx.arc(cx,cy,Rr,a+0.05,a+da-0.05);ctx.stroke();
+  P.forEach((arr,i)=>{const Rr=RINGS[i].r*S;arr.forEach((a,k)=>{const b=arr[(k+1)%N],da=wrap(b-a);ctx.save();ctx.strokeStyle=THOUGHT_LINE;ctx.lineWidth=2.4;ctx.shadowColor=THOUGHT_LINE_GLOW;ctx.shadowBlur=5*SC*DPR;ctx.beginPath();ctx.arc(cx,cy,Rr,a+0.05,a+da-0.05);ctx.stroke();
     for(let m=0;m<3;m++){const q=(t*0.9+k*0.17+m/3)%1,aa=a+0.05+(da-0.1)*q;ctx.fillStyle='rgba(200,200,255,0.95)';ctx.beginPath();ctx.arc(cx+Rr*Math.cos(aa),cy+Rr*Math.sin(aa),1.8,0,TAU);ctx.fill();}ctx.restore();});
    arr.forEach(a=>pod(cx,cy,S,RINGS[i].r,a,RINGS[i].n,{s:4.5,gap:12}));});
   label('Drawn: 10 pods per ring\n(really ~1,667)',14,40,{size:12,colors:['#c4c3bb','#9c9d98']});
   label('Like geese passing calls\ndown a formation: each pod\ntalks to its neighbours',14,478,{size:12,color:'#c4c3bb'});
   const px=640;label('Two kinds of link',px,44,{bold:true,size:15,box:false});
-  ctx.save();ctx.strokeStyle=THOUGHT;ctx.lineWidth=3;ctx.shadowColor=thA(0.9);ctx.shadowBlur=5*SC*DPR;ctx.beginPath();ctx.moveTo(px,76);ctx.lineTo(px+30,76);ctx.stroke();ctx.restore();
+  ctx.save();ctx.strokeStyle=THOUGHT_LINE;ctx.lineWidth=3;ctx.shadowColor=THOUGHT_LINE_GLOW;ctx.shadowBlur=5*SC*DPR;ctx.beginPath();ctx.moveTo(px,76);ctx.lineTo(px+30,76);ctx.stroke();ctx.restore();
   label('Along a ring (neighbours)\n0.33–0.56 million km apart\nfast: Gbps (ceiling 90–250 Gbps)',px+42,80,{size:13,boldFirst:true,colors:['#7df9ff','#c4c3bb','#f2f3ed'],box:false});
-  ctx.save();ctx.setLineDash([3,4]);ctx.strokeStyle=THOUGHT;ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(px,156);ctx.lineTo(px+30,156);ctx.stroke();ctx.restore();
+  ctx.save();ctx.setLineDash([3,4]);ctx.strokeStyle=THOUGHT_LINE;ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(px,156);ctx.lineTo(px+30,156);ctx.stroke();ctx.restore();
   label('Between rings\n27–36 million km apart\nslow: ~20–40 Mbps per watt',px+42,160,{size:13,boldFirst:true,colors:['#9fb2ff','#c4c3bb','#f2f3ed'],box:false});
   // log-scale speed chart
   const cx0=px,cw=340,cy0=268;label('Link speed per watt (log scale)',px,cy0-6,{bold:true,size:13,box:false});
@@ -445,7 +449,7 @@ const STEPS=[
   // Earth, Hill sphere, Moon, relay beams
   ctx.save();ctx.setLineDash([3,3]);ctx.strokeStyle='rgba(159,178,255,0.5)';ctx.lineWidth=1;ctx.beginPath();ctx.arc(ex,ey,17,0,TAU);ctx.stroke();ctx.restore();
   const ma=t*0.7,mx=ex+10*Math.cos(ma),my=ey+10*Math.sin(ma);
-  [pods[0],pods[NP-1]].forEach((p,i)=>{[[ex,ey],[mx,my]].forEach(([tx,ty],j)=>{ctx.save();ctx.strokeStyle=THOUGHT;ctx.lineWidth=1.5;ctx.shadowColor=thA(0.9);ctx.shadowBlur=5*SC*DPR;ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(tx,ty);ctx.stroke();const q=(t*0.8+i*0.5+j*0.25)%1;ctx.fillStyle='#dfe6ff';ctx.beginPath();ctx.arc(lerp(p.x,tx,q),lerp(p.y,ty,q),1.8,0,TAU);ctx.fill();ctx.restore();});
+  [pods[0],pods[NP-1]].forEach((p,i)=>{[[ex,ey],[mx,my]].forEach(([tx,ty],j)=>{ctx.save();ctx.strokeStyle=THOUGHT_LINE;ctx.lineWidth=1.5;ctx.shadowColor=THOUGHT_LINE_GLOW;ctx.shadowBlur=5*SC*DPR;ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(tx,ty);ctx.stroke();const q=(t*0.8+i*0.5+j*0.25)%1;ctx.fillStyle='#dfe6ff';ctx.beginPath();ctx.arc(lerp(p.x,tx,q),lerp(p.y,ty,q),1.8,0,TAU);ctx.fill();ctx.restore();});
    ctx.save();ctx.strokeStyle='rgba(125,249,255,0.9)';ctx.lineWidth=1.2;ctx.beginPath();ctx.arc(p.x,p.y,10,0,TAU);ctx.stroke();ctx.restore();});
   ctx.save();ctx.shadowColor='rgba(72,108,255,0.9)';ctx.shadowBlur=10*SC*DPR;ctx.fillStyle='#486cff';ctx.beginPath();ctx.arc(ex,ey,6,0,TAU);ctx.fill();ctx.restore();ctx.fillStyle='#cfcdc6';ctx.beginPath();ctx.arc(mx,my,2.4,0,TAU);ctx.fill();
   leader(150,226,ex-4,ey-4,'rgba(159,178,255,0.6)');label('Earth + Moon',14,226,{size:13,bold:true,color:'#9fb2ff'});
@@ -461,10 +465,10 @@ const STEPS=[
   ctx.save();ctx.fillStyle='rgba(255,255,255,0.035)';ctx.strokeStyle='rgba(255,255,255,0.16)';rr(px-8,210,286,300,2);ctx.fill();ctx.stroke();ctx.restore();
   label('Belugas that evolve Belugas',px+135,234,{align:'center',bold:true,size:14,box:false});
   const lx=px+135,ly=352,lr=74,nodes=['power','thought','factories','more Belugas'],act=Math.floor(t/1.6)%4;
-  ctx.save();ctx.strokeStyle=thA(0.6);ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(lx,ly,lr,0,TAU);ctx.stroke();ctx.restore();
-  const ra=(t*0.6)%TAU;ctx.save();ctx.strokeStyle=THOUGHT;ctx.lineWidth=2.5;ctx.shadowColor=thA(0.9);ctx.shadowBlur=8*SC*DPR;ctx.beginPath();ctx.arc(lx,ly,lr,ra-0.6,ra);ctx.stroke();ctx.restore();
-  arrow(lx+lr*Math.cos(ra-0.05),ly+lr*Math.sin(ra-0.05),lx+lr*Math.cos(ra),ly+lr*Math.sin(ra),THOUGHT,2);
-  nodes.forEach((n,i)=>{const a=-Math.PI/2+i*Math.PI/2,x=lx+lr*Math.cos(a),y=ly+lr*Math.sin(a);const pw=i<2;label(n,x,y+5,{align:'center',size:12,bold:i===act,color:pw?THOUGHT:(i===act?'#7df9ff':'#c4c3bb'),border:pw?thA(0.55):'rgba(255,255,255,0.16)'});});
+  ctx.save();ctx.strokeStyle=lineA(0.6);ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(lx,ly,lr,0,TAU);ctx.stroke();ctx.restore();
+  const ra=(t*0.6)%TAU;ctx.save();ctx.strokeStyle=THOUGHT_LINE;ctx.lineWidth=2.5;ctx.shadowColor=THOUGHT_LINE_GLOW;ctx.shadowBlur=8*SC*DPR;ctx.beginPath();ctx.arc(lx,ly,lr,ra-0.6,ra);ctx.stroke();ctx.restore();
+  arrow(lx+lr*Math.cos(ra-0.05),ly+lr*Math.sin(ra-0.05),lx+lr*Math.cos(ra),ly+lr*Math.sin(ra),THOUGHT_LINE,2);
+  nodes.forEach((n,i)=>{const a=-Math.PI/2+i*Math.PI/2,x=lx+lr*Math.cos(a),y=ly+lr*Math.sin(a);const pw=i<2;label(n,x,y+5,{align:'center',size:12,bold:i===act,color:pw?THOUGHT_TEXT:(i===act?'#7df9ff':'#c4c3bb'),border:pw?lineA(0.7):'rgba(255,255,255,0.16)'});});
   label('[Physics, unproven] self-building factories',px,474,{size:11,color:'#9c9d98',box:false});
   label('[Speculation] recursive self-improvement',px,494,{size:11,color:'#9c9d98',box:false});}}
 ];

@@ -19,7 +19,7 @@ header .sub{font-size:14px;color:#9aa6bd;white-space:nowrap;overflow:hidden;text
 #lines{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
 .lab{position:absolute;left:0;top:0;max-width:min(470px,46%);padding:7px 10px 7px;background:rgba(3,5,10,.88);border:1px solid rgba(125,249,255,.45);border-left:3px solid var(--y);
  font:500 13px/1.35 'JetBrains Mono',monospace;color:var(--y);text-shadow:0 0 8px rgba(125,249,255,.55);opacity:0;pointer-events:none;overflow-wrap:break-word;will-change:transform,opacity}
-.lab.pw{border-color:var(--thought);border-left-color:var(--thought);box-shadow:0 0 6px var(--thought),0 0 18px color-mix(in srgb,var(--thought) 45%,transparent)}
+.lab.pw{border-color:var(--thought-line);border-left-color:var(--thought-line);box-shadow:0 0 8px var(--thought-line-glow)}
 .lab .tag{color:#8fa6ff;text-shadow:0 0 6px rgba(72,108,255,.9);white-space:nowrap}
 .lab .soft{display:block;margin-top:4px;font:400 13px/1.3 'Courier Prime',monospace;color:#cfdde2;text-shadow:none;opacity:.85}
 #beat{position:absolute;right:10px;top:8px;font:500 11px/1 'JetBrains Mono',monospace;letter-spacing:.12em;color:var(--b);text-shadow:0 0 6px rgba(72,108,255,.8);background:rgba(3,5,10,.6);padding:5px 7px;border:1px solid rgba(72,108,255,.4)}
@@ -196,10 +196,12 @@ B.ground=(()=>{const S=2400,N=240,g=new T.PlaneGeometry(S,S,N,N);g.rotateX(-Math
 B.scene.add(B.ground);
 function groundY(x,z){return 0;}
 // mass driver: rails, coils, pylons
-// THOUGHT = electric-blue power/thought accent: mass-driver coils, their reflection light, and (via CSS var --thought) the mass-driver label border. Swap here only.
-const THOUGHT='#2e2eff';document.documentElement.style.setProperty('--thought',THOUGHT);
+// THOUGHT_LINE = electric-blue power/thought accent for lines: mass-driver coils, their reflection light, and the
+// mass-driver label border (pushed into CSS vars --thought-line / --thought-line-glow). Swap these two values only.
+const THOUGHT_LINE='#1414ff',THOUGHT_LINE_GLOW='rgba(30,30,255,.85)';
+document.documentElement.style.setProperty('--thought-line',THOUGHT_LINE);document.documentElement.style.setProperty('--thought-line-glow',THOUGHT_LINE_GLOW);
 B.track=(()=>{const g=new T.Group();const metal=new T.MeshStandardMaterial({color:0x5c6068,roughness:.55,metalness:.6});
- const coilM=new T.MeshStandardMaterial({color:0x2a2f3a,roughness:.4,metalness:.5,emissive:new T.Color(THOUGHT),emissiveIntensity:.7});
+ const coilM=new T.MeshStandardMaterial({color:0x2a2f3a,roughness:.4,metalness:.5,emissive:new T.Color(THOUGHT_LINE),emissiveIntensity:.7});
  const rot=new T.Quaternion().setFromUnitVectors(V(1,0,0),D);
  for(const zz of [-.55,.55]){const rail=new T.Mesh(new T.BoxGeometry(LT+2,.22,.18),metal);rail.position.copy(TA).addScaledVector(D,LT/2).add(V(0,-.55,zz));rail.quaternion.copy(rot);rail.castShadow=true;g.add(rail);}
  const coilG=new T.TorusGeometry(1.05,.13,8,24);const nC=46;const coils=new T.InstancedMesh(coilG,coilM,nC);coils.castShadow=true;
@@ -225,7 +227,7 @@ B.pad=(()=>{const g=new T.Group(),R=PADR;
  const rim=new T.Mesh(new T.TorusGeometry(R,.06,8,160),new T.MeshStandardMaterial({color:0x5b5a56,roughness:.35,metalness:.12}));
  rim.rotation.x=-Math.PI/2;rim.scale.z=.55;rim.position.set(PADC.x,.02,PADC.z);rim.receiveShadow=true;g.add(rim);
  // faint blue reflection of the coils on the glossy glass
- const bl=new T.PointLight(THOUGHT,.4,7,2);bl.position.set(TA.x+2.2,.85,0);g.add(bl);
+ const bl=new T.PointLight(THOUGHT_LINE,.4,7,2);bl.position.set(TA.x+2.2,.85,0);g.add(bl);
  return g;})();
 B.scene.add(B.pad);
 B.sun=new T.Sprite(new T.SpriteMaterial({map:glowTex([[0,'rgba(255,255,255,1)'],[.07,'rgba(255,255,250,1)'],[.1,'rgba(255,246,225,.65)'],[.3,'rgba(255,236,200,.12)'],[1,'rgba(0,0,0,0)']]),transparent:true,depthWrite:false,blending:T.AdditiveBlending,fog:false}));
