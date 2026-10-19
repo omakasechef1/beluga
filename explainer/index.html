@@ -64,7 +64,8 @@ figcaption{color:#8e897f}figcaption b{color:#7df9ff;text-shadow:0 0 8px rgba(125
 #txt{color:#e8eef0;text-shadow:0 0 5px rgba(125,249,255,.16)}
 #txt .end{color:#7df9ff;text-shadow:0 0 8px rgba(125,249,255,.55)}
 /* Electric-blue POWER/THOUGHT accent. Swap here only: canvas JS reads these too (6-digit hex for the two colors). */
-:root{--thought-text:#2e2eff;--thought-text-glow:0 0 6px rgba(50,50,255,.8),0 0 18px rgba(50,50,255,.8);--thought-line:#1414ff;--thought-line-glow:rgba(30,30,255,.85)}
+:root{--thought-text:#2e2eff;--thought-text-glow:0 0 6px rgba(50,50,255,.8),0 0 18px rgba(50,50,255,.8);--thought-line:#1414ff;--thought-line-glow:rgba(30,30,255,.85);
+ --heat:#ffa64d;--heat-glow:0 0 6px rgba(255,140,60,.7),0 0 18px rgba(255,140,60,.5);--heat-glow-color:rgba(255,140,60,.7)}
 #txt .end.pw{color:var(--thought-text);text-shadow:var(--thought-text-glow)}
 #note{color:#9c968a}
 #nav{border-top-color:rgba(255,255,255,.12)}
@@ -104,7 +105,7 @@ function bg(t){ctx.fillStyle='#121416';ctx.fillRect(0,0,LW,LH);const g=ctx.creat
 function sun(x,y,r,glow=3.5){let g=ctx.createRadialGradient(x,y,r*0.3,x,y,r*glow);g.addColorStop(0,'rgba(229,201,166,0.5)');g.addColorStop(0.3,'rgba(229,201,166,0.14)');g.addColorStop(1,'rgba(229,201,166,0)');ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,y,r*glow,0,TAU);ctx.fill();
  g=ctx.createRadialGradient(x-r*0.25,y-r*0.25,0,x,y,r);g.addColorStop(0,'#ffffff');g.addColorStop(0.35,'#f7f1e9');g.addColorStop(0.72,'#e5c9a6');g.addColorStop(1,'#85705a');ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,y,r,0,TAU);ctx.fill();}
 const tempK=r=>315/Math.sqrt(r);
-function glowCol(T,a){const k=clamp((T-315)/100,0,1);return `rgba(255,${Math.round(lerp(252,165,k))},${Math.round(lerp(248,85,k))},${a})`;}
+function glowCol(T,a){const k=clamp((T-315)/100,0,1),n=parseInt(HEAT.slice(1),16);return `rgba(${Math.round(lerp(255,n>>16,k))},${Math.round(lerp(252,n>>8&255,k))},${Math.round(lerp(248,n&255,k))},${a})`;}
 /* A Beluga, after the original sim (code/handoff.html): a smooth bulbous envelope (1.14 x 0.74 m side, 0.61 m wide)
    with a perimeter heat seal, skinned in a light WHITE membrane, and a small carriage (motors, props, board) hanging below.
    view 'top' = seen from above, long axis across the sunlight (orbit pictures); view 'side' = side profile with carriage.
@@ -156,6 +157,8 @@ const CSSV=n=>getComputedStyle(document.documentElement).getPropertyValue(n).tri
 const THOUGHT_TEXT=(CSSV('--thought-text')||'#2e2eff').toLowerCase(),THOUGHT_LINE=(CSSV('--thought-line')||'#1414ff').toLowerCase(),THOUGHT_LINE_GLOW=CSSV('--thought-line-glow')||'rgba(30,30,255,.85)';
 function hexA(h,a){const n=parseInt(h.slice(1),16);return `rgba(${n>>16},${n>>8&255},${n&255},${a})`;}
 const lineA=a=>hexA(THOUGHT_LINE,a);
+/* HEAT = orange-peach heat-out accent (from --heat / --heat-glow-color in :root). */
+const HEAT=(CSSV('--heat')||'#ffa64d').toLowerCase(),HEAT_GLOW=CSSV('--heat-glow-color')||'rgba(255,140,60,.7)';const heatA=a=>hexA(HEAT,a);
 function label(txt,x,y,o={}){const size=o.size||14,pad=5;ctx.save();
  const lines=String(txt).split('\n'),lh=size*1.28;
  const fontOf=i=>(o.bold||(o.boldFirst&&i===0))?`500 ${size-1}px 'JetBrains Mono',ui-monospace,'DejaVu Sans Mono',monospace`:`${o.weight||400} ${size}px 'Courier Prime','Courier New',ui-monospace,monospace`;
@@ -163,7 +166,7 @@ function label(txt,x,y,o={}){const size=o.size||14,pad=5;ctx.save();
  let x0=o.align==='center'?x-w/2:o.align==='right'?x-w:x;x0=clamp(x0,pad+3,LW-w-pad-3);
  let y0=y-size*1.05;y0=clamp(y0,pad+3,LH-h-pad-3);
  if(o.box!==false){ctx.fillStyle=o.bg||'rgba(18,20,22,0.86)';rr(x0-pad,y0-pad+1,w+2*pad,h+2*pad-2,2);ctx.fill();if(o.border){ctx.strokeStyle=o.border;ctx.lineWidth=1;ctx.stroke();}}
- ctx.textBaseline='top';lines.forEach((l,i)=>{ctx.font=fontOf(i);const fc=(o.colors&&o.colors[i])||o.color||((o.bold||(o.boldFirst&&i===0))?'#7df9ff':'#f2f3ed');ctx.fillStyle=fc;if(fc===THOUGHT_TEXT){ctx.shadowColor=hexA(THOUGHT_TEXT,0.8);ctx.shadowBlur=12*SC*DPR;}else if(fc[0]==='#'&&fc.length===7){ctx.shadowColor=fc+'5c';ctx.shadowBlur=(size>=16?6:4)*SC*DPR;}else ctx.shadowBlur=0;
+ ctx.textBaseline='top';lines.forEach((l,i)=>{ctx.font=fontOf(i);const fc=(o.colors&&o.colors[i])||o.color||((o.bold||(o.boldFirst&&i===0))?'#7df9ff':'#f2f3ed');ctx.fillStyle=fc;if(fc===THOUGHT_TEXT){ctx.shadowColor=hexA(THOUGHT_TEXT,0.8);ctx.shadowBlur=12*SC*DPR;}else if(fc===HEAT){ctx.shadowColor=HEAT_GLOW;ctx.shadowBlur=8*SC*DPR;}else if(fc[0]==='#'&&fc.length===7){ctx.shadowColor=fc+'5c';ctx.shadowBlur=(size>=16?6:4)*SC*DPR;}else ctx.shadowBlur=0;
   let lx=x0;if(o.align==='center')lx=x0+(w-ws[i])/2;else if(o.align==='right')lx=x0+w-ws[i];ctx.fillText(l,lx,y0+i*lh+(lh-size)/2);});
  ctx.restore();return{x:x0,y:y0,w,h};}
 function leader(x1,y1,x2,y2,col){ctx.save();ctx.strokeStyle=col||'rgba(230,230,220,0.55)';ctx.lineWidth=1.2;ctx.setLineDash([3,3]);ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();ctx.setLineDash([]);ctx.fillStyle=col||'rgba(230,230,220,0.8)';ctx.beginPath();ctx.arc(x2,y2,2.5,0,TAU);ctx.fill();ctx.restore();}
@@ -195,7 +198,7 @@ function conveyor(cx,cy,S,t,o={}){
    ctx.restore();const q=sp(d.p,e),aa=thd+q.th;
    beluga(cx+q.r*S*Math.cos(aa),cy+q.r*S*Math.sin(aa),bs*0.85,{ang:aa+Math.PI/2,glowc:'rgba(159,178,255,0.95)',glow:1.4,alpha:e>0.88?(1-e)/0.12+0.15:1});}
   pod(cx,cy,S,p.r,th,nOfU(u),{alpha:a,s:bs,gap});
-  if(o.retire&&u>0.9){const f=(u-0.9)/0.1,R=p.r*S;for(let j=0;j<5;j++){const ang=th+(j-2)*0.05,rr2=R+f*(10+j*5);ctx.fillStyle=`rgba(232,162,122,${0.7*(1-f)})`;ctx.beginPath();ctx.arc(cx+rr2*Math.cos(ang),cy+rr2*Math.sin(ang)-f*8,1.8,0,TAU);ctx.fill();}}
+  if(o.retire&&u>0.9){const f=(u-0.9)/0.1,R=p.r*S;for(let j=0;j<5;j++){const ang=th+(j-2)*0.05,rr2=R+f*(10+j*5);ctx.fillStyle=heatA(0.7*(1-f));ctx.beginPath();ctx.arc(cx+rr2*Math.cos(ang),cy+rr2*Math.sin(ang)-f*8,1.8,0,TAU);ctx.fill();}}
  }}
 /* Little "escalator" loop diagram */
 function loopDiagram(x,y,w,h,t,o={}){
@@ -215,7 +218,7 @@ function loopDiagram(x,y,w,h,t,o={}){
  label('spares\nsail out',xr-60,ys[1]-2,{size:11,box:false,color:'#9fb2ff'});
  if(o.moon){const mx=x+w/2+6,my=y+38;ctx.fillStyle='#cfcdc6';ctx.beginPath();ctx.arc(mx,my,5,0,TAU);ctx.fill();label('Moon',mx+10,my+5,{size:11,box:false,color:'#cfcdc6'});
   const q=(t/2)%1;beluga(mx,lerp(my+6,ys[0]-4,q),3.2,{asp:0.8,glowc:'rgba(183,211,168,0.95)',alpha:1-q*0.6});}
- if(o.retire){const q=(t/2.4)%1;ctx.fillStyle=`rgba(232,162,122,${0.8*(1-q)})`;for(let i=0;i<3;i++){ctx.beginPath();ctx.arc(xl-10+i*10,ys[2]+10+q*14,1.8,0,TAU);ctx.fill();}label('retire',xl+16,ys[2]+30,{size:11,box:false,color:'#e8a27a'});}
+ if(o.retire){const q=(t/2.4)%1;ctx.fillStyle=heatA(0.8*(1-q));for(let i=0;i<3;i++){ctx.beginPath();ctx.arc(xl-10+i*10,ys[2]+10+q*14,1.8,0,TAU);ctx.fill();}label('retire',xl+16,ys[2]+30,{size:11,box:false,color:HEAT});}
 }
 
 /* ---------- steps ---------- */
@@ -259,12 +262,12 @@ const STEPS=[
   const r=1.1+0.55*Math.cos(t*0.55),f=1361/r/r,T=tempK(r),x=X(r),by=455;
   ctx.save();ctx.setLineDash([4,4]);ctx.strokeStyle='rgba(229,201,166,0.6)';ctx.beginPath();ctx.moveTo(x,by-14);ctx.lineTo(x,Y(f));ctx.stroke();ctx.restore();
   ctx.fillStyle='#f7f1e9';ctx.beginPath();ctx.arc(x,Y(f),5,0,TAU);ctx.fill();
-  const hk=clamp((T-300)/140,0,1);g=ctx.createRadialGradient(x,by,4,x,by,48);g.addColorStop(0,`rgba(232,150,100,${0.55*hk})`);g.addColorStop(1,'rgba(232,150,100,0)');ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,by,48,0,TAU);ctx.fill();
+  const hk=clamp((T-300)/140,0,1);g=ctx.createRadialGradient(x,by,4,x,by,48);g.addColorStop(0,heatA(0.55*hk));g.addColorStop(1,heatA(0));ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,by,48,0,TAU);ctx.fill();
   beluga(x,by-4,13,{view:'side',T,glow:0.6+f/2200});
   label('Beluga',x,by+36,{align:'center',size:13,box:false,color:'#c4c3bb'});
-  label('← closer: more power, hotter',X(0.45),528,{align:'center',size:13,color:'#e8a27a',box:false});
+  label('← closer: more power, hotter',X(0.45),528,{align:'center',size:13,color:HEAT,box:false});
   label('farther: less power, cooler →',X(1.6),528,{align:'center',size:13,color:'#9fb2ff',box:false});
-  label(`This Beluga is ${r.toFixed(2)} AU from the Sun\nLight: ${fmt(f)} W per m²\nTemperature: about ${Math.round(T)} K (${Math.round(T-273)} °C)`,990,38,{align:'right',size:16,colors:['#f2f3ed','#e5c9a6','#e8a27a'],border:'rgba(255,255,255,0.16)'});}},
+  label(`This Beluga is ${r.toFixed(2)} AU from the Sun\nLight: ${fmt(f)} W per m²\nTemperature: about ${Math.round(T)} K (${Math.round(T-273)} °C)`,990,38,{align:'right',size:16,colors:['#f2f3ed','#e5c9a6',HEAT],border:'rgba(255,255,255,0.16)'});}},
 {title:'Three rings',kick:'Orbits',
  text:'The standard setup is 10,000 Belugas on three circular orbits around the Sun, at 1.0, 0.816 and 0.577 AU. Inner rings go around faster, so they keep lapping the outer ones.',
  note:'[Physics] A smaller orbit takes less time (Kepler’s law): one lap takes 365, 269 and 160 days. The animation is sped up a lot.',
@@ -309,13 +312,13 @@ const STEPS=[
   ctx.restore();
   const g=ctx.createLinearGradient(0,col[0],0,430);g.addColorStop(0,'rgba(0,0,0,0.75)');g.addColorStop(1,'rgba(0,0,0,0.15)');ctx.fillStyle=g;ctx.beginPath();ctx.moveTo(cxr-30,col[0]+2);ctx.lineTo(cxr+30,col[0]+2);ctx.lineTo(cxr+22,430);ctx.lineTo(cxr-22,430);ctx.closePath();ctx.fill();
   BL.forEach((b,i)=>{beluga(b,by+Math.sin(t*1.1+i)*2,30,{glow:1.2});label('100%',b,by+38,{align:'center',size:13,color:'#b7d3a8',box:false});});
-  col.forEach((y,i)=>{beluga(cxr,y+Math.sin(t*1.1+i)*2,30,{alpha:i?0.5:1,glow:i?0.15:1.2});label(i?'in shadow ≈ 0%':'100%',cxr+44,y+5,{size:13,color:i?'#e08f7a':'#b7d3a8',bg:'rgba(18,20,22,0.92)'});});
+  col.forEach((y,i)=>{beluga(cxr,y+Math.sin(t*1.1+i)*2,30,{alpha:i?0.5:1,glow:i?0.15:1.2});label(i?'in shadow ≈ 0%':'100%',cxr+44,y+5,{size:13,color:i?HEAT:'#b7d3a8',bg:'rgba(18,20,22,0.92)'});});
   ctx.strokeStyle='rgba(255,255,255,0.14)';ctx.setLineDash([4,6]);ctx.beginPath();ctx.moveTo(500,120);ctx.lineTo(500,520);ctx.stroke();ctx.setLineDash([]);
   label('Side by side (across the sunlight)',250,40,{align:'center',bold:true,size:16});
   label('In a line (single file)',750,40,{align:'center',bold:true,size:16});
   label('sunlight ↓',40,82,{size:13,color:'#e5c9a6'});label('sunlight ↓',960,82,{align:'right',size:13,color:'#e5c9a6'});
   const ph=smooth(((t*0.3)%1.3)/0.7);
-  [[70,1.0,'#b7d3a8','Pod power: 100%'],[570,0.25,'#e8a27a','Pod power: about 25%']].forEach(([x,v,c,txt])=>{label(txt,x,452,{size:15,bold:true,color:THOUGHT_TEXT,box:false});ctx.fillStyle='#2a2c2f';ctx.fillRect(x,466,360,16);ctx.fillStyle=c;ctx.fillRect(x,466,360*v*ph,16);});
+  [[70,1.0,'#b7d3a8','Pod power: 100%'],[570,0.25,HEAT,'Pod power: about 25%']].forEach(([x,v,c,txt])=>{label(txt,x,452,{size:15,bold:true,color:THOUGHT_TEXT,box:false});ctx.fillStyle='#2a2c2f';ctx.fillRect(x,466,360,16);ctx.fillStyle=c;ctx.fillRect(x,466,360*v*ph,16);});
   label('Space has no air to “draft” on like geese do. Only shadows matter.',500,522,{align:'center',size:13,color:'#9c9d98'});}},
 {title:'The conveyor',kick:'The conveyor',
  text:'Pods slowly drift inward, from the outer ring toward the inner ring. On the way they drop the Belugas they no longer need (3 → 2 → 1), so each pod keeps making the same power. The spare Belugas sail back out on sunlight and join new pods on the outer ring, like an escalator loop.',
@@ -337,10 +340,10 @@ const STEPS=[
    beluga(sx,sy,3.6,{asp:0.8,glowc:'rgba(183,211,168,0.95)',glow:1.4,alpha:q<0.1?q/0.1:q>0.85?(1-q)/0.15:1});}
   leader(150,96,ex,ey,'rgba(159,208,255,0.6)');
   label('Earth + Moon:\nnew Belugas\nlaunch here',14,70,{size:13,boldFirst:true,colors:['#9fb2ff','#b7d3a8','#b7d3a8'],border:'rgba(255,255,255,0.16)'});
-  const Ri=RINGS[2].r*S;leader(696,190,cx+Ri*Math.cos(-0.25),cy+Ri*Math.sin(-0.25),'rgba(232,162,122,0.7)');
+  const Ri=RINGS[2].r*S;leader(696,190,cx+Ri*Math.cos(-0.25),cy+Ri*Math.sin(-0.25),heatA(0.7));
   label('● New Belugas from the Moon\n   join pods on the outer ring',700,48,{size:14,colors:['#b7d3a8','#b7d3a8']});
   label('● New outer pod =\n   2 returning spares + 1 new',700,112,{size:14,color:'#f2f3ed'});
-  label('● Old inner-ring Belugas\n   retire (fade out)',700,176,{size:14,color:'#e8a27a'});
+  label('● Old inner-ring Belugas\n   retire (fade out)',700,176,{size:14,color:HEAT});
   loopDiagram(700,236,288,262,t,{moon:true,retire:true,title:'The whole thing is one loop'});}},
 {title:'The big picture',kick:'The numbers',
  text:'10,000 Belugas make about 20.4 MW, from the collecting area of about 1.4 soccer fields and roughly 500 kg of membrane film. All at 1 AU they would give only 13.6 MW; all on the inner ring 40.8 MW, but at 415 K. Distance is a dial between power and heat.',
@@ -352,10 +355,10 @@ const STEPS=[
   cards.forEach((c,i)=>{const x=448+i*136;ctx.save();ctx.fillStyle='rgba(255,255,255,0.035)';ctx.strokeStyle='rgba(255,255,255,0.16)';rr(x,22,128,92,2);ctx.fill();ctx.stroke();ctx.restore();
    label(c[0],x+64,52,{align:'center',bold:true,size:21,color:c[0].includes('MW')?THOUGHT_TEXT:'#7df9ff',box:false});label(c[1],x+64,80,{align:'center',size:12,color:'#9c9d98',box:false});});
   label('Distance is a dial: power vs heat',448,148,{bold:true,size:15,box:false});
-  const g=smooth(t/2.5),bars=[['All 10,000 at 1 AU',13.6,'13.6 MW · 315 K',['#c9d3ff','#c9d3ff']],['Three rings (this design)',20.4,'20.4 MW · 315–415 K',['#c9d3ff','#e8a27a']],['All 10,000 on the inner ring',40.8,'40.8 MW · 415 K (hot)',['#e8a27a','#d98a62']]];
+  const g=smooth(t/2.5),bars=[['All 10,000 at 1 AU',13.6,'13.6 MW · 315 K',['#c9d3ff','#c9d3ff']],['Three rings (this design)',20.4,'20.4 MW · 315–415 K',['#c9d3ff','#eef1ef',HEAT]],['All 10,000 on the inner ring',40.8,'40.8 MW · 415 K (hot)',[HEAT,HEAT]]];
   bars.forEach((b,i)=>{const y=180+i*62,w=b[1]/40.8*350*g*(0.985+0.015*Math.sin(t*2+i));label(b[0],448,y,{size:13,color:'#c4c3bb',box:false});
-   const gr=ctx.createLinearGradient(448,0,448+350,0);gr.addColorStop(0,b[3][0]);gr.addColorStop(1,b[3][1]);ctx.fillStyle='#2a2c2f';ctx.fillRect(448,y+8,350,20);ctx.fillStyle=gr;ctx.fillRect(448,y+8,w,20);
-   label(b[2],448+350+10,y+23,{size:13,bold:true,color:i===2?'#e8a27a':THOUGHT_TEXT,box:false});});
+   const gr=ctx.createLinearGradient(448,0,448+350,0);b[3].forEach((c,k,A)=>gr.addColorStop(k/(A.length-1),c));ctx.fillStyle='#2a2c2f';ctx.fillRect(448,y+8,350,20);ctx.fillStyle=gr;ctx.fillRect(448,y+8,w,20);
+   label(b[2],448+350+10,y+23,{size:13,bold:true,color:i===2?HEAT:THOUGHT_TEXT,box:false});});
   label('Random start → this pattern (simulated)',448,392,{bold:true,size:15,box:false});
   const X=y=>448+y/12*520,ay=448;ctx.fillStyle='rgba(159,240,184,0.18)';ctx.fillRect(X(6),ay-14,X(11)-X(6),28);
   ctx.strokeStyle='rgba(230,230,220,0.6)';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(X(0),ay);ctx.lineTo(X(12),ay);ctx.stroke();
@@ -384,7 +387,7 @@ const STEPS=[
   label('1 m laser',ox-20,ly+40,{size:12,color:'#c4c3bb',box:false});
   label('~36 million km',px+150,ly+5,{size:12,color:'#f2f3ed'});
   label('spot ≈ 135 km',ex-6,ly-62,{size:12,align:'right',color:'#7df9ff',box:false});
-  label('1 m receiver catches ~3×10⁻¹¹',px+338,ly+80,{size:12,align:'right',color:'#e08f7a',box:false});
+  label('1 m receiver catches ~3×10⁻¹¹',px+338,ly+80,{size:12,align:'right',color:HEAT,box:false});
   // panel B: thinking per Beluga
   ctx.save();ctx.fillStyle='rgba(255,255,255,0.035)';ctx.strokeStyle='rgba(255,255,255,0.16)';rr(px,236,350,176,2);ctx.fill();ctx.stroke();ctx.restore();
   label('Thinking per Beluga (theoretical limit)',px+12,258,{bold:true,size:14,box:false});
@@ -393,7 +396,7 @@ const STEPS=[
   // panel C: legend
   ctx.save();ctx.shadowColor='rgba(159,178,255,1)';ctx.shadowBlur=7*SC*DPR;ctx.fillStyle='#bfcaff';ctx.fillRect(px+14,445,10,3);ctx.restore();
   label('data pulses: rings swap only data',px+32,452,{size:13,color:'#9fb2ff',box:false});
-  label('✕  no power beams between rings',px+12,482,{size:13,color:'#e08f7a',box:false});
+  label('✕  no power beams between rings',px+12,482,{size:13,color:HEAT,box:false});
   label('glow = how hard each ring thinks',px+12,512,{size:13,color:'#7df9ff',box:false});}},
 {title:'A mesh of laser links',kick:'The mesh',
  text:'Pods pass messages neighbour to neighbour with tiny lasers, like calls down a goose formation. Neighbours on a ring are a few hundred thousand km apart, so those links are fast: gigabits per second. Links between rings are ~100× longer and much slower.',
@@ -436,12 +439,12 @@ const STEPS=[
   ring(cx,cy,S,'rgba(125,249,255,0.35)');
   const ex=cx-S,ey=cy;
   // Sun-shadow wedge seen from Earth
-  const d=S,ha=Math.asin(SR/d),far=2*S+6;ctx.save();const wg=ctx.createLinearGradient(cx,0,cx+S,0);wg.addColorStop(0,'rgba(0,0,0,0.0)');wg.addColorStop(1,'rgba(224,143,122,0.10)');ctx.fillStyle=wg;ctx.beginPath();ctx.moveTo(cx,cy-SR);ctx.lineTo(ex+far*Math.cos(-ha),ey+far*Math.sin(-ha));ctx.lineTo(ex+far*Math.cos(ha),ey+far*Math.sin(ha));ctx.lineTo(cx,cy+SR);ctx.closePath();ctx.fill();ctx.restore();
+  const d=S,ha=Math.asin(SR/d),far=2*S+6;ctx.save();const wg=ctx.createLinearGradient(cx,0,cx+S,0);wg.addColorStop(0,'rgba(0,0,0,0.0)');wg.addColorStop(1,heatA(0.10));ctx.fillStyle=wg;ctx.beginPath();ctx.moveTo(cx,cy-SR);ctx.lineTo(ex+far*Math.cos(-ha),ey+far*Math.sin(-ha));ctx.lineTo(ex+far*Math.cos(ha),ey+far*Math.sin(ha));ctx.lineTo(cx,cy+SR);ctx.closePath();ctx.fill();ctx.restore();
   sun(cx,cy,SR,3.6);
   // outer-ring pods (static in a frame turning with Earth)
   const NP=26,g=TAU/NP,pods=[];for(let k=0;k<NP;k++){const a=Math.PI+g/2+k*g,x=cx+S*Math.cos(a),y=cy+S*Math.sin(a);const vx=x-ex,vy=y-ey,L=Math.hypot(vx,vy),u=clamp(((cx-ex)*vx+(cy-ey)*vy)/(L*L),0,1),dd=Math.hypot(ex+u*vx-cx,ey+u*vy-cy);pods.push({a,x,y,hid:dd<SR+1});}
   const hidA=pods.filter(p=>p.hid).map(p=>p.a);
-  ctx.save();ctx.strokeStyle='rgba(224,143,122,0.75)';ctx.lineWidth=5;ctx.lineCap='round';const half=Math.asin(SR/(2*S))*2+0.06;ctx.beginPath();ctx.arc(cx,cy,S,-half,half);ctx.stroke();ctx.restore();
+  ctx.save();ctx.strokeStyle=heatA(0.75);ctx.lineWidth=5;ctx.lineCap='round';const half=Math.asin(SR/(2*S))*2+0.06;ctx.beginPath();ctx.arc(cx,cy,S,-half,half);ctx.stroke();ctx.restore();
   pods.forEach((p,k)=>{if(!p.hid&&k%3===1){ctx.strokeStyle='rgba(159,178,255,0.10)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(ex,ey);ctx.lineTo(p.x,p.y);ctx.stroke();}});
   // data flowing along the ring toward the relays
   for(let j=0;j<10;j++){const side=j%2?1:-1,q=(t*0.12+j*0.137)%1,a=Math.PI+side*(Math.PI*0.92*(1-q)+g/2);ctx.fillStyle=`rgba(200,200,255,${0.85*Math.sin(Math.PI*Math.min(1,q*1.15))})`;ctx.beginPath();ctx.arc(cx+S*Math.cos(a),cy+S*Math.sin(a),1.8,0,TAU);ctx.fill();}
@@ -455,7 +458,7 @@ const STEPS=[
   leader(150,226,ex-4,ey-4,'rgba(159,178,255,0.6)');label('Earth + Moon',14,226,{size:13,bold:true,color:'#9fb2ff'});
   leader(150,330,pods[0].x-4,pods[0].y+4,'rgba(125,249,255,0.6)');label('relay pods\njust outside Earth’s\ngravity zone\n(~1.5 million km)',14,322,{size:12,boldFirst:true,colors:['#7df9ff','#c4c3bb','#c4c3bb','#9c9d98']});
   label('outer ring = Earth’s orbit',cx,30,{align:'center',size:13,color:'#7df9ff'});
-  label('hidden behind the Sun (~3%)',cx+S-8,cy+44,{align:'center',size:12,color:'#e08f7a'});
+  label('hidden behind the Sun (~3%)',cx+S-8,cy+44,{align:'center',size:12,color:HEAT});
   label('Drawn turning with Earth:\nouter pods stay put',14,500,{size:11,colors:['#9c9d98','#9c9d98']});
   const px=712;
   label('● ~97% of outer pods\n  can see Earth',px,48,{size:13,colors:['#f2f3ed','#f2f3ed'],box:false});
