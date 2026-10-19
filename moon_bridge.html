@@ -19,6 +19,7 @@ header .sub{font-size:14px;color:#9aa6bd;white-space:nowrap;overflow:hidden;text
 #lines{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
 .lab{position:absolute;left:0;top:0;max-width:min(470px,46%);padding:7px 10px 7px;background:rgba(3,5,10,.88);border:1px solid rgba(125,249,255,.45);border-left:3px solid var(--y);
  font:500 13px/1.35 'JetBrains Mono',monospace;color:var(--y);text-shadow:0 0 8px rgba(125,249,255,.55);opacity:0;pointer-events:none;overflow-wrap:break-word;will-change:transform,opacity}
+.lab.pw{border-color:var(--thought);border-left-color:var(--thought);box-shadow:0 0 6px var(--thought),0 0 18px color-mix(in srgb,var(--thought) 45%,transparent)}
 .lab .tag{color:#8fa6ff;text-shadow:0 0 6px rgba(72,108,255,.9);white-space:nowrap}
 .lab .soft{display:block;margin-top:4px;font:400 13px/1.3 'Courier Prime',monospace;color:#cfdde2;text-shadow:none;opacity:.85}
 #beat{position:absolute;right:10px;top:8px;font:500 11px/1 'JetBrains Mono',monospace;letter-spacing:.12em;color:var(--b);text-shadow:0 0 6px rgba(72,108,255,.8);background:rgba(3,5,10,.6);padding:5px 7px;border:1px solid rgba(72,108,255,.4)}
@@ -195,8 +196,10 @@ B.ground=(()=>{const S=2400,N=240,g=new T.PlaneGeometry(S,S,N,N);g.rotateX(-Math
 B.scene.add(B.ground);
 function groundY(x,z){return 0;}
 // mass driver: rails, coils, pylons
+// THOUGHT = electric-blue power/thought accent: mass-driver coils, their reflection light, and (via CSS var --thought) the mass-driver label border. Swap here only.
+const THOUGHT='#2e2eff';document.documentElement.style.setProperty('--thought',THOUGHT);
 B.track=(()=>{const g=new T.Group();const metal=new T.MeshStandardMaterial({color:0x5c6068,roughness:.55,metalness:.6});
- const coilM=new T.MeshStandardMaterial({color:0x2a2f3a,roughness:.4,metalness:.5,emissive:new T.Color(0x486cff),emissiveIntensity:.55});
+ const coilM=new T.MeshStandardMaterial({color:0x2a2f3a,roughness:.4,metalness:.5,emissive:new T.Color(THOUGHT),emissiveIntensity:.7});
  const rot=new T.Quaternion().setFromUnitVectors(V(1,0,0),D);
  for(const zz of [-.55,.55]){const rail=new T.Mesh(new T.BoxGeometry(LT+2,.22,.18),metal);rail.position.copy(TA).addScaledVector(D,LT/2).add(V(0,-.55,zz));rail.quaternion.copy(rot);rail.castShadow=true;g.add(rail);}
  const coilG=new T.TorusGeometry(1.05,.13,8,24);const nC=46;const coils=new T.InstancedMesh(coilG,coilM,nC);coils.castShadow=true;
@@ -222,7 +225,7 @@ B.pad=(()=>{const g=new T.Group(),R=PADR;
  const rim=new T.Mesh(new T.TorusGeometry(R,.06,8,160),new T.MeshStandardMaterial({color:0x5b5a56,roughness:.35,metalness:.12}));
  rim.rotation.x=-Math.PI/2;rim.scale.z=.55;rim.position.set(PADC.x,.02,PADC.z);rim.receiveShadow=true;g.add(rim);
  // faint blue reflection of the coils on the glossy glass
- const bl=new T.PointLight(0x486cff,.35,7,2);bl.position.set(TA.x+2.2,.85,0);g.add(bl);
+ const bl=new T.PointLight(THOUGHT,.4,7,2);bl.position.set(TA.x+2.2,.85,0);g.add(bl);
  return g;})();
 B.scene.add(B.pad);
 B.sun=new T.Sprite(new T.SpriteMaterial({map:glowTex([[0,'rgba(255,255,255,1)'],[.07,'rgba(255,255,250,1)'],[.1,'rgba(255,246,225,.65)'],[.3,'rgba(255,236,200,.12)'],[1,'rgba(0,0,0,0)']]),transparent:true,depthWrite:false,blending:T.AdditiveBlending,fog:false}));
@@ -325,10 +328,10 @@ const LABELS=[
  {t0:11.9,t1:15.7,fade:.22,sc:'B',txt:'regolith: silicon, aluminium, iron, oxygen, raw stuff for cells + film [Physics]',anchor:()=>V(-13,0,9),off:[-40,-150]},
  {t0:12.2,t1:15.7,fade:.22,sc:'B',txt:'hardened pad: regolith melted in place, resolidifies into glassy rock (Ethos Space method) [Physics]',anchor:()=>PADC.clone().add(V(0,.05,PADR*.4)),off:[40,70]},
  {t0:12.5,t1:15.7,fade:.22,sc:'B',txt:'hatching from the soil = a lunar factory, told poetically [Speculation]',anchor:()=>{const s=B.seedStates[2];return s&&s.p?s.p.clone():V(-5,1,0);},off:[30,-120]},
- {t0:16.2,t1:19.6,sc:'B',txt:'mass driver: escape ~2.38 km/s (Earth 11.2) · ~290 g on 1 km track [Physics] · ~27 launches/day if all 10,000 go in a year [Assumption]',anchor:()=>TA.clone().addScaledVector(D,LT*.42),off:[-40,-120]},
+ {t0:16.2,t1:19.6,sc:'B',cls:'pw',txt:'mass driver: escape ~2.38 km/s (Earth 11.2) · ~290 g on 1 km track [Physics] · ~27 launches/day if all 10,000 go in a year [Assumption]',anchor:()=>TA.clone().addScaledVector(D,LT*.42),off:[-40,-120]},
  {t0:19.8,t1:22.6,sc:'B',txt:'launched folded (an inflated balloon would burst at 290 g), opens in space [Physics]',anchor:()=>{const s=B.seedStates[14];return s&&s.p?s.p.clone():TE.clone();},off:[-70,90]},
  {t0:22.8,t1:99,sc:'B',txt:'a sphere can\'t orbit as one piece → next: pods and rings [Physics]',anchor:()=>camera.position.clone().addScaledVector(SUN,6000),off:[-60,110]}];
-for(const L of LABELS){L.el=document.createElement('div');L.el.className='lab';L.el.innerHTML=fmt(L.txt)+(L.soft?'<span class="soft">'+fmt(L.soft)+'</span>':'');stage.appendChild(L.el);
+for(const L of LABELS){L.el=document.createElement('div');L.el.className='lab'+(L.cls?' '+L.cls:'');L.el.innerHTML=fmt(L.txt)+(L.soft?'<span class="soft">'+fmt(L.soft)+'</span>':'');stage.appendChild(L.el);
  L.line=document.createElementNS('http://www.w3.org/2000/svg','line');L.line.setAttribute('stroke','rgba(125,249,255,.7)');L.line.setAttribute('stroke-width','1');svg.appendChild(L.line);
  L.dot=document.createElementNS('http://www.w3.org/2000/svg','circle');L.dot.setAttribute('r','3');L.dot.setAttribute('fill','#7df9ff');svg.appendChild(L.dot);}
 function project(p){const v=p.clone().project(camera);return{x:(v.x*.5+.5)*W,y:(-v.y*.5+.5)*H,ok:v.z<1&&v.z>-1};}
