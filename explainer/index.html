@@ -51,26 +51,26 @@ body:not(.side) .copy{grid-template-columns:1fr;gap:0}body:not(.side) #txt{font-
 @media (max-height:760px){body:not(.side) #foot{display:none}}
 @media (max-width:760px){.wordmark small,.kicker{display:none}h1{font-size:22px}}
 
-/* v3: dark page, amber phosphor glow */
-html,body{background:#0c0e10;color:#efe6d4}
+/* v5: dark page, cyan phosphor glow */
+html,body{background:#0c0e10;color:#e8eef0}
 .site-header{background:#070809;border-bottom-color:#ffffff1c}
-.headrow{border-bottom-color:rgba(255,232,77,.42)}
-h1{color:#ffe84d;font-weight:400;text-shadow:0 0 6px rgba(255,232,77,.42),0 0 18px rgba(255,190,90,.12)}
-.num{color:#ffe84d;border-color:rgba(255,232,77,.38);text-shadow:0 0 5px rgba(255,232,77,.4);box-shadow:0 0 10px rgba(255,232,77,.08) inset}
+.headrow{border-bottom-color:rgba(125,249,255,.42)}
+h1{color:#7df9ff;font-weight:400;text-shadow:0 0 8px rgba(125,249,255,.55),0 0 18px rgba(125,249,255,.18)}
+.num{color:#7df9ff;border-color:rgba(125,249,255,.38);text-shadow:0 0 5px rgba(125,249,255,.4);box-shadow:0 0 10px rgba(125,249,255,.08) inset}
 .kicker,.copy .side{color:#a59d8e}
 canvas{outline:1px solid rgba(255,255,255,.07)}
-figcaption{color:#8e897f}figcaption b{color:#ffe84d;text-shadow:0 0 5px rgba(255,232,77,.4)}
+figcaption{color:#8e897f}figcaption b{color:#7df9ff;text-shadow:0 0 8px rgba(125,249,255,.55)}
 .copy{border-top-color:rgba(255,255,255,.12)}body.side .copy{border-left-color:rgba(255,255,255,.12)}body.side .copy .side{border-bottom-color:rgba(255,255,255,.12)}
-#txt{color:#f1e8d6;text-shadow:0 0 5px rgba(255,214,150,.16)}
-#txt .end{color:#ffe84d;text-shadow:0 0 6px rgba(255,232,77,.42)}
+#txt{color:#e8eef0;text-shadow:0 0 5px rgba(125,249,255,.16)}
+#txt .end{color:#7df9ff;text-shadow:0 0 8px rgba(125,249,255,.55)}
 #note{color:#9c968a}
 #nav{border-top-color:rgba(255,255,255,.12)}
-.btn{background:transparent;color:#ffe84d;border-color:rgba(255,232,77,.38);text-shadow:0 0 5px rgba(255,232,77,.35)}
+.btn{background:transparent;color:#7df9ff;border-color:rgba(125,249,255,.38);text-shadow:0 0 5px rgba(125,249,255,.35)}
 .btn:hover{border-color:var(--blue);color:#9fb2ff;text-shadow:0 0 5px rgba(159,178,255,.35)}
-.btn:disabled{color:#ffe84d;border-color:rgba(255,232,77,.18)}
+.btn:disabled{color:#7df9ff;border-color:rgba(125,249,255,.18)}
 .dot{border-color:rgba(255,255,255,.16);color:#8e897f}
-.dot.on{background:#ffe84d;border-color:#ffe84d;color:#121416;box-shadow:0 0 12px rgba(255,232,77,.45)}
-.chip{color:#ffe84d;border-color:rgba(255,232,77,.3);text-shadow:0 0 5px rgba(255,232,77,.35)}
+.dot.on{background:#7df9ff;border-color:#7df9ff;color:#121416;box-shadow:0 0 12px rgba(125,249,255,.45)}
+.chip{color:#7df9ff;border-color:rgba(125,249,255,.3);text-shadow:0 0 5px rgba(125,249,255,.35)}
 #foot{color:#6d695f}
 </style></head><body>
 <header class="site-header"><div class="wordmark"><span class="wordmark-dot"></span><strong>Beluga Pod</strong><small>Ring conveyor &middot; visitor guide</small></div>
@@ -155,7 +155,7 @@ function label(txt,x,y,o={}){const size=o.size||14,pad=5;ctx.save();
  let x0=o.align==='center'?x-w/2:o.align==='right'?x-w:x;x0=clamp(x0,pad+3,LW-w-pad-3);
  let y0=y-size*1.05;y0=clamp(y0,pad+3,LH-h-pad-3);
  if(o.box!==false){ctx.fillStyle=o.bg||'rgba(18,20,22,0.86)';rr(x0-pad,y0-pad+1,w+2*pad,h+2*pad-2,2);ctx.fill();if(o.border){ctx.strokeStyle=o.border;ctx.lineWidth=1;ctx.stroke();}}
- ctx.textBaseline='top';lines.forEach((l,i)=>{ctx.font=fontOf(i);const fc=(o.colors&&o.colors[i])||o.color||((o.bold||(o.boldFirst&&i===0))?'#ffe84d':'#f2f3ed');ctx.fillStyle=fc;if(fc[0]==='#'&&fc.length===7){ctx.shadowColor=fc+'5c';ctx.shadowBlur=(size>=16?6:4)*SC*DPR;}else ctx.shadowBlur=0;
+ ctx.textBaseline='top';lines.forEach((l,i)=>{ctx.font=fontOf(i);const fc=(o.colors&&o.colors[i])||o.color||((o.bold||(o.boldFirst&&i===0))?'#7df9ff':'#f2f3ed');ctx.fillStyle=fc;if(fc[0]==='#'&&fc.length===7){ctx.shadowColor=fc+'5c';ctx.shadowBlur=(size>=16?6:4)*SC*DPR;}else ctx.shadowBlur=0;
   let lx=x0;if(o.align==='center')lx=x0+(w-ws[i])/2;else if(o.align==='right')lx=x0+w-ws[i];ctx.fillText(l,lx,y0+i*lh+(lh-size)/2);});
  ctx.restore();return{x:x0,y:y0,w,h};}
 function leader(x1,y1,x2,y2,col){ctx.save();ctx.strokeStyle=col||'rgba(230,230,220,0.55)';ctx.lineWidth=1.2;ctx.setLineDash([3,3]);ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();ctx.setLineDash([]);ctx.fillStyle=col||'rgba(230,230,220,0.8)';ctx.beginPath();ctx.arc(x2,y2,2.5,0,TAU);ctx.fill();ctx.restore();}
@@ -198,7 +198,7 @@ function loopDiagram(x,y,w,h,t,o={}){
  // pods going down on the left lane
  for(let j=0;j<2;j++){const q=((t/7)+j/2)%1,yy=lerp(ys[0],ys[2],q),n=q<0.5?3:(q<0.999?2:1);const nn=q<0.48?3:q<0.96?2:1;const al=q<0.06?q/0.06:q>0.94?(1-q)/0.06:1;
   for(let i=0;i<nn;i++)beluga(xl+(i-(nn-1)/2)*15,yy,5,{asp:0.8,alpha:al,T:315+100*q});}
- arrow(xl-34,ys[0]+6,xl-34,ys[2]-6,'rgba(255,215,150,0.75)',1.6);
+ arrow(xl-34,ys[0]+6,xl-34,ys[2]-6,'rgba(125,249,255,0.75)',1.6);
  // spares going up on the right lane
  for(let j=0;j<3;j++){const q=((t/3.5)+j/3)%1,start=j%2?ys[2]:ys[1],yy=lerp(start,ys[0],q),al=q>0.85?(1-q)/0.15:1;
   ctx.strokeStyle=`rgba(159,178,255,${0.5*al})`;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(xr+(j-1)*9,yy);ctx.lineTo(xr+(j-1)*9,Math.min(start,yy+26));ctx.stroke();
@@ -222,12 +222,12 @@ const STEPS=[
   belugaBig(305,by-14,108,t);
   for(let i=0;i<6;i++){const q=(t*0.55+i/6)%1,x=436+q*44,y=by+Math.sin(q*9+i*2)*4;ctx.save();ctx.shadowColor='rgba(247,241,233,1)';ctx.shadowBlur=8*SC*DPR;ctx.fillStyle=`rgba(229,201,166,${Math.sin(Math.PI*q)})`;ctx.beginPath();ctx.arc(x,y,3,0,TAU);ctx.fill();ctx.restore();}
   label('Beluga',305,by-104,{align:'center',bold:true,size:19,box:false});
-  leader(392,128,305+108*0.6,by-14-70*0.86,'rgba(255,232,77,0.6)');label('white membrane\n(collects sunlight)',396,128,{size:13,boldFirst:true,colors:['#ffe84d','#c4c3bb']});
+  leader(392,128,305+108*0.6,by-14-70*0.86,'rgba(125,249,255,0.6)');label('white membrane\n(collects sunlight)',396,128,{size:13,boldFirst:true,colors:['#7df9ff','#c4c3bb']});
   leader(405,322,305+108*0.62,by-14+70*0.55,'rgba(230,230,220,0.6)');label('body',408,327,{size:13,color:'#f2f3ed'});
   leader(150,392,305-108*0.3,by-14+70*1.38,'rgba(230,230,220,0.6)');label('carriage\n(motors, electronics)',22,392,{size:12,colors:['#f2f3ed','#9c9d98']});
   label('(drawn huge here)',305,by+150,{align:'center',size:12,color:'#9c9d98',box:false});
   label('sunlight in',140,215,{align:'center',color:'#e5c9a6'});
-  label('power out',485,by+5,{color:'#ffe84d'});
+  label('power out',485,by+5,{color:'#7df9ff'});
   label('Sun',22,330,{color:'#e5c9a6',bold:true});
   ctx.strokeStyle='rgba(255,255,255,0.14)';ctx.setLineDash([4,6]);ctx.beginPath();ctx.moveTo(588,40);ctx.lineTo(588,500);ctx.stroke();ctx.setLineDash([]);
   const cx=795,cy=280;sun(cx,cy,15,4);
@@ -278,7 +278,7 @@ const STEPS=[
   RINGS.forEach(R=>ring(cx,cy,R.r*S));sun(cx,cy,18,3.4);
   RINGS.forEach((R,i)=>{for(let k=0;k<7;k++)pod(cx,cy,S,R.r,k/7*TAU+i*0.35+W*OM(R.r)*t,R.n,{s:5.5,gap:15});});
   RINGS.forEach((R,i)=>label(`${R.name}: pods of ${R.n}`,cx,cy-R.r*S-8,{align:'center',size:13,color:'#f2f3ed'}));
-  const x0=600;label('Every pod makes the same power',795,42,{align:'center',bold:true,size:17,color:'#ffe84d'});
+  const x0=600;label('Every pod makes the same power',795,42,{align:'center',bold:true,size:17,color:'#7df9ff'});
   const rows=[['Outer ring (1.0 AU): pod of 3','light per Beluga 1,361 W (1×)','3 × 1,361 W = 4,083 W'],['Middle ring (0.816 AU): pod of 2','light per Beluga 2,042 W (1.5×)','2 × 2,042 W = 4,083 W'],['Inner ring (0.577 AU): pod of 1','light per Beluga 4,083 W (3×)','1 × 4,083 W = 4,083 W']];
   const fill=smooth(((t*0.35)%1.4)/0.8);
   rows.forEach((rw,i)=>{const y=120+i*140,n=RINGS[i].n,T=tempK(RINGS[i].r);
@@ -286,7 +286,7 @@ const STEPS=[
    for(let j=0;j<n;j++)beluga(x0+50+(j-(n-1)/2)*27,y+4,10,{view:'side',T});
    label(rw[0],x0+108,y-22,{size:14,bold:true,box:false});
    label(rw[1],x0+108,y,{size:13,color:'#e5c9a6',box:false});
-   label(rw[2],x0+108,y+24,{size:15,bold:true,color:'#ffe84d',box:false});
+   label(rw[2],x0+108,y+24,{size:15,bold:true,color:'#7df9ff',box:false});
    const bx=x0+108,bw=262,bh=11,byy=y+40;ctx.fillStyle='#2a2c2f';ctx.fillRect(bx,byy,bw,bh);
    for(let j=0;j<n;j++){const s0=j/n,s1=(j+1)/n,fe=clamp((fill-s0)/(s1-s0),0,1);if(fe<=0)continue;ctx.fillStyle=j%2?'#e5c9a6':'#f7f1e9';ctx.fillRect(bx+bw*s0+1,byy,(bw/n-2)*fe,bh);}});}},
 {title:'Sharing light: side by side, not single file',kick:'Shading',
@@ -342,7 +342,7 @@ const STEPS=[
   [['315 K (42 °C)',315],['349 K (76 °C)',349],['415 K (142 °C)',415]].forEach((l,i)=>label(l[0],cx,cy-RINGS[i].r*S-4,{align:'center',size:13,color:glowCol(l[1],1)}));
   const cards=[['10,000','Belugas\nin total'],['≈ 20.4 MW','total\npower'],['≈ 1.4','soccer fields\nof area'],['~500 kg','membrane film\n(50 g/m²)']];
   cards.forEach((c,i)=>{const x=448+i*136;ctx.save();ctx.fillStyle='rgba(255,255,255,0.035)';ctx.strokeStyle='rgba(255,255,255,0.16)';rr(x,22,128,92,2);ctx.fill();ctx.stroke();ctx.restore();
-   label(c[0],x+64,52,{align:'center',bold:true,size:21,color:'#ffe84d',box:false});label(c[1],x+64,80,{align:'center',size:12,color:'#9c9d98',box:false});});
+   label(c[0],x+64,52,{align:'center',bold:true,size:21,color:'#7df9ff',box:false});label(c[1],x+64,80,{align:'center',size:12,color:'#9c9d98',box:false});});
   label('Distance is a dial: power vs heat',448,148,{bold:true,size:15,box:false});
   const g=smooth(t/2.5),bars=[['All 10,000 at 1 AU',13.6,'13.6 MW · 315 K',['#c9d3ff','#c9d3ff']],['Three rings (this design)',20.4,'20.4 MW · 315–415 K',['#c9d3ff','#e8a27a']],['All 10,000 on the inner ring',40.8,'40.8 MW · 415 K (hot)',['#e8a27a','#d98a62']]];
   bars.forEach((b,i)=>{const y=180+i*62,w=b[1]/40.8*350*g*(0.985+0.015*Math.sin(t*2+i));label(b[0],448,y,{size:13,color:'#c4c3bb',box:false});
@@ -359,9 +359,9 @@ const STEPS=[
  text:'Power can’t be beamed between rings: across ~36 million km a laser spreads into a spot ~135 km wide. So every Beluga thinks with its own power, and the rings swap only data. The inner ring thinks hardest: 3× the light outweighs its hotter chips, leaving it ~2.3× ahead.',
  note:'[Physics, Kepler] A 1 m receiver catches only ~3×10⁻¹¹ of that beam. [Physics: Landauer limit] Energy per bit ∝ temperature, so a 415 K chip does ~0.76× the work per joule. [Assumption, Kepler] Counting radiators (~0.53 m² inner vs ~0.18 m² outer at 1 kg/m²), the inner ring still does ~2.3× more thinking per kg, unless radiators get much heavier.',
  draw(t){bg(t);const cx=400,cy=272,S=210,K=[1,1.36,2.28],cols=['#9fb2ff','#b7d3a8','#e5c9a6'];
-  RINGS.forEach((R,i)=>{const k=K[i]/2.28,pu=0.85+0.15*Math.sin(t*2.2+i*1.7);ctx.save();ctx.strokeStyle=`rgba(255,232,77,${0.08+0.34*k*pu})`;ctx.lineWidth=3+9*k;ctx.shadowColor='rgba(255,200,110,0.9)';ctx.shadowBlur=(5+20*k)*SC*DPR;ctx.beginPath();ctx.arc(cx,cy,R.r*S,0,TAU);ctx.stroke();ctx.restore();});
+  RINGS.forEach((R,i)=>{const k=K[i]/2.28,pu=0.85+0.15*Math.sin(t*2.2+i*1.7);ctx.save();ctx.strokeStyle=`rgba(125,249,255,${0.08+0.34*k*pu})`;ctx.lineWidth=3+9*k;ctx.shadowColor='rgba(125,249,255,0.9)';ctx.shadowBlur=(5+20*k)*SC*DPR;ctx.beginPath();ctx.arc(cx,cy,R.r*S,0,TAU);ctx.stroke();ctx.restore();});
   sun(cx,cy,16,3.2);
-  RINGS.forEach((R,i)=>{const n=Math.round(14+24*K[i]);for(let j=0;j<n;j++){const ph=(t*0.8+j*0.618)%1,a=j/n*TAU+j*0.37+W0*0.35*OM(R.r)*t,rr2=R.r*S+Math.sin(j*7.1)*6,al=Math.sin(Math.PI*ph)*(0.35+0.65*K[i]/2.28);ctx.fillStyle=`rgba(255,228,165,${al})`;ctx.beginPath();ctx.arc(cx+rr2*Math.cos(a),cy+rr2*Math.sin(a),1.1+K[i]*0.5,0,TAU);ctx.fill();}});
+  RINGS.forEach((R,i)=>{const n=Math.round(14+24*K[i]);for(let j=0;j<n;j++){const ph=(t*0.8+j*0.618)%1,a=j/n*TAU+j*0.37+W0*0.35*OM(R.r)*t,rr2=R.r*S+Math.sin(j*7.1)*6,al=Math.sin(Math.PI*ph)*(0.35+0.65*K[i]/2.28);ctx.fillStyle=`rgba(200,252,255,${al})`;ctx.beginPath();ctx.arc(cx+rr2*Math.cos(a),cy+rr2*Math.sin(a),1.1+K[i]*0.5,0,TAU);ctx.fill();}});
   RINGS.forEach((R,i)=>{for(let k=0;k<6;k++)pod(cx,cy,S,R.r,k/6*TAU+i*0.5+W0*0.35*OM(R.r)*t,R.n,{s:4.5,gap:12});});
   for(let j=0;j<7;j++){const a=j/7*TAU+0.25+t*0.04,r0=RINGS[2].r*S+8,r1=RINGS[0].r*S-8;ctx.save();ctx.setLineDash([2,5]);ctx.strokeStyle='rgba(159,178,255,0.28)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(cx+r0*Math.cos(a),cy+r0*Math.sin(a));ctx.lineTo(cx+r1*Math.cos(a),cy+r1*Math.sin(a));ctx.stroke();ctx.restore();
    for(let m=0;m<2;m++){const q=(t*0.32+j*0.29+m*0.5)%1,rr2=lerp(r0,r1,j%2?q:1-q);ctx.save();ctx.shadowColor='rgba(159,178,255,1)';ctx.shadowBlur=7*SC*DPR;ctx.fillStyle=`rgba(190,205,255,${Math.sin(Math.PI*q)})`;ctx.translate(cx+rr2*Math.cos(a),cy+rr2*Math.sin(a));ctx.rotate(a);ctx.fillRect(-4,-1.5,8,3);ctx.restore();}}
@@ -370,23 +370,23 @@ const STEPS=[
   // panel A: why not beam power
   const px=640;ctx.save();ctx.fillStyle='rgba(255,255,255,0.035)';ctx.strokeStyle='rgba(255,255,255,0.16)';rr(px,24,350,196,2);ctx.fill();ctx.stroke();ctx.restore();
   label('Why not beam power between rings?',px+12,46,{bold:true,size:14,box:false});
-  const ly=128,ox=px+40,ex=px+310;const cg=ctx.createLinearGradient(ox,0,ex,0);cg.addColorStop(0,'rgba(255,232,77,0.55)');cg.addColorStop(1,'rgba(255,232,77,0.06)');ctx.fillStyle=cg;ctx.beginPath();ctx.moveTo(ox,ly-2);ctx.lineTo(ex,ly-58);ctx.lineTo(ex,ly+58);ctx.lineTo(ox,ly+2);ctx.closePath();ctx.fill();
-  ctx.strokeStyle='rgba(255,232,77,0.6)';ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(ex,ly-58);ctx.lineTo(ex,ly+58);ctx.stroke();
+  const ly=128,ox=px+40,ex=px+310;const cg=ctx.createLinearGradient(ox,0,ex,0);cg.addColorStop(0,'rgba(125,249,255,0.55)');cg.addColorStop(1,'rgba(125,249,255,0.06)');ctx.fillStyle=cg;ctx.beginPath();ctx.moveTo(ox,ly-2);ctx.lineTo(ex,ly-58);ctx.lineTo(ex,ly+58);ctx.lineTo(ox,ly+2);ctx.closePath();ctx.fill();
+  ctx.strokeStyle='rgba(125,249,255,0.6)';ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(ex,ly-58);ctx.lineTo(ex,ly+58);ctx.stroke();
   beluga(ox-12,ly,9,{view:'side'});ctx.fillStyle='#ffffff';ctx.beginPath();ctx.arc(ex,ly+20,2,0,TAU);ctx.fill();
   label('1 m laser',ox-20,ly+40,{size:12,color:'#c4c3bb',box:false});
   label('~36 million km',px+150,ly+5,{size:12,color:'#f2f3ed'});
-  label('spot ≈ 135 km',ex-6,ly-62,{size:12,align:'right',color:'#ffe84d',box:false});
+  label('spot ≈ 135 km',ex-6,ly-62,{size:12,align:'right',color:'#7df9ff',box:false});
   label('1 m receiver catches ~3×10⁻¹¹',px+338,ly+80,{size:12,align:'right',color:'#e08f7a',box:false});
   // panel B: thinking per Beluga
   ctx.save();ctx.fillStyle='rgba(255,255,255,0.035)';ctx.strokeStyle='rgba(255,255,255,0.16)';rr(px,236,350,176,2);ctx.fill();ctx.stroke();ctx.restore();
   label('Thinking per Beluga (theoretical limit)',px+12,258,{bold:true,size:14,box:false});
-  const gr=0.97+0.03*Math.sin(t*2);[['Outer',1],['Middle',1.36],['Inner',2.28]].forEach((b,i)=>{const y=282+i*34;label(b[0],px+12,y+12,{size:12,color:cols[i],box:false});ctx.fillStyle='#2a2c2f';ctx.fillRect(px+80,y,200,14);ctx.save();ctx.shadowColor='rgba(255,232,77,0.8)';ctx.shadowBlur=6*SC*DPR;ctx.fillStyle='#ffe84d';ctx.fillRect(px+80,y,200*b[1]/2.28*gr,14);ctx.restore();label(b[1]+'×',px+290,y+12,{size:13,bold:true,box:false});});
+  const gr=0.97+0.03*Math.sin(t*2);[['Outer',1],['Middle',1.36],['Inner',2.28]].forEach((b,i)=>{const y=282+i*34;label(b[0],px+12,y+12,{size:12,color:cols[i],box:false});ctx.fillStyle='#2a2c2f';ctx.fillRect(px+80,y,200,14);ctx.save();ctx.shadowColor='rgba(125,249,255,0.8)';ctx.shadowBlur=6*SC*DPR;ctx.fillStyle='#7df9ff';ctx.fillRect(px+80,y,200*b[1]/2.28*gr,14);ctx.restore();label(b[1]+'×',px+290,y+12,{size:13,bold:true,box:false});});
   label('3× light × 0.76× work per joule ≈ 2.3×',px+12,398,{size:12,color:'#9c9d98',box:false});
   // panel C: legend
   ctx.save();ctx.shadowColor='rgba(159,178,255,1)';ctx.shadowBlur=7*SC*DPR;ctx.fillStyle='#bfcaff';ctx.fillRect(px+14,445,10,3);ctx.restore();
   label('data pulses: rings swap only data',px+32,452,{size:13,color:'#9fb2ff',box:false});
   label('✕  no power beams between rings',px+12,482,{size:13,color:'#e08f7a',box:false});
-  label('glow = how hard each ring thinks',px+12,512,{size:13,color:'#ffe84d',box:false});}},
+  label('glow = how hard each ring thinks',px+12,512,{size:13,color:'#7df9ff',box:false});}},
 {title:'A mesh of laser links',kick:'The mesh',
  text:'Pods pass messages neighbour to neighbour with tiny lasers, like calls down a goose formation. Neighbours on a ring are a few hundred thousand km apart, so those links are fast: gigabits per second. Links between rings are ~100× longer and much slower.',
  note:'[Physics, Kepler] 1 W laser, 1 m optics: along a ring (326k–564k km) the ceiling is ~90–250 Gbps; between rings (27–36 million km) ~20–40 Mbps per watt. Aim must hold to ~1.5 microradians. NASA’s DSOC sent 267 Mbps from ~33 million km in 2023 with 4 W.',
@@ -398,34 +398,34 @@ const STEPS=[
    ctx.save();ctx.setLineDash([3,4]);ctx.strokeStyle='rgba(159,178,255,0.42)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(x0,y0);ctx.lineTo(x1,y1);ctx.stroke();ctx.restore();
    const q=(t*0.16+k*0.23+i*0.4)%1;ctx.save();ctx.shadowColor='rgba(159,178,255,1)';ctx.shadowBlur=6*SC*DPR;ctx.fillStyle=`rgba(190,205,255,${0.3+0.7*Math.sin(Math.PI*q)})`;ctx.beginPath();ctx.arc(lerp(x0,x1,q),lerp(y0,y1,q),2,0,TAU);ctx.fill();ctx.restore();});
   // along-ring links (fast)
-  P.forEach((arr,i)=>{const Rr=RINGS[i].r*S;arr.forEach((a,k)=>{const b=arr[(k+1)%N],da=wrap(b-a);ctx.save();ctx.strokeStyle='rgba(255,232,77,0.5)';ctx.lineWidth=2.4;ctx.shadowColor='rgba(255,232,77,0.8)';ctx.shadowBlur=5*SC*DPR;ctx.beginPath();ctx.arc(cx,cy,Rr,a+0.05,a+da-0.05);ctx.stroke();
-    for(let m=0;m<3;m++){const q=(t*0.9+k*0.17+m/3)%1,aa=a+0.05+(da-0.1)*q;ctx.fillStyle='rgba(255,236,190,0.95)';ctx.beginPath();ctx.arc(cx+Rr*Math.cos(aa),cy+Rr*Math.sin(aa),1.8,0,TAU);ctx.fill();}ctx.restore();});
+  P.forEach((arr,i)=>{const Rr=RINGS[i].r*S;arr.forEach((a,k)=>{const b=arr[(k+1)%N],da=wrap(b-a);ctx.save();ctx.strokeStyle='rgba(125,249,255,0.5)';ctx.lineWidth=2.4;ctx.shadowColor='rgba(125,249,255,0.8)';ctx.shadowBlur=5*SC*DPR;ctx.beginPath();ctx.arc(cx,cy,Rr,a+0.05,a+da-0.05);ctx.stroke();
+    for(let m=0;m<3;m++){const q=(t*0.9+k*0.17+m/3)%1,aa=a+0.05+(da-0.1)*q;ctx.fillStyle='rgba(205,252,255,0.95)';ctx.beginPath();ctx.arc(cx+Rr*Math.cos(aa),cy+Rr*Math.sin(aa),1.8,0,TAU);ctx.fill();}ctx.restore();});
    arr.forEach(a=>pod(cx,cy,S,RINGS[i].r,a,RINGS[i].n,{s:4.5,gap:12}));});
   label('Drawn: 10 pods per ring\n(really ~1,667)',14,40,{size:12,colors:['#c4c3bb','#9c9d98']});
   label('Like geese passing calls\ndown a formation: each pod\ntalks to its neighbours',14,478,{size:12,color:'#c4c3bb'});
   const px=640;label('Two kinds of link',px,44,{bold:true,size:15,box:false});
-  ctx.save();ctx.strokeStyle='rgba(255,232,77,0.8)';ctx.lineWidth=3;ctx.shadowColor='rgba(255,232,77,0.8)';ctx.shadowBlur=5*SC*DPR;ctx.beginPath();ctx.moveTo(px,76);ctx.lineTo(px+30,76);ctx.stroke();ctx.restore();
-  label('Along a ring (neighbours)\n0.33–0.56 million km apart\nfast: Gbps (ceiling 90–250 Gbps)',px+42,80,{size:13,boldFirst:true,colors:['#ffe84d','#c4c3bb','#f2f3ed'],box:false});
+  ctx.save();ctx.strokeStyle='rgba(125,249,255,0.8)';ctx.lineWidth=3;ctx.shadowColor='rgba(125,249,255,0.8)';ctx.shadowBlur=5*SC*DPR;ctx.beginPath();ctx.moveTo(px,76);ctx.lineTo(px+30,76);ctx.stroke();ctx.restore();
+  label('Along a ring (neighbours)\n0.33–0.56 million km apart\nfast: Gbps (ceiling 90–250 Gbps)',px+42,80,{size:13,boldFirst:true,colors:['#7df9ff','#c4c3bb','#f2f3ed'],box:false});
   ctx.save();ctx.setLineDash([3,4]);ctx.strokeStyle='rgba(159,178,255,0.9)';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(px,156);ctx.lineTo(px+30,156);ctx.stroke();ctx.restore();
   label('Between rings\n27–36 million km apart\nslow: ~20–40 Mbps per watt',px+42,160,{size:13,boldFirst:true,colors:['#9fb2ff','#c4c3bb','#f2f3ed'],box:false});
   // log-scale speed chart
   const cx0=px,cw=340,cy0=268;label('Link speed per watt (log scale)',px,cy0-6,{bold:true,size:13,box:false});
   const X=v=>cx0+Math.log10(v/1e6)/6*cw;ctx.strokeStyle='rgba(230,230,220,0.5)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(cx0,cy0+84);ctx.lineTo(cx0+cw,cy0+84);ctx.stroke();
   [[1e6,'1 Mbps'],[1e9,'1 Gbps'],[1e12,'1 Tbps']].forEach(([v,n])=>{ctx.beginPath();ctx.moveTo(X(v),cy0+80);ctx.lineTo(X(v),cy0+88);ctx.stroke();label(n,X(v),cy0+104,{align:'center',size:11,color:'#9c9d98',box:false});});
-  const g2=0.97+0.03*Math.sin(t*2);ctx.save();ctx.shadowColor='rgba(255,232,77,0.8)';ctx.shadowBlur=5*SC*DPR;ctx.fillStyle='#ffe84d';ctx.fillRect(cx0,cy0+12,(X(1e9)-cx0)*g2,14);ctx.fillStyle='rgba(255,232,77,0.25)';ctx.fillRect(X(9e10),cy0+12,(X(2.5e11)-X(9e10))*g2,14);ctx.fillStyle='#9fb2ff';ctx.shadowColor='rgba(159,178,255,0.8)';ctx.fillRect(cx0,cy0+44,(X(3e7)-cx0)*g2,14);ctx.restore();
-  label('on a ring: Gbps',X(1e9)+6,cy0+24,{size:11,color:'#ffe84d',box:false});label('ceiling',X(9e10),cy0+8,{size:10,color:'#9c9d98',box:false});
+  const g2=0.97+0.03*Math.sin(t*2);ctx.save();ctx.shadowColor='rgba(125,249,255,0.8)';ctx.shadowBlur=5*SC*DPR;ctx.fillStyle='#7df9ff';ctx.fillRect(cx0,cy0+12,(X(1e9)-cx0)*g2,14);ctx.fillStyle='rgba(125,249,255,0.25)';ctx.fillRect(X(9e10),cy0+12,(X(2.5e11)-X(9e10))*g2,14);ctx.fillStyle='#9fb2ff';ctx.shadowColor='rgba(159,178,255,0.8)';ctx.fillRect(cx0,cy0+44,(X(3e7)-cx0)*g2,14);ctx.restore();
+  label('on a ring: Gbps',X(1e9)+6,cy0+24,{size:11,color:'#7df9ff',box:false});label('ceiling',X(9e10),cy0+8,{size:10,color:'#9c9d98',box:false});
   label('between rings: ~20–40 Mbps',X(3e7)+6,cy0+56,{size:11,color:'#9fb2ff',box:false});
   ctx.fillStyle='#f2f3ed';ctx.beginPath();ctx.moveTo(X(6.7e7),cy0+66);ctx.lineTo(X(6.7e7)-4,cy0+74);ctx.lineTo(X(6.7e7)+4,cy0+74);ctx.closePath();ctx.fill();
   label('▲ NASA DSOC (2023): 267 Mbps\n  from ~33 million km with 4 W',px,cy0+134,{size:11,colors:['#f2f3ed','#c4c3bb'],box:false});
-  label('Aim within ~1.5 microradians\n(≈ 1.5 m of drift at 1,000 km)',px,cy0+184,{size:13,boldFirst:true,colors:['#ffe84d','#c4c3bb'],box:false});
-  label('Fast links between neighbours,\nslow links between rings.',px,cy0+232,{size:12,color:'#ffe84d',box:false});}},
+  label('Aim within ~1.5 microradians\n(≈ 1.5 m of drift at 1,000 km)',px,cy0+184,{size:13,boldFirst:true,colors:['#7df9ff','#c4c3bb'],box:false});
+  label('Fast links between neighbours,\nslow links between rings.',px,cy0+232,{size:12,color:'#7df9ff',box:false});}},
 {title:'The voice home',kick:'Home',
  text:'The outer ring is Earth’s own orbit. About 97% of outer pods can see Earth, and since they share Earth’s year the nearest relays stay nearest for years. Relay pods sit just outside Earth’s gravity zone and beam answers to Earth and the Moon.',
- end:['Machines introduce new, evolved machines. More thinking needs more power.','Concept sketch, not the simulation.'],
+ end:['Belugas build new, evolved Belugas. Deeper understanding takes more thought, and thought takes power.','Concept sketch, not the simulation.'],
  note:'[Physics, Kepler] Relays sit ~3 pod gaps out, past Earth’s Hill sphere (~1.5M km). Light delay ~8 min per AU: batch work, not live chat. [Physics, unproven] Self-building factories. [Speculation] Recursive self-improvement.',
  draw(t){bg(t);const cx=430,cy=272,S=228,SR=12;
   [1,2].forEach(i=>{const R=RINGS[i];ring(cx,cy,R.r*S,'rgba(235,235,225,0.12)');for(let k=0;k<8;k++){const a=k/8*TAU+i+W0*0.3*(OM(R.r)-1)*t;beluga(cx+R.r*S*Math.cos(a),cy+R.r*S*Math.sin(a),3,{ang:a+Math.PI/2,alpha:0.5,T:tempK(R.r)});}});
-  ring(cx,cy,S,'rgba(255,232,77,0.35)');
+  ring(cx,cy,S,'rgba(125,249,255,0.35)');
   const ex=cx-S,ey=cy;
   // Sun-shadow wedge seen from Earth
   const d=S,ha=Math.asin(SR/d),far=2*S+6;ctx.save();const wg=ctx.createLinearGradient(cx,0,cx+S,0);wg.addColorStop(0,'rgba(0,0,0,0.0)');wg.addColorStop(1,'rgba(224,143,122,0.10)');ctx.fillStyle=wg;ctx.beginPath();ctx.moveTo(cx,cy-SR);ctx.lineTo(ex+far*Math.cos(-ha),ey+far*Math.sin(-ha));ctx.lineTo(ex+far*Math.cos(ha),ey+far*Math.sin(ha));ctx.lineTo(cx,cy+SR);ctx.closePath();ctx.fill();ctx.restore();
@@ -436,17 +436,17 @@ const STEPS=[
   ctx.save();ctx.strokeStyle='rgba(224,143,122,0.75)';ctx.lineWidth=5;ctx.lineCap='round';const half=Math.asin(SR/(2*S))*2+0.06;ctx.beginPath();ctx.arc(cx,cy,S,-half,half);ctx.stroke();ctx.restore();
   pods.forEach((p,k)=>{if(!p.hid&&k%3===1){ctx.strokeStyle='rgba(159,178,255,0.10)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(ex,ey);ctx.lineTo(p.x,p.y);ctx.stroke();}});
   // data flowing along the ring toward the relays
-  for(let j=0;j<10;j++){const side=j%2?1:-1,q=(t*0.12+j*0.137)%1,a=Math.PI+side*(Math.PI*0.92*(1-q)+g/2);ctx.fillStyle=`rgba(255,226,160,${0.85*Math.sin(Math.PI*Math.min(1,q*1.15))})`;ctx.beginPath();ctx.arc(cx+S*Math.cos(a),cy+S*Math.sin(a),1.8,0,TAU);ctx.fill();}
+  for(let j=0;j<10;j++){const side=j%2?1:-1,q=(t*0.12+j*0.137)%1,a=Math.PI+side*(Math.PI*0.92*(1-q)+g/2);ctx.fillStyle=`rgba(200,252,255,${0.85*Math.sin(Math.PI*Math.min(1,q*1.15))})`;ctx.beginPath();ctx.arc(cx+S*Math.cos(a),cy+S*Math.sin(a),1.8,0,TAU);ctx.fill();}
   pods.forEach((p,k)=>pod(cx,cy,S,1,p.a,3,{s:4,gap:9,alpha:p.hid?0.35:1}));
   // Earth, Hill sphere, Moon, relay beams
   ctx.save();ctx.setLineDash([3,3]);ctx.strokeStyle='rgba(159,178,255,0.5)';ctx.lineWidth=1;ctx.beginPath();ctx.arc(ex,ey,17,0,TAU);ctx.stroke();ctx.restore();
   const ma=t*0.7,mx=ex+10*Math.cos(ma),my=ey+10*Math.sin(ma);
   [pods[0],pods[NP-1]].forEach((p,i)=>{[[ex,ey],[mx,my]].forEach(([tx,ty],j)=>{ctx.save();ctx.strokeStyle='rgba(159,178,255,0.55)';ctx.lineWidth=1.3;ctx.shadowColor='rgba(159,178,255,0.9)';ctx.shadowBlur=5*SC*DPR;ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(tx,ty);ctx.stroke();const q=(t*0.8+i*0.5+j*0.25)%1;ctx.fillStyle='#dfe6ff';ctx.beginPath();ctx.arc(lerp(p.x,tx,q),lerp(p.y,ty,q),1.8,0,TAU);ctx.fill();ctx.restore();});
-   ctx.save();ctx.strokeStyle='rgba(255,232,77,0.9)';ctx.lineWidth=1.2;ctx.beginPath();ctx.arc(p.x,p.y,10,0,TAU);ctx.stroke();ctx.restore();});
+   ctx.save();ctx.strokeStyle='rgba(125,249,255,0.9)';ctx.lineWidth=1.2;ctx.beginPath();ctx.arc(p.x,p.y,10,0,TAU);ctx.stroke();ctx.restore();});
   ctx.save();ctx.shadowColor='rgba(72,108,255,0.9)';ctx.shadowBlur=10*SC*DPR;ctx.fillStyle='#486cff';ctx.beginPath();ctx.arc(ex,ey,6,0,TAU);ctx.fill();ctx.restore();ctx.fillStyle='#cfcdc6';ctx.beginPath();ctx.arc(mx,my,2.4,0,TAU);ctx.fill();
   leader(150,226,ex-4,ey-4,'rgba(159,178,255,0.6)');label('Earth + Moon',14,226,{size:13,bold:true,color:'#9fb2ff'});
-  leader(150,330,pods[0].x-4,pods[0].y+4,'rgba(255,232,77,0.6)');label('relay pods\njust outside Earth’s\ngravity zone\n(~1.5 million km)',14,322,{size:12,boldFirst:true,colors:['#ffe84d','#c4c3bb','#c4c3bb','#9c9d98']});
-  label('outer ring = Earth’s orbit',cx,30,{align:'center',size:13,color:'#ffe84d'});
+  leader(150,330,pods[0].x-4,pods[0].y+4,'rgba(125,249,255,0.6)');label('relay pods\njust outside Earth’s\ngravity zone\n(~1.5 million km)',14,322,{size:12,boldFirst:true,colors:['#7df9ff','#c4c3bb','#c4c3bb','#9c9d98']});
+  label('outer ring = Earth’s orbit',cx,30,{align:'center',size:13,color:'#7df9ff'});
   label('hidden behind the Sun (~3%)',cx+S-8,cy+44,{align:'center',size:12,color:'#e08f7a'});
   label('Drawn turning with Earth:\nouter pods stay put',14,500,{size:11,colors:['#9c9d98','#9c9d98']});
   const px=712;
@@ -457,10 +457,10 @@ const STEPS=[
   ctx.save();ctx.fillStyle='rgba(255,255,255,0.035)';ctx.strokeStyle='rgba(255,255,255,0.16)';rr(px-8,210,286,300,2);ctx.fill();ctx.stroke();ctx.restore();
   label('Machines that evolve machines',px+135,234,{align:'center',bold:true,size:14,box:false});
   const lx=px+135,ly=352,lr=74,nodes=['power','thinking','factories','more Belugas'],act=Math.floor(t/1.6)%4;
-  ctx.save();ctx.strokeStyle='rgba(255,232,77,0.35)';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(lx,ly,lr,0,TAU);ctx.stroke();ctx.restore();
-  const ra=(t*0.6)%TAU;ctx.save();ctx.strokeStyle='rgba(255,232,77,0.9)';ctx.lineWidth=2.5;ctx.shadowColor='rgba(255,232,77,0.9)';ctx.shadowBlur=6*SC*DPR;ctx.beginPath();ctx.arc(lx,ly,lr,ra-0.6,ra);ctx.stroke();ctx.restore();
-  arrow(lx+lr*Math.cos(ra-0.05),ly+lr*Math.sin(ra-0.05),lx+lr*Math.cos(ra),ly+lr*Math.sin(ra),'rgba(255,232,77,0.95)',2);
-  nodes.forEach((n,i)=>{const a=-Math.PI/2+i*Math.PI/2,x=lx+lr*Math.cos(a),y=ly+lr*Math.sin(a);label(n,x,y+5,{align:'center',size:12,bold:i===act,color:i===act?'#ffe84d':'#c4c3bb',border:'rgba(255,255,255,0.16)'});});
+  ctx.save();ctx.strokeStyle='rgba(125,249,255,0.35)';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(lx,ly,lr,0,TAU);ctx.stroke();ctx.restore();
+  const ra=(t*0.6)%TAU;ctx.save();ctx.strokeStyle='rgba(125,249,255,0.9)';ctx.lineWidth=2.5;ctx.shadowColor='rgba(125,249,255,0.9)';ctx.shadowBlur=6*SC*DPR;ctx.beginPath();ctx.arc(lx,ly,lr,ra-0.6,ra);ctx.stroke();ctx.restore();
+  arrow(lx+lr*Math.cos(ra-0.05),ly+lr*Math.sin(ra-0.05),lx+lr*Math.cos(ra),ly+lr*Math.sin(ra),'rgba(125,249,255,0.95)',2);
+  nodes.forEach((n,i)=>{const a=-Math.PI/2+i*Math.PI/2,x=lx+lr*Math.cos(a),y=ly+lr*Math.sin(a);label(n,x,y+5,{align:'center',size:12,bold:i===act,color:i===act?'#7df9ff':'#c4c3bb',border:'rgba(255,255,255,0.16)'});});
   label('[Physics, unproven] self-building factories',px,474,{size:11,color:'#9c9d98',box:false});
   label('[Speculation] recursive self-improvement',px,494,{size:11,color:'#9c9d98',box:false});}}
 ];
