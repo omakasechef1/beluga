@@ -421,7 +421,7 @@ const STEPS=[
   label('Fast links between neighbours,\nslow links between rings.',px,cy0+232,{size:12,color:'#7df9ff',box:false});}},
 {title:'The voice home',kick:'Home',
  text:'The outer ring is Earth’s own orbit. About 97% of outer pods can see Earth, and since they share Earth’s year the nearest relays stay nearest for years. Relay pods sit just outside Earth’s gravity zone and beam answers to Earth and the Moon.',
- end:['Belugas build new, evolved Belugas. Deeper understanding takes more thought, and thought takes energy.','Concept sketch, not the simulation.'],
+ end:['Belugas build new, evolved Belugas. Deeper understanding takes more thought, and thought takes power.','Concept sketch, not the simulation.'],
  note:'[Physics, Kepler] Relays sit ~3 pod gaps out, past Earth’s Hill sphere (~1.5M km). Light delay ~8 min per AU: batch work, not live chat. [Physics, unproven] Self-building factories. [Speculation] Recursive self-improvement.',
  draw(t){bg(t);const cx=430,cy=272,S=228,SR=12;
   [1,2].forEach(i=>{const R=RINGS[i];ring(cx,cy,R.r*S,'rgba(235,235,225,0.12)');for(let k=0;k<8;k++){const a=k/8*TAU+i+W0*0.3*(OM(R.r)-1)*t;beluga(cx+R.r*S*Math.cos(a),cy+R.r*S*Math.sin(a),3,{ang:a+Math.PI/2,alpha:0.5,T:tempK(R.r)});}});
