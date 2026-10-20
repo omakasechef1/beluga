@@ -4,22 +4,27 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <style>
   html,body{margin:0;height:100%;background:#030507;overflow:hidden;font-family:"DejaVu Sans Mono",Menlo,Consolas,"Courier New",monospace}
-  canvas{position:fixed;inset:0;width:100%;height:100%;display:block;cursor:grab}
+  canvas{position:fixed;inset:0;width:100%;height:100%;display:block;cursor:grab;touch-action:none}
   canvas:active{cursor:grabbing}
   .ui{position:fixed;left:0;right:0;pointer-events:none;text-align:center}
   #top{top:26px}
-  h1{margin:0;color:#7df9ff;font-weight:normal;font-size:26px;letter-spacing:.06em;text-shadow:0 0 8px rgba(125,249,255,.55)}
+  h1{margin:0 auto;width:fit-content;padding:2px 12px;border-radius:6px;background:rgba(3,5,7,.5);color:#7df9ff;font-weight:normal;font-size:26px;letter-spacing:.06em;text-shadow:0 0 8px rgba(125,249,255,.55)}
   #btn{pointer-events:auto;margin-top:16px;background:rgba(3,5,7,.6);color:#7df9ff;border:1px solid #7df9ff;border-radius:3px;
        font:inherit;font-size:15px;padding:8px 18px;letter-spacing:.05em;cursor:pointer;text-shadow:0 0 8px rgba(125,249,255,.55);
        box-shadow:0 0 10px rgba(125,249,255,.25)}
   #btn:hover{background:rgba(125,249,255,.08)}
   #btn .sw{opacity:.45}
   #btn .on{opacity:1}
+  #zoomui{position:fixed;top:26px;right:24px;display:flex;gap:6px;z-index:2}
+  #zoomui button{background:rgba(3,5,7,.6);color:#7df9ff;border:1px solid #7df9ff;border-radius:3px;font:inherit;font-size:15px;
+       min-width:36px;height:34px;padding:0 10px;cursor:pointer;text-shadow:0 0 8px rgba(125,249,255,.55);box-shadow:0 0 10px rgba(125,249,255,.25)}
+  #zoomui button:hover{background:rgba(125,249,255,.08)}
+  #zlab{position:fixed;top:66px;right:24px;color:#7df9ff;opacity:.6;font-size:12px;letter-spacing:.06em;text-shadow:0 0 8px rgba(125,249,255,.55);pointer-events:none}
   #cap{top:auto;bottom:58px;padding:0 40px}
-  #cap p{margin:0 auto;max-width:900px;color:#e8eef0;font-size:16px;line-height:1.5}
+  #cap p{margin:0 auto;max-width:900px;width:fit-content;padding:6px 14px;border-radius:6px;background:rgba(3,5,7,.62);color:#e8eef0;font-size:16px;line-height:1.5}
   #cap .tag{color:#7df9ff;text-shadow:0 0 8px rgba(125,249,255,.55)}
   #cap .mode{color:#7df9ff;text-shadow:0 0 8px rgba(125,249,255,.55);display:block;font-size:13px;letter-spacing:.12em;margin-bottom:4px;opacity:.85}
-  #foot{bottom:18px;color:#e8eef0;opacity:.5;font-size:12px;letter-spacing:.04em}
+  #foot{bottom:18px;width:fit-content;margin:0 auto;padding:2px 10px;border-radius:4px;background:rgba(3,5,7,.6);color:#e8eef0;opacity:.5;font-size:12px;letter-spacing:.04em}
 </style></head>
 <body>
 <canvas id="c"></canvas>
@@ -27,6 +32,8 @@
   <h1>Same Belugas, two arrangements</h1>
   <button id="btn" title="Toggle arrangement"><span id="bFlat">Flat rings</span> <span class="sw">&#8644;</span> <span id="bShell">Tilted-orbit shell</span></button>
 </div>
+<div id="zoomui"><button id="zIn" title="Zoom in" aria-label="Zoom in">+</button><button id="zOut" title="Zoom out" aria-label="Zoom out">&minus;</button><button id="zReset" title="Reset view">reset</button></div>
+<div id="zlab"></div>
 <div class="ui" id="cap"><p><span class="mode" id="capMode"></span><span id="capText"></span> <span class="tag">[Physics]</span></p></div>
 <div class="ui" id="foot">Concept sketch, not the simulation. Sample of Belugas, not to scale.</div>
 <script>
@@ -86,7 +93,11 @@ resize();
 let mix = mode==='shell'?1:0;               // 0 flat, 1 shell
 if (tParam!==null) mix = Math.max(0,Math.min(1,parseFloat(tParam)||0));
 let target = mix;
-let az = 0.62, el = 27*Math.PI/180;
+const AZ0 = 0.62, EL0 = 27*Math.PI/180;
+let az = AZ0, el = EL0;
+const ZMIN = 0.4, ZMAX = 12;
+const clampZ = z => Math.max(ZMIN, Math.min(ZMAX, z));
+let zoom = clampZ(parseFloat(Q.get('zoom')) || 1), zoomTarget = zoom;
 let simT = 18.0;
 const ease = x => x<.5 ? 4*x*x*x : 1-Math.pow(-2*x+2,3)/2;
 
@@ -101,14 +112,40 @@ function setUI(){
 btn.addEventListener('click', ()=>{ mode = mode==='flat'?'shell':'flat'; target = mode==='shell'?1:0; setUI(); if(!autoplay) animateOnce(); });
 setUI();
 
-// drag to orbit
+// ---- drag to orbit, pinch & wheel zoom ----
 let drag=null, lastInteract=-1e9;
-cv.addEventListener('pointerdown', e=>{ drag={x:e.clientX,y:e.clientY,az,el}; cv.setPointerCapture(e.pointerId); });
-cv.addEventListener('pointermove', e=>{ if(!drag) return;
+const ptrs = new Map(); let pinch=null;
+function kick(){ lastInteract = performance.now(); if(!autoplay) animateOnce(); }
+function pinchDist(){ const a=[...ptrs.values()]; return Math.hypot(a[0].x-a[1].x, a[0].y-a[1].y)||1; }
+cv.addEventListener('pointerdown', e=>{
+  ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY}); cv.setPointerCapture(e.pointerId);
+  if (ptrs.size===2){ drag=null; pinch={d:pinchDist(), z:zoomTarget}; }
+  else if (ptrs.size===1){ drag={x:e.clientX,y:e.clientY,az,el}; }
+});
+cv.addEventListener('pointermove', e=>{
+  if(!ptrs.has(e.pointerId)) return;
+  ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  if (pinch && ptrs.size>=2){ zoomTarget = clampZ(pinch.z * pinchDist()/pinch.d); kick(); return; }
+  if(!drag) return;
   az = drag.az - (e.clientX-drag.x)*0.006;
   el = Math.max(-1.2, Math.min(1.4, drag.el + (e.clientY-drag.y)*0.005));
-  lastInteract = performance.now(); if(!autoplay) draw(); });
-addEventListener('pointerup', ()=>{ drag=null; });
+  kick();
+});
+function ptrUp(e){ ptrs.delete(e.pointerId); if(ptrs.size<2) pinch=null; if(ptrs.size===0) drag=null;
+  else if(ptrs.size===1){ const q=[...ptrs.values()][0]; drag={x:q.x,y:q.y,az,el}; } }
+cv.addEventListener('pointerup', ptrUp); cv.addEventListener('pointercancel', ptrUp);
+// wheel: plain wheel and trackpad pinch (ctrlKey) both zoom; never scroll the page
+cv.addEventListener('wheel', e=>{
+  e.preventDefault();
+  let dy = e.deltaY; if (e.deltaMode===1) dy*=16; else if (e.deltaMode===2) dy*=400;
+  const k = e.ctrlKey ? 0.012 : 0.0016;
+  zoomTarget = clampZ(zoomTarget * Math.exp(-dy*k));
+  kick();
+}, {passive:false});
+document.getElementById('zIn').addEventListener('click', ()=>{ zoomTarget=clampZ(zoomTarget*1.5); kick(); });
+document.getElementById('zOut').addEventListener('click', ()=>{ zoomTarget=clampZ(zoomTarget/1.5); kick(); });
+document.getElementById('zReset').addEventListener('click', ()=>{ zoomTarget=1; az=AZ0; el=EL0; lastInteract=-1e9; if(!autoplay) animateOnce(); });
+const zlab = document.getElementById('zlab');
 
 // ---- math ----
 function planeBasis(p, m){
@@ -120,7 +157,7 @@ function planeBasis(p, m){
 let cam;
 function setupCam(){
   const scale = Math.min(W*0.36, H*0.31);
-  cam = {ca:Math.cos(az), sa:Math.sin(az), ce:Math.cos(el), se:Math.sin(el), D:4.2, f:4.2*scale, cx:W/2, cy:H*0.485};
+  cam = {ca:Math.cos(az), sa:Math.sin(az), ce:Math.cos(el), se:Math.sin(el), D:4.2, f:4.2*scale*zoom, f0:4.2*scale, cx:W/2, cy:H*0.485};
 }
 // world (x,y,z with z up) -> screen
 function proj(x,y,z,out){
@@ -182,10 +219,11 @@ function draw(){
     const vx=-B[0]*su+B[3]*cu, vy=-B[1]*su+B[4]*cu, vz=-B[2]*su+B[5]*cu;
     proj(x+vx*0.02, y+vy*0.02, z+vz*0.02, tmp2);
     it.x=tmp[0]; it.y=tmp[1]; it.d=tmp[2]; it.k=tmp[3];
+    it.off = (it.x<-60 || it.x>W+60 || it.y<-60 || it.y>H+60);
     const dx=tmp2[0]-tmp[0], dy=tmp2[1]-tmp[1];
     const L=Math.hypot(dx,dy)+1e-6;
     it.ang=Math.atan2(dy,dx);
-    const base = it.k*0.0074*b.s;
+    const base = (it.k/zoom)*0.0074*b.s*Math.pow(zoom,0.6);
     const fore = Math.min(1, L/(it.k*0.02*b.r+1e-6));   // foreshortening of the long axis
     it.a = base*(1+0.7*fore); it.b = base*0.72;
   }
@@ -193,15 +231,16 @@ function draw(){
 
   // Sun position (screen)
   proj(0,0,0,tmp); const sx=tmp[0], sy=tmp[1], sk=tmp[3];
-  const sunR = sk*0.085;
+  const sunR = (sk/zoom)*0.085*Math.pow(zoom,0.7);   // Sun not to scale; grows gently so zoomed views stay readable
   let sunDrawn=false;
   for (let n=0;n<items.length;n++){
     const it=items[n];
     if(!sunDrawn && it.d<0){ drawSun(sx,sy,sunR); sunDrawn=true; }
-    drawBeluga(it);
+    if(!it.off) drawBeluga(it);
   }
   if(!sunDrawn) drawSun(sx,sy,sunR);
   ctx.globalCompositeOperation='source-over';
+  zlab.textContent = 'zoom ' + zoom.toFixed(zoom<2?2:1) + '\u00d7';
 }
 
 function drawSun(x,y,R){
@@ -218,21 +257,25 @@ function drawSun(x,y,R){
 function drawBeluga(it){
   // depth cue: nearer = brighter
   const near = Math.max(0, Math.min(1, 0.5 - it.d*0.6));
-  const alpha = 0.28 + 0.72*near;
+  const alpha = 0.28 + 0.55*near + 0.17*Math.min(1,(zoom-1)/3);
   ctx.save();
-  ctx.translate(it.x,it.y); ctx.rotate(it.ang);
-  // glow
-  ctx.globalAlpha = alpha*0.16;
-  ctx.fillStyle = '#ffffff';
-  ctx.beginPath(); ctx.ellipse(0,0,it.a*2.0,it.b*2.3,0,0,7); ctx.fill();
-  // body
+  ctx.translate(it.x,it.y); ctx.rotate(it.ang); ctx.scale(it.a, it.b);   // unit circle -> ellipsoid
+  // soft glow that fades out (no hard rim)
   ctx.globalAlpha = alpha;
-  const g = ctx.createRadialGradient(-it.a*0.25,-it.b*0.3,0,0,0,it.a);
-  g.addColorStop(0,'rgba(255,255,255,1)'); g.addColorStop(0.7,'rgba(236,242,244,0.85)'); g.addColorStop(1,'rgba(220,230,234,0.35)');
-  ctx.fillStyle = g;
-  ctx.beginPath(); ctx.ellipse(0,0,it.a,it.b,0,0,7); ctx.fill();
+  ctx.fillStyle = HALO; ctx.beginPath(); ctx.arc(0,0,2.4,0,7); ctx.fill();
+  // body: shaded like a white ellipsoid
+  ctx.fillStyle = BODY; ctx.beginPath(); ctx.arc(0,0,1,0,7); ctx.fill();
+  if (it.a > 4.5){   // up close: bulbous front 'melon' highlight, still white
+    ctx.fillStyle = MELON; ctx.beginPath(); ctx.arc(0.5,-0.05,0.55,0,7); ctx.fill();
+  }
   ctx.restore();
 }
+const HALO = (()=>{ const g=ctx.createRadialGradient(0,0,0,0,0,2.4);
+  g.addColorStop(0,'rgba(255,255,255,0.30)'); g.addColorStop(0.4,'rgba(255,255,255,0.10)'); g.addColorStop(1,'rgba(255,255,255,0)'); return g; })();
+const BODY = (()=>{ const g=ctx.createRadialGradient(-0.2,-0.35,0,0,0,1);
+  g.addColorStop(0,'rgba(255,255,255,1)'); g.addColorStop(0.65,'rgba(240,245,247,0.92)'); g.addColorStop(0.92,'rgba(214,224,228,0.7)'); g.addColorStop(1,'rgba(214,224,228,0)'); return g; })();
+const MELON = (()=>{ const g=ctx.createRadialGradient(0.5,-0.15,0,0.5,-0.05,0.55);
+  g.addColorStop(0,'rgba(255,255,255,0.9)'); g.addColorStop(1,'rgba(255,255,255,0)'); return g; })();
 
 // ---- loop ----
 let last=performance.now(), anim=false;
@@ -242,10 +285,11 @@ function frame(now){
     simT += dt;
     if (now-lastInteract>2500 && !drag) az += dt*0.12;
   }
+  if (zoom!==zoomTarget){ zoom += (zoomTarget-zoom)*(1-Math.exp(-dt*9)); if (Math.abs(zoom-zoomTarget)<zoomTarget*0.002) zoom=zoomTarget; }
   const step = dt/2.5;                       // ~2.5 s transition
   if (mix<target) mix=Math.min(target,mix+step); else if (mix>target) mix=Math.max(target,mix-step);
   draw();
-  if (autoplay || mix!==target) requestAnimationFrame(frame); else anim=false;
+  if (autoplay || mix!==target || zoom!==zoomTarget || drag || pinch) requestAnimationFrame(frame); else anim=false;
 }
 function animateOnce(){ if(!anim){ anim=true; last=performance.now(); requestAnimationFrame(frame);} }
 if (autoplay) requestAnimationFrame(frame); else draw();
