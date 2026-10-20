@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<title>Same Belugas, two arrangements</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+  html,body{margin:0;height:100%;background:#030507;overflow:hidden;font-family:"DejaVu Sans Mono",Menlo,Consolas,"Courier New",monospace}
+  canvas{position:fixed;inset:0;width:100%;height:100%;display:block;cursor:grab}
+  canvas:active{cursor:grabbing}
+  .ui{position:fixed;left:0;right:0;pointer-events:none;text-align:center}
+  #top{top:26px}
+  h1{margin:0;color:#7df9ff;font-weight:normal;font-size:26px;letter-spacing:.06em;text-shadow:0 0 8px rgba(125,249,255,.55)}
+  #btn{pointer-events:auto;margin-top:16px;background:rgba(3,5,7,.6);color:#7df9ff;border:1px solid #7df9ff;border-radius:3px;
+       font:inherit;font-size:15px;padding:8px 18px;letter-spacing:.05em;cursor:pointer;text-shadow:0 0 8px rgba(125,249,255,.55);
+       box-shadow:0 0 10px rgba(125,249,255,.25)}
+  #btn:hover{background:rgba(125,249,255,.08)}
+  #btn .sw{opacity:.45}
+  #btn .on{opacity:1}
+  #cap{top:auto;bottom:58px;padding:0 40px}
+  #cap p{margin:0 auto;max-width:900px;color:#e8eef0;font-size:16px;line-height:1.5}
+  #cap .tag{color:#7df9ff;text-shadow:0 0 8px rgba(125,249,255,.55)}
+  #cap .mode{color:#7df9ff;text-shadow:0 0 8px rgba(125,249,255,.55);display:block;font-size:13px;letter-spacing:.12em;margin-bottom:4px;opacity:.85}
+  #foot{bottom:18px;color:#e8eef0;opacity:.5;font-size:12px;letter-spacing:.04em}
+</style></head>
+<body>
+<canvas id="c"></canvas>
+<div class="ui" id="top">
+  <h1>Same Belugas, two arrangements</h1>
+  <button id="btn" title="Toggle arrangement"><span id="bFlat">Flat rings</span> <span class="sw">&#8644;</span> <span id="bShell">Tilted-orbit shell</span></button>
+</div>
+<div class="ui" id="cap"><p><span class="mode" id="capMode"></span><span id="capText"></span> <span class="tag">[Physics]</span></p></div>
+<div class="ui" id="foot">Concept sketch, not the simulation. Sample of Belugas, not to scale.</div>
+<script>
+(function(){
+"use strict";
+const Q = new URLSearchParams(location.search);
+let mode = Q.get('mode') === 'shell' ? 'shell' : 'flat';
+const autoplay = Q.get('autoplay') !== '0';
+const tParam = Q.get('t');                 // optional fixed transition fraction 0..1 (for stills)
+
+const CAP = {
+  flat:  "All orbits in one plane, like Saturn's rings. Simple, and pods share one lane per ring.",
+  shell: "Same Belugas, orbits tipped into many planes. Together they wrap the Sun like a loose shell; no solid structure."
+};
+
+// ---- deterministic RNG ----
+let seed = 1337;
+function rnd(){ seed = (seed*1664525 + 1013904223) >>> 0; return seed/4294967296; }
+
+// ---- orbital planes: normals spread over a hemisphere (Fibonacci) -> circles cover the sphere ----
+const RADII = [1.0, 0.816, 0.577];
+const PLANES = 32;
+const planes = [];
+const GA = Math.PI*(3-Math.sqrt(5));
+for (let p=0;p<PLANES;p++){
+  const nz = 1 - (p+0.5)/PLANES;          // cos(inclination) in (0,1): inclinations 0..90 deg, all prograde
+  const inc = Math.acos(nz);
+  const node = (p*GA) % (2*Math.PI);
+  planes.push({inc, node});
+}
+
+// ---- Belugas ----
+const COUNTS = [440, 360, 260];            // ~1060 total, more on the bigger rings
+const bel = [];
+for (let r=0;r<3;r++){
+  for (let k=0;k<COUNTS[r];k++){
+    const p = (k*7 + r*11) % PLANES;
+    bel.push({
+      r: RADII[r] * (1 + (rnd()-0.5)*0.006),
+      ring: r,
+      plane: p,
+      phase: rnd()*Math.PI*2,
+      w: Math.pow(RADII[r], -1.5),          // Kepler: angular speed ~ r^-1.5
+      s: 0.85 + rnd()*0.3
+    });
+  }
+}
+
+// ---- state ----
+const cv = document.getElementById('c'), ctx = cv.getContext('2d');
+let W=0,H=0,DPR=1;
+function resize(){ DPR = Math.min(window.devicePixelRatio||1, 2); W=innerWidth; H=innerHeight;
+  cv.width=W*DPR; cv.height=H*DPR; ctx.setTransform(DPR,0,0,DPR,0,0); }
+addEventListener('resize', ()=>{resize(); if(!autoplay) draw();});
+resize();
+
+let mix = mode==='shell'?1:0;               // 0 flat, 1 shell
+if (tParam!==null) mix = Math.max(0,Math.min(1,parseFloat(tParam)||0));
+let target = mix;
+let az = 0.62, el = 27*Math.PI/180;
+let simT = 18.0;
+const ease = x => x<.5 ? 4*x*x*x : 1-Math.pow(-2*x+2,3)/2;
+
+// ---- UI ----
+const btn = document.getElementById('btn');
+function setUI(){
+  document.getElementById('bFlat').className = mode==='flat'?'on':'sw';
+  document.getElementById('bShell').className = mode==='shell'?'on':'sw';
+  document.getElementById('capMode').textContent = mode==='flat' ? 'FLAT RINGS' : 'TILTED-ORBIT SHELL';
+  document.getElementById('capText').textContent = CAP[mode];
+}
+btn.addEventListener('click', ()=>{ mode = mode==='flat'?'shell':'flat'; target = mode==='shell'?1:0; setUI(); if(!autoplay) animateOnce(); });
+setUI();
+
+// drag to orbit
+let drag=null, lastInteract=-1e9;
+cv.addEventListener('pointerdown', e=>{ drag={x:e.clientX,y:e.clientY,az,el}; cv.setPointerCapture(e.pointerId); });
+cv.addEventListener('pointermove', e=>{ if(!drag) return;
+  az = drag.az - (e.clientX-drag.x)*0.006;
+  el = Math.max(-1.2, Math.min(1.4, drag.el + (e.clientY-drag.y)*0.005));
+  lastInteract = performance.now(); if(!autoplay) draw(); });
+addEventListener('pointerup', ()=>{ drag=null; });
+
+// ---- math ----
+function planeBasis(p, m){
+  const inc = planes[p].inc * m, node = planes[p].node;
+  const cn=Math.cos(node), sn=Math.sin(node), ci=Math.cos(inc), si=Math.sin(inc);
+  // u axis (line of nodes), v axis (in-plane, perpendicular)
+  return [cn, sn, 0,  -sn*ci, cn*ci, si];
+}
+let cam;
+function setupCam(){
+  const scale = Math.min(W*0.36, H*0.31);
+  cam = {ca:Math.cos(az), sa:Math.sin(az), ce:Math.cos(el), se:Math.sin(el), D:4.2, f:4.2*scale, cx:W/2, cy:H*0.485};
+}
+// world (x,y,z with z up) -> screen
+function proj(x,y,z,out){
+  const xr = x*cam.ca - y*cam.sa;
+  const yr = x*cam.sa + y*cam.ca;            // toward/away from viewer (before elevation)
+  const depth = yr*cam.ce - z*cam.se;        // + = away? we define viewer at -depth side
+  const up = yr*cam.se + z*cam.ce;
+  const d = cam.D + depth;
+  const k = cam.f / d;
+  out[0] = cam.cx + xr*k; out[1] = cam.cy - up*k; out[2] = depth; out[3] = k;
+  return out;
+}
+
+// ---- static starfield ----
+const stars=[]; { let s2=seed; seed=99; for(let i=0;i<260;i++) stars.push([rnd(),rnd(),rnd()]); seed=s2; }
+
+const tmp=[0,0,0,0], tmp2=[0,0,0,0];
+const items = new Array(bel.length);
+for (let i=0;i<bel.length;i++) items[i] = {x:0,y:0,d:0,k:0,a:0,b:0,ang:0,i};
+
+function draw(){
+  setupCam();
+  const m = ease(mix);
+  ctx.globalCompositeOperation='source-over';
+  ctx.fillStyle='#030507'; ctx.fillRect(0,0,W,H);
+  // stars
+  for (const s of stars){ ctx.fillStyle = 'rgba(232,238,240,'+(0.08+s[2]*0.25)+')'; ctx.fillRect(s[0]*W, s[1]*H, 1, 1); }
+
+  const bases = planes.map((_,p)=>planeBasis(p,m));
+
+  // orbit lines: in flat mode only 3 lines are distinct; fade the duplicates so brightness stays even
+  ctx.globalCompositeOperation='lighter';
+  ctx.lineWidth = 1;
+  const lineA = 0.06 + 0.03*(1-m);
+  for (let p=0;p<PLANES;p++){
+    const B = bases[p];
+    const a = (p===0) ? Math.max(lineA, 0.32*(1-m)+lineA*m) : lineA*m + 0.004*(1-m);
+    for (let r=0;r<3;r++){
+      const R=RADII[r];
+      ctx.strokeStyle = 'rgba(125,249,255,'+a.toFixed(4)+')';
+      ctx.beginPath();
+      for (let j=0;j<=96;j++){
+        const u=j/96*Math.PI*2, cu=Math.cos(u)*R, su=Math.sin(u)*R;
+        proj(B[0]*cu+B[3]*su, B[1]*cu+B[4]*su, B[2]*cu+B[5]*su, tmp);
+        j?ctx.lineTo(tmp[0],tmp[1]):ctx.moveTo(tmp[0],tmp[1]);
+      }
+      ctx.stroke();
+    }
+  }
+
+  // Belugas positions
+  for (let i=0;i<bel.length;i++){
+    const b=bel[i], B=bases[b.plane], it=items[i];
+    const u = b.phase + b.w*simT*0.35;
+    const cu=Math.cos(u)*b.r, su=Math.sin(u)*b.r;
+    const x=B[0]*cu+B[3]*su, y=B[1]*cu+B[4]*su, z=B[2]*cu+B[5]*su;
+    proj(x,y,z,tmp);
+    // velocity direction for elongation
+    const vx=-B[0]*su+B[3]*cu, vy=-B[1]*su+B[4]*cu, vz=-B[2]*su+B[5]*cu;
+    proj(x+vx*0.02, y+vy*0.02, z+vz*0.02, tmp2);
+    it.x=tmp[0]; it.y=tmp[1]; it.d=tmp[2]; it.k=tmp[3];
+    const dx=tmp2[0]-tmp[0], dy=tmp2[1]-tmp[1];
+    const L=Math.hypot(dx,dy)+1e-6;
+    it.ang=Math.atan2(dy,dx);
+    const base = it.k*0.0074*b.s;
+    const fore = Math.min(1, L/(it.k*0.02*b.r+1e-6));   // foreshortening of the long axis
+    it.a = base*(1+0.7*fore); it.b = base*0.72;
+  }
+  items.sort((p,q)=>q.d-p.d);   // far first
+
+  // Sun position (screen)
+  proj(0,0,0,tmp); const sx=tmp[0], sy=tmp[1], sk=tmp[3];
+  const sunR = sk*0.085;
+  let sunDrawn=false;
+  for (let n=0;n<items.length;n++){
+    const it=items[n];
+    if(!sunDrawn && it.d<0){ drawSun(sx,sy,sunR); sunDrawn=true; }
+    drawBeluga(it);
+  }
+  if(!sunDrawn) drawSun(sx,sy,sunR);
+  ctx.globalCompositeOperation='source-over';
+}
+
+function drawSun(x,y,R){
+  ctx.globalCompositeOperation='source-over';
+  let g=ctx.createRadialGradient(x,y,0,x,y,R*5.5);
+  g.addColorStop(0,'rgba(229,201,166,0.38)'); g.addColorStop(0.25,'rgba(229,201,166,0.12)'); g.addColorStop(1,'rgba(229,201,166,0)');
+  ctx.fillStyle=g; ctx.beginPath(); ctx.arc(x,y,R*5.5,0,7); ctx.fill();
+  g=ctx.createRadialGradient(x-R*0.25,y-R*0.25,R*0.1,x,y,R);
+  g.addColorStop(0,'#f6eadb'); g.addColorStop(0.6,'#e5c9a6'); g.addColorStop(1,'#cfae88');
+  ctx.fillStyle=g; ctx.beginPath(); ctx.arc(x,y,R,0,7); ctx.fill();
+  ctx.globalCompositeOperation='lighter';
+}
+
+function drawBeluga(it){
+  // depth cue: nearer = brighter
+  const near = Math.max(0, Math.min(1, 0.5 - it.d*0.6));
+  const alpha = 0.28 + 0.72*near;
+  ctx.save();
+  ctx.translate(it.x,it.y); ctx.rotate(it.ang);
+  // glow
+  ctx.globalAlpha = alpha*0.16;
+  ctx.fillStyle = '#ffffff';
+  ctx.beginPath(); ctx.ellipse(0,0,it.a*2.0,it.b*2.3,0,0,7); ctx.fill();
+  // body
+  ctx.globalAlpha = alpha;
+  const g = ctx.createRadialGradient(-it.a*0.25,-it.b*0.3,0,0,0,it.a);
+  g.addColorStop(0,'rgba(255,255,255,1)'); g.addColorStop(0.7,'rgba(236,242,244,0.85)'); g.addColorStop(1,'rgba(220,230,234,0.35)');
+  ctx.fillStyle = g;
+  ctx.beginPath(); ctx.ellipse(0,0,it.a,it.b,0,0,7); ctx.fill();
+  ctx.restore();
+}
+
+// ---- loop ----
+let last=performance.now(), anim=false;
+function frame(now){
+  const dt=Math.min(0.05,(now-last)/1000); last=now;
+  if (autoplay){
+    simT += dt;
+    if (now-lastInteract>2500 && !drag) az += dt*0.12;
+  }
+  const step = dt/2.5;                       // ~2.5 s transition
+  if (mix<target) mix=Math.min(target,mix+step); else if (mix>target) mix=Math.max(target,mix-step);
+  draw();
+  if (autoplay || mix!==target) requestAnimationFrame(frame); else anim=false;
+}
+function animateOnce(){ if(!anim){ anim=true; last=performance.now(); requestAnimationFrame(frame);} }
+if (autoplay) requestAnimationFrame(frame); else draw();
+})();
+</script>
+</body></html>
