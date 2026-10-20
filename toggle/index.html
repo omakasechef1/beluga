@@ -9,31 +9,46 @@
   .ui{position:fixed;left:0;right:0;pointer-events:none;text-align:center}
   #top{top:26px}
   h1{margin:0 auto;width:fit-content;padding:2px 12px;border-radius:6px;background:rgba(3,5,7,.5);color:#7df9ff;font-weight:normal;font-size:26px;letter-spacing:.06em;text-shadow:0 0 8px rgba(125,249,255,.55)}
-  #btn{pointer-events:auto;margin-top:16px;background:rgba(3,5,7,.6);color:#7df9ff;border:1px solid #7df9ff;border-radius:3px;
+  .row{margin-top:16px;display:flex;justify-content:center;gap:10px}
+  .cbtn{pointer-events:auto;background:rgba(3,5,7,.6);color:#7df9ff;border:1px solid #7df9ff;border-radius:3px;
        font:inherit;font-size:15px;padding:8px 18px;letter-spacing:.05em;cursor:pointer;text-shadow:0 0 8px rgba(125,249,255,.55);
        box-shadow:0 0 10px rgba(125,249,255,.25)}
-  #btn:hover{background:rgba(125,249,255,.08)}
+  .cbtn:hover{background:rgba(125,249,255,.08)}
+  .cbtn.active{background:rgba(125,249,255,.16);box-shadow:0 0 14px rgba(125,249,255,.5)}
   #btn .sw{opacity:.45}
   #btn .on{opacity:1}
-  #zoomui{position:fixed;top:26px;right:24px;display:flex;gap:6px;z-index:2}
-  #zoomui button{background:rgba(3,5,7,.6);color:#7df9ff;border:1px solid #7df9ff;border-radius:3px;font:inherit;font-size:15px;
-       min-width:36px;height:34px;padding:0 10px;cursor:pointer;text-shadow:0 0 8px rgba(125,249,255,.55);box-shadow:0 0 10px rgba(125,249,255,.25)}
-  #zoomui button:hover{background:rgba(125,249,255,.08)}
+  #zoomui{position:fixed;top:26px;right:24px;display:flex;gap:6px;z-index:2;transition:opacity .4s}
+  #zoomui button{min-width:36px;height:34px;padding:0 10px}
+  #zoomui.dim{opacity:.3;pointer-events:none}
   #zlab{position:fixed;top:66px;right:24px;color:#7df9ff;opacity:.6;font-size:12px;letter-spacing:.06em;text-shadow:0 0 8px rgba(125,249,255,.55);pointer-events:none}
+  #speedui{position:fixed;right:24px;bottom:18px;display:flex;align-items:center;gap:10px;z-index:2;
+       padding:6px 10px;border-radius:6px;background:rgba(3,5,7,.6)}
+  #slab{color:#7df9ff;font-size:13px;letter-spacing:.06em;text-shadow:0 0 8px rgba(125,249,255,.55);min-width:104px;text-align:right}
+  #speed{-webkit-appearance:none;appearance:none;width:150px;height:18px;background:transparent;cursor:pointer;margin:0}
+  #speed::-webkit-slider-runnable-track{height:2px;background:rgba(125,249,255,.55);box-shadow:0 0 6px rgba(125,249,255,.5)}
+  #speed::-moz-range-track{height:2px;background:rgba(125,249,255,.55)}
+  #speed::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;margin-top:-6px;border-radius:50%;background:#030507;border:1px solid #7df9ff;box-shadow:0 0 8px rgba(125,249,255,.7)}
+  #speed::-moz-range-thumb{width:12px;height:12px;border-radius:50%;background:#030507;border:1px solid #7df9ff}
+  #sdef{font-size:13px;padding:5px 10px}
   #cap{top:auto;bottom:58px;padding:0 40px}
   #cap p{margin:0 auto;max-width:900px;width:fit-content;padding:6px 14px;border-radius:6px;background:rgba(3,5,7,.62);color:#e8eef0;font-size:16px;line-height:1.5}
   #cap .tag{color:#7df9ff;text-shadow:0 0 8px rgba(125,249,255,.55)}
   #cap .mode{color:#7df9ff;text-shadow:0 0 8px rgba(125,249,255,.55);display:block;font-size:13px;letter-spacing:.12em;margin-bottom:4px;opacity:.85}
-  #foot{bottom:18px;width:fit-content;margin:0 auto;padding:2px 10px;border-radius:4px;background:rgba(3,5,7,.6);color:#e8eef0;opacity:.5;font-size:12px;letter-spacing:.04em}
+  #foot{bottom:22px;left:24px;right:auto;text-align:left;width:fit-content;padding:2px 10px;border-radius:4px;background:rgba(3,5,7,.6);color:#e8eef0;opacity:.5;font-size:12px;letter-spacing:.04em}
+  @media (max-width:1000px){ #cap{bottom:100px} #foot{bottom:64px} }
 </style></head>
 <body>
 <canvas id="c"></canvas>
 <div class="ui" id="top">
   <h1>Same Belugas, two arrangements</h1>
-  <button id="btn" title="Toggle arrangement"><span id="bFlat">Flat rings</span> <span class="sw">&#8644;</span> <span id="bShell">Tilted-orbit shell</span></button>
+  <div class="row">
+    <button class="cbtn" id="btn" title="Toggle arrangement"><span id="bFlat">Flat rings</span> <span class="sw">&#8644;</span> <span id="bShell">Tilted-orbit shell</span></button>
+    <button class="cbtn" id="fly" title="Fly a drone camera through the swarm">Flyby</button>
+  </div>
 </div>
-<div id="zoomui"><button id="zIn" title="Zoom in" aria-label="Zoom in">+</button><button id="zOut" title="Zoom out" aria-label="Zoom out">&minus;</button><button id="zReset" title="Reset view">reset</button></div>
+<div id="zoomui"><button class="cbtn" id="zIn" title="Zoom in" aria-label="Zoom in">+</button><button class="cbtn" id="zOut" title="Zoom out" aria-label="Zoom out">&minus;</button><button class="cbtn" id="zReset" title="Reset view">reset</button></div>
 <div id="zlab"></div>
+<div id="speedui"><span id="slab">speed 1.00x</span><input id="speed" type="range" min="0" max="1000" step="1" aria-label="speed"><button class="cbtn" id="sdef" title="Back to normal speed">default</button></div>
 <div class="ui" id="cap"><p><span class="mode" id="capMode"></span><span id="capText"></span> <span class="tag">[Physics]</span></p></div>
 <div class="ui" id="foot">Concept sketch, not the simulation. Sample of Belugas, not to scale.</div>
 <script>
@@ -60,9 +75,7 @@ const planes = [];
 const GA = Math.PI*(3-Math.sqrt(5));
 for (let p=0;p<PLANES;p++){
   const nz = 1 - (p+0.5)/PLANES;          // cos(inclination) in (0,1): inclinations 0..90 deg, all prograde
-  const inc = Math.acos(nz);
-  const node = (p*GA) % (2*Math.PI);
-  planes.push({inc, node});
+  planes.push({inc: Math.acos(nz), node: (p*GA) % (2*Math.PI)});
 }
 
 // ---- Belugas ----
@@ -70,11 +83,9 @@ const COUNTS = [440, 360, 260];            // ~1060 total, more on the bigger ri
 const bel = [];
 for (let r=0;r<3;r++){
   for (let k=0;k<COUNTS[r];k++){
-    const p = (k*7 + r*11) % PLANES;
     bel.push({
       r: RADII[r] * (1 + (rnd()-0.5)*0.006),
-      ring: r,
-      plane: p,
+      plane: (k*7 + r*11) % PLANES,
       phase: rnd()*Math.PI*2,
       w: Math.pow(RADII[r], -1.5),          // Kepler: angular speed ~ r^-1.5
       s: 0.85 + rnd()*0.3
@@ -82,7 +93,7 @@ for (let r=0;r<3;r++){
   }
 }
 
-// ---- state ----
+// ---- canvas ----
 const cv = document.getElementById('c'), ctx = cv.getContext('2d');
 let W=0,H=0,DPR=1;
 function resize(){ DPR = Math.min(window.devicePixelRatio||1, 2); W=innerWidth; H=innerHeight;
@@ -90,6 +101,7 @@ function resize(){ DPR = Math.min(window.devicePixelRatio||1, 2); W=innerWidth; 
 addEventListener('resize', ()=>{resize(); if(!autoplay) draw();});
 resize();
 
+// ---- state ----
 let mix = mode==='shell'?1:0;               // 0 flat, 1 shell
 if (tParam!==null) mix = Math.max(0,Math.min(1,parseFloat(tParam)||0));
 let target = mix;
@@ -100,43 +112,78 @@ const clampZ = z => Math.max(ZMIN, Math.min(ZMAX, z));
 let zoom = clampZ(parseFloat(Q.get('zoom')) || 1), zoomTarget = zoom;
 let simT = 18.0;
 const ease = x => x<.5 ? 4*x*x*x : 1-Math.pow(-2*x+2,3)/2;
+const clamp01 = x => Math.max(0, Math.min(1, x));
+
+// speed (log slider 0.02x .. 3x, default 1x)
+const SMIN = 0.02, SMAX = 3;
+let speed = parseFloat(Q.get('speed')); if (!(speed>0)) speed = 1; speed = Math.max(SMIN, Math.min(SMAX, speed));
+// flyby
+let flyOn = Q.get('flyby') === '1';
+let flyBlend = flyOn ? 1 : 0;               // 0 orbit camera, 1 drone camera
+let ft = parseFloat(Q.get('ft')); if (!(ft>=0)) ft = 0; ft = ft % 1;
+const FLY_PERIOD = 55;                       // seconds per loop at 1x
+let lookYaw = 0, lookPitch = 0;              // gentle look-around in flyby
 
 // ---- UI ----
-const btn = document.getElementById('btn');
+const btn = document.getElementById('btn'), flyBtn = document.getElementById('fly');
+const zoomui = document.getElementById('zoomui'), zlab = document.getElementById('zlab');
+const slider = document.getElementById('speed'), slab = document.getElementById('slab');
 function setUI(){
   document.getElementById('bFlat').className = mode==='flat'?'on':'sw';
   document.getElementById('bShell').className = mode==='shell'?'on':'sw';
-  document.getElementById('capMode').textContent = mode==='flat' ? 'FLAT RINGS' : 'TILTED-ORBIT SHELL';
+  document.getElementById('capMode').textContent = (mode==='flat' ? 'FLAT RINGS' : 'TILTED-ORBIT SHELL') + (flyOn ? '  \u00b7  DRONE FLYBY' : '');
   document.getElementById('capText').textContent = CAP[mode];
+  flyBtn.classList.toggle('active', flyOn);
+  flyBtn.textContent = flyOn ? 'Flyby: on' : 'Flyby';
+  zoomui.classList.toggle('dim', flyOn);
 }
-btn.addEventListener('click', ()=>{ mode = mode==='flat'?'shell':'flat'; target = mode==='shell'?1:0; setUI(); if(!autoplay) animateOnce(); });
+function sliderFromSpeed(s){ return Math.round(1000*Math.log(s/SMIN)/Math.log(SMAX/SMIN)); }
+function setSpeed(s, fromSlider){
+  speed = Math.max(SMIN, Math.min(SMAX, s));
+  if (Math.abs(Math.log(speed)) < 0.03) speed = 1;   // gentle snap at 1x
+  if (!fromSlider) slider.value = sliderFromSpeed(speed);
+  slab.textContent = 'speed ' + speed.toFixed(2) + 'x';
+}
+slider.addEventListener('input', ()=>{ setSpeed(SMIN*Math.pow(SMAX/SMIN, slider.value/1000), true); });
+document.getElementById('sdef').addEventListener('click', ()=>setSpeed(1));
+setSpeed(speed);
+btn.addEventListener('click', ()=>{ mode = mode==='flat'?'shell':'flat'; target = mode==='shell'?1:0; setUI(); kick(true); });
+flyBtn.addEventListener('click', ()=>{ flyOn = !flyOn; lookYaw = lookPitch = 0; setUI(); kick(true); });
 setUI();
 
-// ---- drag to orbit, pinch & wheel zoom ----
+// ---- drag to orbit (or look around in flyby), pinch & wheel zoom ----
 let drag=null, lastInteract=-1e9;
 const ptrs = new Map(); let pinch=null;
-function kick(){ lastInteract = performance.now(); if(!autoplay) animateOnce(); }
+function kick(noStamp){ if(!noStamp) lastInteract = performance.now(); if(!autoplay) animateOnce(); }
 function pinchDist(){ const a=[...ptrs.values()]; return Math.hypot(a[0].x-a[1].x, a[0].y-a[1].y)||1; }
+function startDrag(x,y){ drag={x,y,az,el,ly:lookYaw,lp:lookPitch}; }
 cv.addEventListener('pointerdown', e=>{
   ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY}); cv.setPointerCapture(e.pointerId);
   if (ptrs.size===2){ drag=null; pinch={d:pinchDist(), z:zoomTarget}; }
-  else if (ptrs.size===1){ drag={x:e.clientX,y:e.clientY,az,el}; }
+  else if (ptrs.size===1) startDrag(e.clientX,e.clientY);
 });
 cv.addEventListener('pointermove', e=>{
   if(!ptrs.has(e.pointerId)) return;
   ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});
-  if (pinch && ptrs.size>=2){ zoomTarget = clampZ(pinch.z * pinchDist()/pinch.d); kick(); return; }
+  if (pinch && ptrs.size>=2){ if(!flyOn) zoomTarget = clampZ(pinch.z * pinchDist()/pinch.d); kick(); return; }
   if(!drag) return;
-  az = drag.az - (e.clientX-drag.x)*0.006;
-  el = Math.max(-1.2, Math.min(1.4, drag.el + (e.clientY-drag.y)*0.005));
+  const dx=e.clientX-drag.x, dy=e.clientY-drag.y;
+  if (flyOn){
+    lookYaw = Math.max(-1.2, Math.min(1.2, drag.ly - dx*0.004));
+    lookPitch = Math.max(-0.8, Math.min(0.8, drag.lp + dy*0.004));
+  } else {
+    az = drag.az - dx*0.006;
+    el = Math.max(-1.2, Math.min(1.4, drag.el + dy*0.005));
+  }
   kick();
 });
 function ptrUp(e){ ptrs.delete(e.pointerId); if(ptrs.size<2) pinch=null; if(ptrs.size===0) drag=null;
-  else if(ptrs.size===1){ const q=[...ptrs.values()][0]; drag={x:q.x,y:q.y,az,el}; } }
+  else if(ptrs.size===1){ const q=[...ptrs.values()][0]; startDrag(q.x,q.y); } }
 cv.addEventListener('pointerup', ptrUp); cv.addEventListener('pointercancel', ptrUp);
-// wheel: plain wheel and trackpad pinch (ctrlKey) both zoom; never scroll the page
+// wheel: plain wheel and trackpad pinch (ctrlKey) both zoom; never scroll the page. Ignored in flyby.
 cv.addEventListener('wheel', e=>{
   e.preventDefault();
+  if (flyOn) return;
   let dy = e.deltaY; if (e.deltaMode===1) dy*=16; else if (e.deltaMode===2) dy*=400;
   const k = e.ctrlKey ? 0.012 : 0.0016;
   zoomTarget = clampZ(zoomTarget * Math.exp(-dy*k));
@@ -144,106 +191,239 @@ cv.addEventListener('wheel', e=>{
 }, {passive:false});
 document.getElementById('zIn').addEventListener('click', ()=>{ zoomTarget=clampZ(zoomTarget*1.5); kick(); });
 document.getElementById('zOut').addEventListener('click', ()=>{ zoomTarget=clampZ(zoomTarget/1.5); kick(); });
-document.getElementById('zReset').addEventListener('click', ()=>{ zoomTarget=1; az=AZ0; el=EL0; lastInteract=-1e9; if(!autoplay) animateOnce(); });
-const zlab = document.getElementById('zlab');
+document.getElementById('zReset').addEventListener('click', ()=>{ zoomTarget=1; az=AZ0; el=EL0; lastInteract=-1e9; kick(true); });
 
-// ---- math ----
-function planeBasis(p, m){
-  const inc = planes[p].inc * m, node = planes[p].node;
-  const cn=Math.cos(node), sn=Math.sin(node), ci=Math.cos(inc), si=Math.sin(inc);
-  // u axis (line of nodes), v axis (in-plane, perpendicular)
-  return [cn, sn, 0,  -sn*ci, cn*ci, si];
+// ---- vector helpers ----
+const sub=(a,b)=>[a[0]-b[0],a[1]-b[1],a[2]-b[2]];
+const add=(a,b)=>[a[0]+b[0],a[1]+b[1],a[2]+b[2]];
+const mul=(a,s)=>[a[0]*s,a[1]*s,a[2]*s];
+const lerp3=(a,b,t)=>[a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t,a[2]+(b[2]-a[2])*t];
+const len=a=>Math.hypot(a[0],a[1],a[2]);
+const norm=a=>{const l=len(a)||1;return [a[0]/l,a[1]/l,a[2]/l];};
+const cross=(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]];
+
+// ---- drone path: closed Catmull-Rom spline (world units = AU, z up; flat rings lie in z=0) ----
+const FP = [
+  [ 2.05,-1.05, 0.62],   // outside, above: whole system in view
+  [ 1.40,-0.50, 0.20],   // diving toward the outer ring
+  [ 0.98, 0.02, 0.03],   // skimming through ring 1.0 / 0.816
+  [ 0.66, 0.50, 0.07],   // between the inner rings
+  [ 0.12, 0.56, 0.14],   // inside the inner ring
+  [-0.38, 0.22, 0.16],   // sweep near the Sun (stays > 0.3 AU away)
+  [-0.36,-0.30, 0.12],
+  [-0.68,-0.62, 0.06],   // back out through the rings
+  [-1.08,-0.80, 0.16],
+  [-1.62,-1.10, 0.50],   // pull back out
+  [-1.20,-1.90, 0.95],   // arc around the outside, looking back at the Sun
+  [ 0.55,-2.15, 0.95]
+];
+function crPoint(t){
+  const n=FP.length, x=((t%1)+1)%1*n, i=Math.floor(x), u=x-i;
+  const p0=FP[(i-1+n)%n], p1=FP[i], p2=FP[(i+1)%n], p3=FP[(i+2)%n];
+  const u2=u*u, u3=u2*u, o=[0,0,0];
+  for (let k=0;k<3;k++) o[k]=0.5*((2*p1[k])+(-p0[k]+p2[k])*u+(2*p0[k]-5*p1[k]+4*p2[k]-p3[k])*u2+(-p0[k]+3*p1[k]-3*p2[k]+p3[k])*u3);
+  return o;
 }
+// time reparameterisation: steady pace, a bit slower inside the swarm, quicker on the outside arc
+const ALN=800, arcT=[0], arcS=[0];
+{ let prev=crPoint(0), s=0;
+  for(let i=1;i<=ALN;i++){ const t=i/ALN, p=crPoint(t); const mid=lerp3(p,prev,0.5);
+    const v = 0.55 + 0.9*clamp01((len(mid)-0.9)/1.2);       // pace (relative)
+    s+=len(sub(p,prev))/v; prev=p; arcT.push(t); arcS.push(s);} 
+  for(let i=0;i<=ALN;i++) arcS[i]/=s; }
+function pathAt(f){
+  f=((f%1)+1)%1; let lo=0,hi=ALN;
+  while(hi-lo>1){ const m=(lo+hi)>>1; if(arcS[m]<f) lo=m; else hi=m; }
+  const u=(f-arcS[lo])/((arcS[hi]-arcS[lo])||1);
+  return crPoint(arcT[lo]+(arcT[hi]-arcT[lo])*u);
+}
+function tOf(f){ f=((f%1)+1)%1; let lo=0,hi=ALN; while(hi-lo>1){ const m=(lo+hi)>>1; if(arcS[m]<f) lo=m; else hi=m; }
+  return arcT[lo]+(arcT[hi]-arcT[lo])*((f-arcS[lo])/((arcS[hi]-arcS[lo])||1)); }
+// Look direction table: blend 'ahead' and 'toward the Sun' in yaw/pitch with a continuous (unwrapped)
+// yaw difference, so when they point opposite ways the camera turns smoothly instead of flipping.
+const LN=1200, LOOK=[];
+{ let prevD=0, prevY=null;
+  for (let i=0;i<LN;i++){
+    const t=tOf(i/LN), e=crPoint(t);
+    const ah = norm(sub(crPoint(t+0.01), crPoint(t-0.002)));
+    const ts = norm(mul(e,-1));
+    const ya=Math.atan2(ah[1],ah[0]), pa=Math.asin(ah[2]);
+    const ys=Math.atan2(ts[1],ts[0]), ps=Math.asin(ts[2]);
+    let d=ys-ya; while(d-prevD> Math.PI) d-=2*Math.PI; while(d-prevD<-Math.PI) d+=2*Math.PI; prevD=d;
+    // outside: look in at the Sun / swarm; inside: lead along the path with a glance toward the Sun
+    // and when heading outward, glance back toward the Sun so the swarm stays in view
+    const outward = clamp01(-(ah[0]*ts[0]+ah[1]*ts[1]+ah[2]*ts[2]));
+    const g = Math.min(0.92, 0.42 + 0.5*clamp01((len(e)-0.95)/0.8) + 0.4*outward);
+    const y=ya+g*d, pt=pa+(ps-pa)*g;
+    LOOK.push([Math.cos(y)*Math.cos(pt), Math.sin(y)*Math.cos(pt), Math.sin(pt)]);
+  } }
+function rawLook(f){
+  const x=((f%1)+1)%1*LN, i=Math.floor(x), u=x-i;
+  return norm(lerp3(LOOK[i%LN], LOOK[(i+1)%LN], u));
+}
+function droneCam(f){
+  const e = pathAt(f);
+  // eased look-at: average the look direction over a short window of the path (no snapping)
+  let F=[0,0,0]; for (let i=-8;i<=8;i++){ const w=9-Math.abs(i); F=add(F, mul(rawLook(f+i*0.007), w)); }
+  F = norm(F);
+  if (lookYaw||lookPitch){   // gentle look-around offsets
+    const R=norm(cross(F,[0,0,1])); const U=cross(R,F);
+    F = norm(add(add(mul(F,Math.cos(lookYaw)*Math.cos(lookPitch)), mul(R,-Math.sin(lookYaw)*Math.cos(lookPitch))), mul(U,-Math.sin(lookPitch))));
+  }
+  return {e, F};
+}
+
+// ---- generic perspective camera ----
 let cam;
+const NEAR = 0.015;
 function setupCam(){
   const scale = Math.min(W*0.36, H*0.31);
-  cam = {ca:Math.cos(az), sa:Math.sin(az), ce:Math.cos(el), se:Math.sin(el), D:4.2, f:4.2*scale*zoom, f0:4.2*scale, cx:W/2, cy:H*0.485};
+  const ca=Math.cos(az), sa=Math.sin(az), ce=Math.cos(el), se=Math.sin(el);
+  const D = 4.2;
+  const Fo = [sa*ce, ca*ce, -se];
+  const Eo = mul(Fo, -D);
+  const fo = D*scale*zoom;
+  let E=Eo, F=Fo, f=fo, cy=H*0.485;
+  const fb = ease(flyBlend);
+  if (fb>0){
+    const d = droneCam(ft);
+    const fd = Math.max(W, H*1.3)*0.55;      // ~85 deg horizontal field of view
+    E = lerp3(Eo, d.e, fb); F = norm(lerp3(Fo, d.F, fb));
+    f = fo + (fd-fo)*fb; cy = H*0.485 + (H*0.5-H*0.485)*fb;
+  }
+  const R = norm(cross(F,[0,0,1])), U = cross(R,F);
+  cam = {E, F, R, U, f, cx:W/2, cy, fb, sunDist: len(E)};
 }
-// world (x,y,z with z up) -> screen
+// world -> screen; out = [sx, sy, z(camera depth), f/z]
 function proj(x,y,z,out){
-  const xr = x*cam.ca - y*cam.sa;
-  const yr = x*cam.sa + y*cam.ca;            // toward/away from viewer (before elevation)
-  const depth = yr*cam.ce - z*cam.se;        // + = away? we define viewer at -depth side
-  const up = yr*cam.se + z*cam.ce;
-  const d = cam.D + depth;
-  const k = cam.f / d;
-  out[0] = cam.cx + xr*k; out[1] = cam.cy - up*k; out[2] = depth; out[3] = k;
+  const vx=x-cam.E[0], vy=y-cam.E[1], vz=z-cam.E[2];
+  const zc = vx*cam.F[0]+vy*cam.F[1]+vz*cam.F[2];
+  const xc = vx*cam.R[0]+vy*cam.R[1]+vz*cam.R[2];
+  const yc = vx*cam.U[0]+vy*cam.U[1]+vz*cam.U[2];
+  const k = cam.f / Math.max(zc, 1e-6);
+  out[0] = cam.cx + xc*k; out[1] = cam.cy - yc*k; out[2] = zc; out[3] = k;
   return out;
 }
 
-// ---- static starfield ----
-const stars=[]; { let s2=seed; seed=99; for(let i=0;i<260;i++) stars.push([rnd(),rnd(),rnd()]); seed=s2; }
+// ---- starfield: directions at infinity (rotate with the camera) ----
+const stars=[]; { let s2=seed; seed=99; for(let i=0;i<1400;i++){ const z=rnd()*2-1, a=rnd()*Math.PI*2, r=Math.sqrt(1-z*z); stars.push([r*Math.cos(a), r*Math.sin(a), z, rnd()]); } seed=s2; }
 
 const tmp=[0,0,0,0], tmp2=[0,0,0,0];
 const items = new Array(bel.length);
-for (let i=0;i<bel.length;i++) items[i] = {x:0,y:0,d:0,k:0,a:0,b:0,ang:0,i};
+for (let i=0;i<bel.length;i++) items[i] = {x:0,y:0,z:0,k:0,a:0,b:0,ang:0,al:1,off:false};
 
 function draw(){
   setupCam();
-  const m = ease(mix);
+  const m = ease(mix), fb = cam.fb;
   ctx.globalCompositeOperation='source-over';
   ctx.fillStyle='#030507'; ctx.fillRect(0,0,W,H);
   // stars
-  for (const s of stars){ ctx.fillStyle = 'rgba(232,238,240,'+(0.08+s[2]*0.25)+')'; ctx.fillRect(s[0]*W, s[1]*H, 1, 1); }
+  for (const s of stars){
+    const zc = s[0]*cam.F[0]+s[1]*cam.F[1]+s[2]*cam.F[2]; if (zc<=0.05) continue;
+    const k = cam.f/zc;
+    const x = cam.cx + (s[0]*cam.R[0]+s[1]*cam.R[1]+s[2]*cam.R[2])*k*0.35;  // 0.35: keep star density sane at any zoom
+    const y = cam.cy - (s[0]*cam.U[0]+s[1]*cam.U[1]+s[2]*cam.U[2])*k*0.35;
+    if (x<0||x>W||y<0||y>H) continue;
+    ctx.fillStyle = 'rgba(232,238,240,'+(0.08+s[3]*0.25)+')'; ctx.fillRect(x, y, 1, 1);
+  }
 
   const bases = planes.map((_,p)=>planeBasis(p,m));
 
-  // orbit lines: in flat mode only 3 lines are distinct; fade the duplicates so brightness stays even
+  // orbit lines (chunked so they can fade with distance and clip at the near plane)
   ctx.globalCompositeOperation='lighter';
   ctx.lineWidth = 1;
   const lineA = 0.06 + 0.03*(1-m);
+  const SEG=96, CH=6;
   for (let p=0;p<PLANES;p++){
     const B = bases[p];
     const a = (p===0) ? Math.max(lineA, 0.32*(1-m)+lineA*m) : lineA*m + 0.004*(1-m);
+    if (a < 0.005) continue;
     for (let r=0;r<3;r++){
       const R=RADII[r];
-      ctx.strokeStyle = 'rgba(125,249,255,'+a.toFixed(4)+')';
-      ctx.beginPath();
-      for (let j=0;j<=96;j++){
-        const u=j/96*Math.PI*2, cu=Math.cos(u)*R, su=Math.sin(u)*R;
-        proj(B[0]*cu+B[3]*su, B[1]*cu+B[4]*su, B[2]*cu+B[5]*su, tmp);
-        j?ctx.lineTo(tmp[0],tmp[1]):ctx.moveTo(tmp[0],tmp[1]);
+      for (let c=0;c<SEG;c+=CH){
+        let ok=true, zs=0;
+        ctx.beginPath();
+        for (let j=c;j<=c+CH;j++){
+          const u=j/SEG*Math.PI*2, cu=Math.cos(u)*R, su=Math.sin(u)*R;
+          proj(B[0]*cu+B[3]*su, B[1]*cu+B[4]*su, B[2]*cu+B[5]*su, tmp);
+          if (tmp[2] < NEAR*4){ ok=false; break; }
+          zs += tmp[2];
+          j===c?ctx.moveTo(tmp[0],tmp[1]):ctx.lineTo(tmp[0],tmp[1]);
+        }
+        if (!ok) continue;
+        const zm = zs/(CH+1);
+        const fade = 1 + (clamp01(1.25 - zm/2.4)*1.6 - 1)*fb;   // flyby: brighter near, fading with distance
+        const aa = a*fade; if (aa < 0.003) continue;
+        ctx.strokeStyle = 'rgba(125,249,255,'+aa.toFixed(4)+')';
+        ctx.stroke();
       }
-      ctx.stroke();
     }
   }
 
-  // Belugas positions
+  // Belugas
+  const zp = Math.pow(zoom,0.6)/zoom;
   for (let i=0;i<bel.length;i++){
     const b=bel[i], B=bases[b.plane], it=items[i];
     const u = b.phase + b.w*simT*0.35;
     const cu=Math.cos(u)*b.r, su=Math.sin(u)*b.r;
     const x=B[0]*cu+B[3]*su, y=B[1]*cu+B[4]*su, z=B[2]*cu+B[5]*su;
     proj(x,y,z,tmp);
-    // velocity direction for elongation
+    it.z=tmp[2];
+    if (it.z < NEAR){ it.off=true; continue; }
+    it.x=tmp[0]; it.y=tmp[1]; it.k=tmp[3];
+    // orbit-camera size (gentle zoom growth) vs. drone size (true perspective, capped)
+    const so = it.k*0.0074*b.s*zp;
+    const sd = Math.min(18, it.k*0.0042*b.s);
+    let base = so + (sd-so)*fb;
+    if (base < 0.55) base = 0.55;
+    const pad = base*5+10;
+    it.off = (it.x<-pad || it.x>W+pad || it.y<-pad || it.y>H+pad);
+    if (it.off) continue;
+    // elongation along the projected velocity
     const vx=-B[0]*su+B[3]*cu, vy=-B[1]*su+B[4]*cu, vz=-B[2]*su+B[5]*cu;
-    proj(x+vx*0.02, y+vy*0.02, z+vz*0.02, tmp2);
-    it.x=tmp[0]; it.y=tmp[1]; it.d=tmp[2]; it.k=tmp[3];
-    it.off = (it.x<-60 || it.x>W+60 || it.y<-60 || it.y>H+60);
-    const dx=tmp2[0]-tmp[0], dy=tmp2[1]-tmp[1];
-    const L=Math.hypot(dx,dy)+1e-6;
-    it.ang=Math.atan2(dy,dx);
-    const base = (it.k/zoom)*0.0074*b.s*Math.pow(zoom,0.6);
-    const fore = Math.min(1, L/(it.k*0.02*b.r+1e-6));   // foreshortening of the long axis
+    const h = 0.004;
+    proj(x+vx*h, y+vy*h, z+vz*h, tmp2);
+    let fore = 0;
+    if (tmp2[2] > NEAR){
+      const dx=tmp2[0]-it.x, dy=tmp2[1]-it.y, L=Math.hypot(dx,dy);
+      it.ang=Math.atan2(dy,dx);
+      fore = Math.min(1, L/(it.k*h*b.r+1e-6));            // 1 = seen side-on, 0 = head-on
+    }
     it.a = base*(1+0.7*fore); it.b = base*0.72;
+    // brightness: orbit = depth cue relative to the Sun; drone = distance fade, fade-in when very close
+    const nearO = clamp01(0.5 - (it.z-cam.sunDist)*0.6);
+    const aO = 0.28 + 0.55*nearO + 0.17*Math.min(1,(zoom-1)/3);
+    const aD = clamp01(1.15 - it.z/2.6) * clamp01((it.z-NEAR)/0.03);
+    it.al = Math.max(0.12, aO + (aD-aO)*fb);
   }
-  items.sort((p,q)=>q.d-p.d);   // far first
+  items.sort((p,q)=>q.z-p.z);   // far first
 
-  // Sun position (screen)
-  proj(0,0,0,tmp); const sx=tmp[0], sy=tmp[1], sk=tmp[3];
-  const sunR = (sk/zoom)*0.085*Math.pow(zoom,0.7);   // Sun not to scale; grows gently so zoomed views stay readable
-  let sunDrawn=false;
+  // Sun
+  proj(0,0,0,tmp); const sx=tmp[0], sy=tmp[1], sz=tmp[2], sk=tmp[3];
+  const sunRo = sk*0.085*Math.pow(zoom,0.7)/zoom;   // Sun not to scale; grows gently with zoom
+  const sunRd = sk*0.07;
+  const sunR = sunRo + (sunRd-sunRo)*fb;
+  const sunVis = sz > NEAR*4;
+  let sunDrawn=!sunVis;
   for (let n=0;n<items.length;n++){
     const it=items[n];
-    if(!sunDrawn && it.d<0){ drawSun(sx,sy,sunR); sunDrawn=true; }
+    if (it.z < NEAR) continue;
+    if(!sunDrawn && it.z<sz){ drawSun(sx,sy,sunR); sunDrawn=true; }
     if(!it.off) drawBeluga(it);
   }
   if(!sunDrawn) drawSun(sx,sy,sunR);
   ctx.globalCompositeOperation='source-over';
-  zlab.textContent = 'zoom ' + zoom.toFixed(zoom<2?2:1) + '\u00d7';
+  zlab.textContent = flyOn ? 'drone camera' : 'zoom ' + zoom.toFixed(zoom<2?2:1) + '\u00d7';
+}
+
+function planeBasis(p, m){
+  const inc = planes[p].inc * m, node = planes[p].node;
+  const cn=Math.cos(node), sn=Math.sin(node), ci=Math.cos(inc), si=Math.sin(inc);
+  return [cn, sn, 0,  -sn*ci, cn*ci, si];   // u axis (line of nodes), v axis (in-plane)
 }
 
 function drawSun(x,y,R){
+  if (R > 4000) R = 4000;
   ctx.globalCompositeOperation='source-over';
   let g=ctx.createRadialGradient(x,y,0,x,y,R*5.5);
   g.addColorStop(0,'rgba(229,201,166,0.38)'); g.addColorStop(0.25,'rgba(229,201,166,0.12)'); g.addColorStop(1,'rgba(229,201,166,0)');
@@ -255,16 +435,11 @@ function drawSun(x,y,R){
 }
 
 function drawBeluga(it){
-  // depth cue: nearer = brighter
-  const near = Math.max(0, Math.min(1, 0.5 - it.d*0.6));
-  const alpha = 0.28 + 0.55*near + 0.17*Math.min(1,(zoom-1)/3);
   ctx.save();
   ctx.translate(it.x,it.y); ctx.rotate(it.ang); ctx.scale(it.a, it.b);   // unit circle -> ellipsoid
-  // soft glow that fades out (no hard rim)
-  ctx.globalAlpha = alpha;
-  ctx.fillStyle = HALO; ctx.beginPath(); ctx.arc(0,0,2.4,0,7); ctx.fill();
-  // body: shaded like a white ellipsoid
-  ctx.fillStyle = BODY; ctx.beginPath(); ctx.arc(0,0,1,0,7); ctx.fill();
+  ctx.globalAlpha = it.al;
+  ctx.fillStyle = HALO; ctx.beginPath(); ctx.arc(0,0,2.4,0,7); ctx.fill();   // soft glow, no hard rim
+  ctx.fillStyle = BODY; ctx.beginPath(); ctx.arc(0,0,1,0,7); ctx.fill();     // shaded white ellipsoid
   if (it.a > 4.5){   // up close: bulbous front 'melon' highlight, still white
     ctx.fillStyle = MELON; ctx.beginPath(); ctx.arc(0.5,-0.05,0.55,0,7); ctx.fill();
   }
@@ -282,14 +457,18 @@ let last=performance.now(), anim=false;
 function frame(now){
   const dt=Math.min(0.05,(now-last)/1000); last=now;
   if (autoplay){
-    simT += dt;
+    simT += dt*speed;                                   // orbital motion follows the speed slider
+    ft = (ft + dt*speed/FLY_PERIOD) % 1;                // so does the drone
     if (now-lastInteract>2500 && !drag) az += dt*0.12;
   }
+  if (!drag && (lookYaw||lookPitch)){ const k=Math.exp(-dt*1.2); lookYaw*=k; lookPitch*=k; if(Math.abs(lookYaw)+Math.abs(lookPitch)<1e-3) lookYaw=lookPitch=0; }
   if (zoom!==zoomTarget){ zoom += (zoomTarget-zoom)*(1-Math.exp(-dt*9)); if (Math.abs(zoom-zoomTarget)<zoomTarget*0.002) zoom=zoomTarget; }
-  const step = dt/2.5;                       // ~2.5 s transition
+  const step = dt/2.5;                                  // ~2.5 s arrangement transition (not speed-scaled)
   if (mix<target) mix=Math.min(target,mix+step); else if (mix>target) mix=Math.max(target,mix-step);
+  const ft2 = flyOn?1:0, fstep = dt/2.0;                // ~2 s camera hand-off
+  if (flyBlend<ft2) flyBlend=Math.min(1,flyBlend+fstep); else if (flyBlend>ft2) flyBlend=Math.max(0,flyBlend-fstep);
   draw();
-  if (autoplay || mix!==target || zoom!==zoomTarget || drag || pinch) requestAnimationFrame(frame); else anim=false;
+  if (autoplay || mix!==target || zoom!==zoomTarget || flyBlend!==ft2 || drag || pinch || lookYaw || lookPitch) requestAnimationFrame(frame); else anim=false;
 }
 function animateOnce(){ if(!anim){ anim=true; last=performance.now(); requestAnimationFrame(frame);} }
 if (autoplay) requestAnimationFrame(frame); else draw();
