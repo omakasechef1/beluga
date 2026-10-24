@@ -67,6 +67,8 @@ figcaption{color:#8e897f}figcaption b{color:#7df9ff;text-shadow:0 0 8px rgba(125
 :root{--thought-text:#6464ff;--thought-text-glow:0 0 5px rgba(80,80,255,.75),0 0 14px rgba(60,60,255,.55);--thought-line:#1414ff;--thought-line-glow:rgba(30,30,255,.85);
  --heat:#ffa64d;--heat-glow:0 0 6px rgba(255,140,60,.7),0 0 18px rgba(255,140,60,.5);--heat-glow-color:rgba(255,140,60,.7)}
 #txt .end.pw{color:var(--thought-text);text-shadow:var(--thought-text-glow)}
+#txt .end.ask{font-size:.92em;font-style:normal;font-weight:400;margin-top:14px;color:#7df9ff;text-shadow:0 0 6px rgba(125,249,255,.3)}
+#txt .end.fine{font-size:13px;line-height:1.38;margin-top:7px;color:#9c968a;text-shadow:none}
 #note{color:#9c968a}
 #nav{border-top-color:rgba(255,255,255,.12)}
 .btn{background:transparent;color:#7df9ff;border-color:rgba(125,249,255,.38);text-shadow:0 0 5px rgba(125,249,255,.35)}
@@ -125,9 +127,9 @@ function beluga(x,y,s,o={}){const al=o.alpha==null?1:o.alpha;if(al<=0.01)return;
  if(s>=8){ctx.fillStyle='rgba(255,255,255,0.85)';ctx.beginPath();ctx.ellipse(-a*0.38,-b*0.48,a*0.22,b*0.12,-0.25,0,TAU);ctx.fill();}
  ctx.restore();}
 /* Large, detailed Beluga for step 1 (side view, after the sim's "carriage view") */
-function belugaBig(x,y,a,t){const b=a*0.65;ctx.save();ctx.translate(x,y);
+function belugaBig(x,y,a,t,o={}){const b=a*0.65;ctx.save();ctx.translate(x,y);
  // feeler wire forward with red tip
- ctx.strokeStyle='rgba(150,155,160,0.9)';ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(a*0.98,-b*0.02);ctx.lineTo(a*1.2,-b*0.07);ctx.stroke();ctx.fillStyle='#d24a3a';ctx.beginPath();ctx.arc(a*1.2,-b*0.07,2.4,0,TAU);ctx.fill();
+ ctx.strokeStyle='rgba(150,155,160,0.9)';ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(a*0.98,-b*0.02);ctx.lineTo(a*1.2,-b*0.07);ctx.stroke();ctx.fillStyle=o.tip||'#d24a3a';ctx.beginPath();ctx.arc(a*1.2,-b*0.07,2.4,0,TAU);ctx.fill();
  // carriage: attachment arch, saddle, motors + spinning props, hanging board, blue LED
  ctx.strokeStyle='#e9ebe6';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(-a*0.07,b*0.96);ctx.quadraticCurveTo(0,b*1.12,a*0.07,b*0.96);ctx.stroke();
  ctx.fillStyle='#f2f3ef';ctx.fillRect(-a*0.2,b*1.12,a*0.4,4);
@@ -220,6 +222,39 @@ function loopDiagram(x,y,w,h,t,o={}){
   const q=(t/2)%1;beluga(mx,lerp(my+6,ys[0]-4,q),3.2,{asp:0.8,glowc:'rgba(183,211,168,0.95)',alpha:1-q*0.6});}
  if(o.retire){const q=(t/2.4)%1;ctx.fillStyle=heatA(0.8*(1-q));for(let i=0;i<3;i++){ctx.beginPath();ctx.arc(xl-10+i*10,ys[2]+10+q*14,1.8,0,TAU);ctx.fill();}label('retire',xl+16,ys[2]+30,{size:11,box:false,color:HEAT});}
 }
+
+/* Closing-step figures. Human: a clean, abstract outline with a blue augmentation node at the temple; y = head centre. */
+function humanFig(x,y){const col='rgba(232,238,240,0.92)';
+ ctx.save();ctx.strokeStyle=col;ctx.lineWidth=1.7;ctx.lineCap='round';ctx.lineJoin='round';ctx.shadowColor='rgba(232,238,240,0.45)';ctx.shadowBlur=5*SC*DPR;
+ ctx.beginPath();ctx.arc(x,y,13,0,TAU);ctx.stroke();
+ ctx.beginPath();ctx.moveTo(x-10,y+96);ctx.bezierCurveTo(x-13,y+66,x-26,y+50,x-22,y+31);ctx.quadraticCurveTo(x-18,y+21,x,y+20);ctx.quadraticCurveTo(x+18,y+21,x+22,y+31);ctx.bezierCurveTo(x+26,y+50,x+13,y+66,x+10,y+96);ctx.stroke();
+ ctx.globalAlpha=0.75;ctx.beginPath();ctx.moveTo(x-24,y+36);ctx.quadraticCurveTo(x-31,y+62,x-28,y+88);ctx.moveTo(x+24,y+36);ctx.quadraticCurveTo(x+31,y+62,x+28,y+88);ctx.stroke();ctx.globalAlpha=1;
+ ctx.beginPath();ctx.moveTo(x-6,y+98);ctx.quadraticCurveTo(x-8,y+122,x-8,y+142);ctx.moveTo(x+6,y+98);ctx.quadraticCurveTo(x+8,y+122,x+8,y+142);ctx.stroke();ctx.restore();
+ const g=ctx.createRadialGradient(x+8,y-5,0,x+8,y-5,11);g.addColorStop(0,hexA('#4d4dff',0.85));g.addColorStop(1,hexA('#4d4dff',0));ctx.fillStyle=g;ctx.beginPath();ctx.arc(x+8,y-5,11,0,TAU);ctx.fill();
+ ctx.save();ctx.strokeStyle=THOUGHT_LINE;ctx.fillStyle=THOUGHT_LINE;ctx.lineWidth=1.5;ctx.shadowColor=THOUGHT_LINE_GLOW;ctx.shadowBlur=6*SC*DPR;ctx.beginPath();ctx.moveTo(x+1,y-9);ctx.lineTo(x+8,y-5);ctx.stroke();ctx.beginPath();ctx.arc(x+8,y-5,2.4,0,TAU);ctx.fill();ctx.restore();}
+/* Machine: a distributed, heterogeneous cluster of mismatched modules on a blue mesh, with one articulated limb. Not humanoid. (x,y) = core module. */
+function machineNet(x,y,t){const col='rgba(232,238,240,0.92)',dark='rgba(9,12,16,0.92)';
+ const M=[[-6,0],[34,30],[-34,40],[10,74],[-36,104],[34,108],[0,138]].map(([dx,dy],k)=>[x+dx+1.6*Math.sin(t*0.8+k*1.9),y+dy+1.6*Math.cos(t*0.7+k*1.3)]);
+ const L=[[0,1],[0,2],[1,3],[2,3],[0,3],[3,4],[3,5],[2,4],[1,5],[4,6],[5,6]];
+ ctx.save();ctx.strokeStyle=lineA(0.85);ctx.lineWidth=1.3;ctx.shadowColor=THOUGHT_LINE_GLOW;ctx.shadowBlur=5*SC*DPR;ctx.beginPath();L.forEach(([i,j])=>{ctx.moveTo(M[i][0],M[i][1]);ctx.lineTo(M[j][0],M[j][1]);});ctx.stroke();ctx.restore();
+ L.forEach(([i,j],k)=>{if(k%3)return;const q=(t*0.45+k*0.29)%1;ctx.save();ctx.shadowColor='rgba(77,77,255,1)';ctx.shadowBlur=6*SC*DPR;ctx.fillStyle=`rgba(223,230,255,${Math.sin(Math.PI*q)})`;ctx.beginPath();ctx.arc(lerp(M[i][0],M[j][0],q),lerp(M[i][1],M[j][1],q),1.7,0,TAU);ctx.fill();ctx.restore();});
+ ctx.save();ctx.strokeStyle=col;ctx.lineWidth=1.6;ctx.lineJoin='round';ctx.lineCap='round';ctx.shadowColor='rgba(232,238,240,0.4)';ctx.shadowBlur=4*SC*DPR;ctx.fillStyle=dark;
+ const poly=(cx,cy,r,n,rot)=>{ctx.beginPath();for(let i=0;i<n;i++){const an=rot+i*TAU/n;i?ctx.lineTo(cx+r*Math.cos(an),cy+r*Math.sin(an)):ctx.moveTo(cx+r*Math.cos(an),cy+r*Math.sin(an));}ctx.closePath();ctx.fill();ctx.stroke();};
+ // articulated limb from the round module
+ const [ax,ay]=M[1],a1=-0.35+0.25*Math.sin(t*0.9),a2=a1+0.9+0.35*Math.sin(t*1.3+1),j1=[ax+24*Math.cos(a1),ay+24*Math.sin(a1)],j2=[j1[0]+20*Math.cos(a2),j1[1]+20*Math.sin(a2)];
+ ctx.beginPath();ctx.moveTo(ax,ay);ctx.lineTo(j1[0],j1[1]);ctx.lineTo(j2[0],j2[1]);ctx.stroke();
+ ctx.beginPath();ctx.moveTo(j2[0],j2[1]);ctx.lineTo(j2[0]+7*Math.cos(a2-0.6),j2[1]+7*Math.sin(a2-0.6));ctx.moveTo(j2[0],j2[1]);ctx.lineTo(j2[0]+7*Math.cos(a2+0.6),j2[1]+7*Math.sin(a2+0.6));ctx.stroke();
+ ctx.beginPath();ctx.arc(j1[0],j1[1],3,0,TAU);ctx.fill();ctx.stroke();
+ poly(M[0][0],M[0][1],17,6,Math.PI/6+0.1*Math.sin(t*0.5));
+ ctx.beginPath();ctx.arc(M[1][0],M[1][1],10,0,TAU);ctx.fill();ctx.stroke();
+ {const [cx,cy]=M[2],r=10,d=6;ctx.beginPath();ctx.rect(cx-r,cy-r+d/2,2*r-d,2*r-d);ctx.fill();ctx.stroke();ctx.beginPath();ctx.moveTo(cx-r,cy-r+d/2);ctx.lineTo(cx-r+d,cy-r-d/2);ctx.lineTo(cx+r,cy-r-d/2);ctx.lineTo(cx+r,cy+r-d*1.5);ctx.lineTo(cx+r-d,cy+r-d/2);ctx.moveTo(cx+r-d,cy-r+d/2);ctx.lineTo(cx+r,cy-r-d/2);ctx.stroke();}
+ rr(M[3][0]-16,M[3][1]-9,32,18,4);ctx.fill();ctx.stroke();
+ poly(M[4][0],M[4][1],12,3,-Math.PI/2);
+ ctx.beginPath();ctx.arc(M[5][0],M[5][1],7,0,TAU);ctx.fill();ctx.stroke();
+ poly(M[6][0],M[6][1],8,4,Math.PI/4);
+ ctx.restore();
+ // blue nodes: one in every module
+ ctx.save();ctx.fillStyle=hexA('#4d4dff',0.95);ctx.shadowColor=THOUGHT_LINE_GLOW;ctx.shadowBlur=7*SC*DPR;M.forEach(([mx,my],k)=>{ctx.beginPath();ctx.arc(mx,my,k?2.2:3.4,0,TAU);ctx.fill();});ctx.restore();}
 
 /* ---------- steps ---------- */
 const STEPS=[
@@ -432,7 +467,7 @@ const STEPS=[
   label('Fast links between neighbours,\nslow links between rings.',px,cy0+232,{size:12,color:'#7df9ff',box:false});}},
 {title:'The voice home',kick:'Home',
  text:'The outer ring is Earth’s own orbit. About 97% of outer pods can see Earth, and since they share Earth’s year the nearest relays stay nearest for years. Relay pods sit just outside Earth’s gravity zone and beam answers to Earth and the Moon.',
- end:['Belugas build new, evolved Belugas. Deeper understanding takes more thought, and thought takes power.','Concept sketch, not the simulation.'],
+ end:['Belugas build new, evolved Belugas. Deeper understanding takes more thought, and thought takes power.'],
  note:'[Physics, Kepler] Relays sit ~3 pod gaps out, past Earth’s Hill sphere (~1.5M km). Light delay ~8 min per AU: batch work, not live chat. [Physics, unproven] Self-building factories. [Speculation] Recursive self-improvement.',
  draw(t){bg(t);const cx=430,cy=272,S=228,SR=12;
   [1,2].forEach(i=>{const R=RINGS[i];ring(cx,cy,R.r*S,'rgba(235,235,225,0.12)');for(let k=0;k<8;k++){const a=k/8*TAU+i+W0*0.3*(OM(R.r)-1)*t;beluga(cx+R.r*S*Math.cos(a),cy+R.r*S*Math.sin(a),3,{ang:a+Math.PI/2,alpha:0.5,T:tempK(R.r)});}});
@@ -513,7 +548,71 @@ const STEPS=[
   leader(700,388,spt(TH)[0]-3,spt(TH)[1]+3,heatA(0.6));label('glows and burns up\nnear the Sun',750,404,{align:'center',size:13,colors:[HEAT,HEAT],box:false});
   label('tilting the membrane like a solar sail\nspirals it inward, over years [Physics]',750,452,{align:'center',size:13,colors:['#7df9ff','#7df9ff'],box:false});
   // shared note
-  label('Falling straight into the Sun is hard: from Earth’s distance you’d have to cancel ~30 km/s,\nmore than escaping the solar system [Physics].',500,508,{align:'center',size:13,color:'#e8eef0',box:false});}}
+  label('Falling straight into the Sun is hard: from Earth’s distance you’d have to cancel ~30 km/s,\nmore than escaping the solar system [Physics].',500,508,{align:'center',size:13,color:'#e8eef0',box:false});}},
+{title:'Knowledge comes home',kick:'Abundance',
+ text:'The Belugas never come back, but questions go out and what they work out comes home: data, not energy.',
+ end:['Matter goes one way. Knowledge comes home, and knowledge is abundance for every kind of life: augmented humans, curious machines, and the transitional species where they meet.','What will they ask next?','Concept sketch, not the simulation.'],
+ note:'[Assumption] Data, not energy, goes home. [Speculation] Transitional species: the moment evolution might occur, as machines gain intelligence and humans are augmented by it. Extends Jed Berk’s Transitional Species (ALAVs, Blubber Bots, Beluga Pod, Odense 2008).',
+ draw(t){bg(t);const cx=185,cy=285,S=150;
+  RINGS.forEach(R=>ring(cx,cy,R.r*S,'rgba(235,235,225,0.2)'));sun(cx,cy,14,3.4);
+  RINGS.forEach((R,i)=>{for(let k=0;k<7;k++)pod(cx,cy,S,R.r,k/7*TAU+i*0.45+W0*0.25*OM(R.r)*t,R.n,{s:3.6,gap:9,alpha:0.6});});
+  const ea=-0.35,ex=cx+S*Math.cos(ea),ey=cy+S*Math.sin(ea),ma=t*0.7,mx=ex+13*Math.cos(ma),my=ey+13*Math.sin(ma);
+  // matter: new Belugas leave the Moon, one way
+  const mp=q=>{const a=lerp(ea+0.05,0.75,q),r=S*lerp(1,0.816,smooth(q));return[cx+r*Math.cos(a),cy+r*Math.sin(a)];};
+  ctx.save();ctx.setLineDash([3,5]);ctx.strokeStyle='rgba(235,235,225,0.32)';ctx.lineWidth=1.2;ctx.beginPath();for(let i=0;i<=40;i++){const p=mp(i/40);i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]);}ctx.stroke();ctx.restore();
+  {const a=mp(0.97),b=mp(1);arrow(a[0],a[1],b[0],b[1],'rgba(235,235,225,0.5)',1.2);}
+  for(let j=0;j<3;j++){const q=((t/4)+j/3)%1,p=mp(q);beluga(p[0],p[1],3.6,{glow:1.2,alpha:q<0.1?q/0.1:q>0.85?(1-q)/0.15:1});}
+  // knowledge: data lines from the rings to Earth and the Moon
+  const SRC=[[0,-1.25],[0,-0.8],[0,0.3],[0,0.75],[1,-1.0],[1,-0.2],[1,0.55],[2,-0.6],[2,0.4]];
+  SRC.forEach(([ri,a0],i)=>{const a=a0+0.06*Math.sin(t*0.3+i),R=RINGS[ri].r*S,sx=cx+R*Math.cos(a),sy=cy+R*Math.sin(a),[tx,ty]=i%2?[mx,my]:[ex,ey];
+   ctx.save();ctx.strokeStyle=lineA(0.8);ctx.lineWidth=1.2;ctx.shadowColor=THOUGHT_LINE_GLOW;ctx.shadowBlur=5*SC*DPR;ctx.beginPath();ctx.moveTo(sx,sy);ctx.lineTo(tx,ty);ctx.stroke();ctx.restore();
+   // answers come home (big, bright), at a calm pace: light takes minutes
+   const q=(t*0.16+i*0.23)%1;ctx.save();ctx.shadowColor='rgba(77,77,255,1)';ctx.shadowBlur=7*SC*DPR;ctx.fillStyle=`rgba(223,230,255,${Math.sin(Math.PI*q)})`;ctx.beginPath();ctx.arc(lerp(sx,tx,q),lerp(sy,ty,q),2.3,0,TAU);ctx.fill();ctx.restore();
+   // questions go out on the same link (small, dim cyan)
+   const qo=(t*0.13+i*0.37+0.45)%1;ctx.save();ctx.shadowColor='rgba(125,249,255,1)';ctx.shadowBlur=5*SC*DPR;ctx.fillStyle=`rgba(125,249,255,${Math.min(1,1.4*Math.sin(Math.PI*qo))})`;ctx.beginPath();ctx.arc(lerp(tx,sx,qo),lerp(ty,sy,qo),1.5,0,TAU);ctx.fill();ctx.restore();
+   pod(cx,cy,S,RINGS[ri].r,a,RINGS[ri].n,{s:3.8,gap:9});});
+  {const PER=6.5,n=Math.floor(t/PER),p=(t%PER)/PER,PAIRS=[[[2,2.6],[0,2.0],0],[[1,1.9],null,1],[[0,-2.2],[2,-1.6],0]],[A,B]=PAIRS[n%3],pt=([ri,an])=>{const R=RINGS[ri].r*S,a=an+0.02*t;return[cx+R*Math.cos(a),cy+R*Math.sin(a)];},a0=pt(A),b0=B?pt(B):[ex,ey];
+   if(p<0.2){const f=Math.sin(Math.PI*p/0.2),g=ctx.createRadialGradient(a0[0],a0[1],0,a0[0],a0[1],9);g.addColorStop(0,`rgba(125,249,255,${0.85*f})`);g.addColorStop(1,'rgba(125,249,255,0)');ctx.fillStyle=g;ctx.beginPath();ctx.arc(a0[0],a0[1],9,0,TAU);ctx.fill();}
+   if(p>0.08&&p<0.85){const u=(p-0.08)/0.77,m=[(a0[0]+b0[0])/2+(cy-(a0[1]+b0[1])/2)*0.25,(a0[1]+b0[1])/2-((a0[0]+b0[0])/2-cx)*0.25],v=1-u,x=v*v*a0[0]+2*v*u*m[0]+u*u*b0[0],y=v*v*a0[1]+2*v*u*m[1]+u*u*b0[1];
+    ctx.save();ctx.shadowColor='rgba(125,249,255,0.9)';ctx.shadowBlur=6*SC*DPR;ctx.fillStyle=`rgba(125,249,255,${0.9*Math.min(1,Math.sin(Math.PI*u)*1.8)})`;ctx.beginPath();ctx.arc(x,y,1.6,0,TAU);ctx.fill();ctx.restore();}}
+  ctx.save();ctx.shadowColor='rgba(72,108,255,0.9)';ctx.shadowBlur=10*SC*DPR;ctx.fillStyle='#486cff';ctx.beginPath();ctx.arc(ex,ey,6,0,TAU);ctx.fill();ctx.restore();ctx.fillStyle='#cfcdc6';ctx.beginPath();ctx.arc(mx,my,2.6,0,TAU);ctx.fill();
+  // from home, knowledge branches out to every kind of life: human (augmented), machine (curious), and the transitional species where they meet
+  const BP=[470,120],HY=256,TX=740,TY=180+Math.sin(t*1.1)*4,FX=[575,TX,905],END=[HY-32,TY-62,HY-32];
+  const P1=s=>{const u=1-s;return[u*u*ex+2*u*s*360+s*s*BP[0],u*u*ey+2*u*s*BP[1]+s*s*BP[1]];},P2=(k,s)=>{const u=1-s,x=FX[k];return[u*u*BP[0]+2*u*s*x+s*s*x,u*u*BP[1]+2*u*s*BP[1]+s*s*END[k]];};
+  ctx.save();ctx.strokeStyle=THOUGHT_LINE;ctx.lineWidth=2;ctx.shadowColor=THOUGHT_LINE_GLOW;ctx.shadowBlur=6*SC*DPR;ctx.beginPath();ctx.moveTo(ex,ey);ctx.quadraticCurveTo(360,BP[1],BP[0],BP[1]);ctx.stroke();
+  ctx.lineWidth=1.4;FX.forEach((x,k)=>{ctx.beginPath();ctx.moveTo(BP[0],BP[1]);ctx.quadraticCurveTo(x,BP[1],x,END[k]);ctx.stroke();});ctx.restore();
+  ctx.fillStyle=THOUGHT_LINE;ctx.beginPath();ctx.arc(BP[0],BP[1],3,0,TAU);ctx.fill();
+  // convergence: human and machine both arch into the transitional species
+  const CV=[[[600,HY-10],[640,170],[TX-94,TY+18]],[[880,HY-10],[840,170],[TX+98,TY+18]]];
+  CV.forEach(([p0,c,p1],k)=>{ctx.save();ctx.setLineDash([4,5]);ctx.lineDashOffset=-t*14;ctx.strokeStyle=lineA(0.75);ctx.lineWidth=1.3;ctx.shadowColor=THOUGHT_LINE_GLOW;ctx.shadowBlur=4*SC*DPR;ctx.beginPath();ctx.moveTo(p0[0],p0[1]);ctx.quadraticCurveTo(c[0],c[1],p1[0],p1[1]);ctx.stroke();ctx.restore();
+   const qb=s=>{const u=1-s;return[u*u*p0[0]+2*u*s*c[0]+s*s*p1[0],u*u*p0[1]+2*u*s*c[1]+s*s*p1[1]];},e0=qb(0.93);arrow(e0[0],e0[1],p1[0],p1[1],hexA('#4d4dff',0.85),1.3);
+   const q=(t*0.3+k*0.5)%1,pp=qb(q);ctx.save();ctx.shadowColor='rgba(77,77,255,1)';ctx.shadowBlur=6*SC*DPR;ctx.fillStyle=`rgba(223,230,255,${Math.sin(Math.PI*q)})`;ctx.beginPath();ctx.arc(pp[0],pp[1],1.8,0,TAU);ctx.fill();ctx.restore();});
+  FX.forEach((x,k)=>{let h=0;for(let m=0;m<2;m++){const q=(t*0.22+m/2+k*0.17)%1,p=q<0.35?P1(q/0.35):P2(k,(q-0.35)/0.65);h=Math.max(h,q>0.93?(q-0.93)/0.07:q<0.2?1-q/0.2:0);
+    ctx.save();ctx.shadowColor='rgba(77,77,255,1)';ctx.shadowBlur=7*SC*DPR;ctx.fillStyle=`rgba(223,230,255,${Math.min(1,Math.sin(Math.PI*q)*1.6)})`;ctx.beginPath();ctx.arc(p[0],p[1],2.2,0,TAU);ctx.fill();ctx.restore();}
+   const pu=0.5+0.5*Math.sin(t*1.6+k*2.1),hy=k===1?TY:HY;ctx.save();ctx.strokeStyle=hexA('#4d4dff',0.25+0.25*pu+0.5*h);ctx.lineWidth=1.4+h;ctx.shadowColor=THOUGHT_LINE_GLOW;ctx.shadowBlur=(6+10*h)*SC*DPR;ctx.beginPath();
+   if(k===1)ctx.ellipse(x+4,hy+12,92+3*h,70+3*h,0,0,TAU);else ctx.arc(x,hy,24+3*h,0,TAU);ctx.stroke();ctx.restore();
+   if(k===1)belugaBig(x,TY,62*(1+0.025*Math.sin(t*1.4)),t,{tip:'#c9cfd2'});else if(k)machineNet(x,HY+Math.sin(t*0.9)*1.5,t);else humanFig(x,HY+Math.sin(t*0.9+1.7)*1.5);});
+  label('human\n(augmented)',FX[0],422,{align:'center',size:14,colors:['#7df9ff',THOUGHT_TEXT],box:false});
+  label('machine\n(curious)',FX[2],422,{align:'center',size:14,colors:['#7df9ff',THOUGHT_TEXT],box:false});
+  label('transitional species',TX,294,{align:'center',size:14,bold:true,color:'#7df9ff',box:false});
+  label('where they meet · [Speculation]',TX,312,{align:'center',size:11,color:'#9c9d98',box:false});
+  label('Knowledge comes home',BP[0]-6,94,{align:'center',bold:true,size:15,color:THOUGHT_TEXT,box:false});
+  label('…and reaches every kind of life',TX,62,{align:'center',size:13,color:'#7df9ff',box:false});
+  label('Earth + Moon',ex+24,ey+30,{size:13,bold:true,color:'#7df9ff',box:false});
+  label('light delay:\n~8 to 17 min each way',ex+24,ey+46,{size:10.5,color:'#9c9d98',box:false});
+  label('Sun',cx,cy+34,{align:'center',size:12,color:'#e5c9a6',box:false});
+  label('the rings think',cx,112,{align:'center',bold:true,size:14,box:false});
+  label('● Matter goes out one way (Belugas never return)',14,486,{size:13,color:'#e8eef0',box:false});
+  ctx.save();ctx.fillStyle='#7df9ff';ctx.shadowColor='rgba(125,249,255,0.6)';ctx.shadowBlur=4*SC*DPR;ctx.beginPath();ctx.arc(17,505.5,2,0,TAU);ctx.fill();ctx.restore();
+  ctx.save();ctx.fillStyle='#e8eeff';ctx.shadowColor='rgba(77,77,255,1)';ctx.shadowBlur=6*SC*DPR;ctx.beginPath();ctx.arc(25,505.5,3,0,TAU);ctx.fill();ctx.restore();
+  const k1=label('Questions go out,',33,510,{size:13,color:'#7df9ff',box:false});
+  const kb=label('knowledge comes home, as data, not energy',k1.x+k1.w+8,510,{size:13,color:THOUGHT_TEXT,box:false});
+  label('[Assumption]',kb.x+kb.w+8,510,{size:11,color:'#9c9d98',box:false});
+  // lineage strip
+  label('From sea to space.',986,470,{align:'right',size:14,bold:true,color:'#7df9ff',box:false});
+  const ls=label('ALAVs 2006 · Blubber Bots 2007 · Beluga Pod 2008 · Belugas next',958,490,{align:'right',size:12,color:'#7df9ff',box:false});
+  beluga(974,485,7,{glow:1.1});
+  label('from Transitional Species, J. Berk',986,511,{align:'right',size:11,color:'#9c9d98',box:false});}}
 ];
 
 /* ---------- slide machinery ---------- */
@@ -525,7 +624,7 @@ function go(i,keepAuto){cur=clamp(i,0,STEPS.length-1);const s=STEPS[cur];t0=perf
  const nn=String(cur+1).padStart(2,'0');$('title').textContent=s.title;$('count').textContent=`Step ${nn} / ${String(STEPS.length).padStart(2,'0')}`;
  $('num').textContent=nn;$('kicker').textContent=s.kick;$('fig').textContent='Fig. '+nn;$('figk').textContent=s.kick;
  $('side').innerHTML=`Step ${nn}<br>${esc(s.kick)}<br><span style="color:#486cff">&#9679;</span> ${String(cur+1)}/${STEPS.length}`;
- $('txt').innerHTML=esc(s.text)+(s.end?[].concat(s.end).map(e=>`<span class="end${/thought takes power/.test(e)?' pw':''}">${esc(e)}</span>`).join(''):'');
+ $('txt').innerHTML=esc(s.text)+(s.end?[].concat(s.end).map(e=>`<span class="end${/thought takes power/.test(e)?' pw':''}${/^Concept sketch/.test(e)?' fine':''}${/^What will they ask next/.test(e)?' ask':''}">${esc(e)}</span>`).join(''):'');
  $('note').textContent=s.note;$('back').disabled=cur===0;$('next').disabled=cur===STEPS.length-1&&!auto;
  [...dots.children].forEach((d,j)=>d.classList.toggle('on',j===cur));
  try{const u=new URL(location.href);u.searchParams.set('step',cur+1);history.replaceState(null,'',u);}catch(e){}
