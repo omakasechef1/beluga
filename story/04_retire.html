@@ -169,6 +169,7 @@ window.ReadPace=function(o){
  const api={
   get holding(){return holding;},get readPace(){return readPace;},
   release(){holding=false;},
+  get step(){return step;},setReadPace(v){readPace=!!v;sync();},setStep(v){step=!!v;if(!step)holding=false;sync();},   // story player
   space(){if(holding){holding=false;return true;}return false;},   // returns true if the key was used to leave a step hold
   // effective playback rate (story s per real s), eased
   rate(dt,speed){if(rate===null)rate=speed;const reading=readPace&&now()-shownAt<curMin;const tg=reading?Math.min(speed,READ_RATE):speed;
@@ -459,6 +460,7 @@ S.rec=new T.Group();
  for(let i=0;i<3;i++){const sp=new T.Mesh(new T.BoxGeometry(2,.06,.06),m);sp.rotation.z=i*Math.PI/3;S.rec.add(sp);}
  const mouth=new T.Mesh(new T.TorusGeometry(.42,.05,6,12),new T.MeshBasicMaterial({color:0x7df9ff,transparent:true,opacity:.8,toneMapped:false}));mouth.position.z=.38;S.rec.add(mouth);S.recRing=ring;}
 S.rec.visible=false;S.scene.add(S.rec);
+const REC_MATS=[];S.rec.traverse(o=>{if(o.material&&!REC_MATS.includes(o.material)){o.material.userData.op=o.material.opacity;o.material.userData.tr=o.material.transparent;REC_MATS.push(o.material);}});
 S.hint=[0,1,2].map(()=>{const m=new T.Mesh(new T.RingGeometry(.86,1,64),new T.MeshBasicMaterial({color:0x7df9ff,transparent:true,opacity:0,depthTest:false,depthWrite:false,blending:T.AdditiveBlending,toneMapped:false}));m.visible=false;m.renderOrder=5;S.scene.add(m);return m;});
 // burn-up zone ~0.2-0.35 AU: a faint heat-coloured annulus facing the camera (the zone is really a spherical shell)
 S.zone=new T.Group();
@@ -504,17 +506,22 @@ function updateSys(t,uc){const cs=sysCam(t,uc);const dpr=rS.getPixelRatio();
  const rw=.0074*Math.pow(cs.d/D0,.8);
  const sunR=.085*Math.pow(Math.min(1,cs.d/D0),.3);S.sunCore.scale.setScalar(sunR);S.sunGlow.scale.set(sunR*11,sunR*11,1);
  const fo=focusAt(t),fi=focusIn(t),ad=S.bel.geometry.attributes.aDim.array;
+ // no dark transits: a Beluga between the camera and the Sun's disc shows its unlit side as a dark blot, so it shrinks away
+ // while it crosses the disc (its halo stays). Off in the wide views (d>=4.5: D t=0 / B's last frame, and the hold at 55 s = E t=0).
+ const camP=camS.position,camD=camP.length(),aSun=Math.asin(Math.min(1,sunR/camD)),occW=1-sm(2.5,4.5,cs.d);
+ const occ=(p,g)=>{if(occW<=0)return g;const vx=p.x-camP.x,vy=p.y-camP.y,vz=p.z-camP.z,dl=Math.hypot(vx,vy,vz);if(dl>=camD)return g;
+  const ang=Math.acos(clamp(-(vx*camP.x+vy*camP.y+vz*camP.z)/(dl*camD),-1,1));return g*lerp(1,sm(aSun*.9,aSun*1.3+.6*g/dl,ang),occW);};
  // --- shell Belugas (retirees are drawn separately, in S.ret)
  for(let i=0;i<ND;i++){const b=bodies[i];
   if(retired.has(i)){S.bel.setMatrixAt(i,ZERO);S.halo.hide(i);bpx[i]=0;continue;}
   const phi=phiAt(b.k,RING_BASE[b.k]+b.off,t);orbitPos(b.k,b.j,phi,0,0,_p);orbitVel(b.k,b.j,phi,_q);
-  const g=b.s*rw*2.3;basis(_p,_q,g);bmat[i].copy(_m);S.bel.setMatrixAt(i,_m);
-  const dist=_p.distanceTo(camS.position),px=.7*g*fpx/dist;bpx[i]=px;
+  const g0=b.s*rw*2.3,g=occ(_p,g0);basis(_p,_q,g);bmat[i].copy(_m);S.bel.setMatrixAt(i,_m);
+  const dist=_p.distanceTo(camS.position),px=.7*g*fpx/dist,px0=.7*g0*fpx/dist;bpx[i]=px;
   const f=b.k===2?fi:fo;bdim[i]=f;ad[i]=f;
   let fl=0;const rp=REPAIR.get(i);if(rp)for(const ta of rp)if(t>=ta)fl=Math.max(fl,Math.exp(-(t-ta)/1.1));
   if(tintOn){const c=TINT[b.k];_c.setRGB(lerp(1,c.r,HMIX),lerp(1,c.g,HMIX),lerp(1,c.b,HMIX));}else _c.setRGB(1,1,1);
   if(fl>0)_c.lerp(CYAN,fl);
-  S.halo.set(i,_p,_c.r,_c.g,_c.b,((tintOn?.44:.3)*f)+.5*fl,Math.max(2.2,px*(tintOn?5.6:4.8))*(1+1.4*fl));}
+  S.halo.set(i,_p,_c.r,_c.g,_c.b,((tintOn?.44:.3)*f)+.5*fl,Math.max(2.2,px0*(tintOn?5.6:4.8))*(1+1.4*fl));}
  {const near=[];for(let i=0;i<ND;i++)if(bpx[i]>7)near.push(i);near.sort((a,b)=>bpx[b]-bpx[a]);const n=Math.min(NHI,near.length),hd=S.belHi.geometry.attributes.aDim.array;
   for(let q=0;q<n;q++){S.belHi.setMatrixAt(q,bmat[near[q]]);hd[q]=bdim[near[q]];S.bel.setMatrixAt(near[q],ZERO);}S.belHi.count=n;S.belHi.instanceMatrix.needsUpdate=true;S.belHi.geometry.attributes.aDim.needsUpdate=true;}
  S.bel.instanceMatrix.needsUpdate=true;S.bel.geometry.attributes.aDim.needsUpdate=true;S.halo.flush();
@@ -552,7 +559,7 @@ function updateSys(t,uc){const cs=sysCam(t,uc);const dpr=rS.getPixelRatio();
   else{if(t>=R.dock)scale=1-smr(R.dock,R.dock+TDIS,t);if(t>=R.dock+TDIS)vis=false;if(t>R.dep&&t<R.dock+TDIS)ST_.retiring++;if(t>=R.dock+TDIS*.5)ST_.recycled++;}
   retPos(R,t,_p);const phi=R._phi;orbitVel(2,R.j,phi,_q);
   const g=b.s*rw*2.3*rsc*scale;
-  if(vis&&g>0){basis(_p,_q,g);S.ret.setMatrixAt(n,_m);}else S.ret.setMatrixAt(n,ZERO);
+  if(vis&&g>0){basis(_p,_q,occ(_p,g));S.ret.setMatrixAt(n,_m);}else S.ret.setMatrixAt(n,ZERO);
   ra[n]=dim*(1-.55*heat);rh[n*3]=HEAT.r*1.05*heat;rh[n*3+1]=HEAT.g*1.05*heat;rh[n*3+2]=HEAT.b*1.05*heat;
   const dist=_p.distanceTo(camS.position),px=.7*b.s*rw*2.3*rsc*fpx/dist;
   // halo: inner tint, greyer as it wears, heat-coloured as it fails
@@ -584,7 +591,8 @@ function updateSys(t,uc){const cs=sysCam(t,uc);const dpr=rS.getPixelRatio();
   if(m.visible){retPos(R,t,_p);m.position.copy(_p);m.quaternion.copy(camS.quaternion);const dist=_p.distanceTo(camS.position);
    m.scale.setScalar((13+5*sm(R.d0,R.d0+3.8,t))*dist/fpx);m.material.opacity=.7*a;}});
  // recycler
- const recOn=sm(14.5,17.5,t)*(1-sm(45.5,49,t));S.rec.visible=recOn>0;
+ const recOn=sm(14.5,17.5,t)*(1-sm(28.8,31.3,t));S.rec.visible=recOn>0;   // out after ending A: not brought back (D's last frame = E's first)
+ {for(const m of REC_MATS){const tr=m.userData.tr||recOn<1;if(m.transparent!==tr){m.transparent=tr;m.needsUpdate=true;}m.opacity=m.userData.op*recOn;if(!m.userData.tr)m.depthWrite=!tr;}}
  if(S.rec.visible){planePos(2,JR,recPhase(t),R_DOCK,_p);orbitVel(2,JR,recPhase(t),_q);const g=rw*2.3*rsc*6.1*Math.max(recOn,.001);basis(_p,_q,g);
   S.rec.matrixAutoUpdate=false;S.rec.matrix.copy(_m);S.rec.matrixWorldNeedsUpdate=true;S.recRing.rotation.z=t*.5;
   const dist=_p.distanceTo(camS.position),px=.7*g*fpx/dist;let busy=0;for(const R of RET)if(R.kind==='rec')busy=Math.max(busy,sm(R.dock-.3,R.dock,t)*(1-sm(R.dock+TDIS,R.dock+TDIS+.6,t)));
@@ -763,11 +771,48 @@ function loop(now){const dt=Math.min(.1,(now-last)/1000);last=now;
 resize();render(tNow);RP.seek(tNow);lastT=tNow;RP.update(tNow);requestAnimationFrame(loop);
 if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>render(tNow));
 // merge API, same shape as window.SectionB. D t=0 == B t=60 (B_END).
+window.__ctl={DUR,get t(){return tNow;},get playing(){return playing;},play:v=>setPlay(!!v),seek(t){tNow=clamp(+t||0,0,DUR);render(tNow);},setSpeed:s=>setSpeed(s),RP};   // story player (embed.js)
 window.SectionD={DUR,PHASES,render,scene:S.scene,camera:camS,renderer:rS,B_END:TB,
  setTime(t){tNow=clamp(t,0,DUR);render(tNow);},get t(){return tNow;},play(v=true){setPlay(v);},
  setRingBase(a){for(let k=0;k<3;k++)RING_BASE[k]=a[k];render(tNow);},RING_BASE,T_A,retirees:NR};
 if(Q.get('log')==='1')console.log('[seam] D RING_BASE',JSON.stringify(RING_BASE.map(x=>+x.toFixed(5))),'recycler plane',JR,'burn times',RET.filter(R=>R.kind==='burn').map(R=>[R.dep.toFixed(1),R.tGlow.toFixed(1),R.tBreak.toFixed(1),R.tGone.toFixed(1)].join('/')).join(' '));
 console.log('SectionD ready: retirees',NR,'(burn',NRB+', recycle',(NR-NRB)+')','recycler plane',JR,'parts',PARTS.length);
+})();
+
+// embed.js · story-player shim (inlined after MAIN by the build scripts). Does nothing unless the page is opened with ?embed=1.
+// story_full.html loads each section in an iframe; file:// frames are opaque origins, so the player drives them by postMessage:
+//   in : {storyCmd:'play',v} 'start' (seek t + reset caption clock + play) 'seek' 'speed' 'clean' (0/1/2) 'readpace' 'step' 'space'
+//   out: {story:1,type:'ready'|'state'|'ended'|'key'|'toggle',...}   Space / arrows / C / Esc / Home / End are forwarded to the player.
+(()=>{const Q=new URLSearchParams(location.search);if(Q.get('embed')!=='1')return;
+ const C=()=>window.__ctl;if(!C())return;
+ const post=m=>parent.postMessage(Object.assign({story:1},m),'*');
+ document.documentElement.classList.add('embed');
+ const st=document.createElement('style');st.textContent='html.embed #ctl{visibility:hidden}';document.head.appendChild(st);
+ const setClean=m=>{document.body.classList.toggle('clean',m>=1);document.body.classList.toggle('bare',m>=2);dispatchEvent(new Event('resize'));};
+ if(Q.has('clean'))setClean(+Q.get('clean')||0);
+ dispatchEvent(new Event('resize'));
+ addEventListener('message',e=>{const m=e.data;if(!m||!m.storyCmd)return;const c=C();
+  switch(m.storyCmd){
+   case 'play':c.play(!!m.v);break;
+   case 'start':c.seek(+m.t||0);if(c.RP)c.RP.seek(+m.t||0);ended=false;c.play(true);break;
+   case 'seek':c.seek(+m.t||0);ended=false;break;
+   case 'speed':if(c.setSpeed)c.setSpeed(+m.v);break;
+   case 'clean':setClean(+m.v||0);break;
+   case 'readpace':if(c.RP)c.RP.setReadPace(!!m.v);break;
+   case 'step':if(c.RP)c.RP.setStep(!!m.v);break;
+   case 'space':if(!(c.RP&&c.RP.space()))post({type:'toggle'});break;}
+  postState();});
+ const FWD=new Set(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','c','C','Escape','Home','End','PageUp','PageDown']);
+ addEventListener('keydown',e=>{if(e.code==='Space'||FWD.has(e.key)){e.preventDefault();e.stopImmediatePropagation();
+  if(!e.repeat)post({type:'key',key:e.key,code:e.code});}},true);
+ let ended=false,lastPost=0;
+ const postState=()=>{const c=C();lastPost=performance.now();
+  post({type:'state',t:c.t,DUR:c.DUR,playing:c.playing,holding:!!(c.RP&&c.RP.holding),readPace:c.RP?c.RP.readPace:null,step:c.RP?c.RP.step:null});};
+ const tick=now=>{const c=C(),end=c.t>=c.DUR-1e-6;
+  if(end&&c.playing&&!ended){ended=true;postState();post({type:'ended',t:c.t});}
+  if(now-lastPost>100)postState();
+  requestAnimationFrame(tick);};
+ post({type:'ready',DUR:C().DUR,readPace:C().RP?C().RP.readPace:null,step:C().RP?C().RP.step:null});requestAnimationFrame(tick);
 })();
 </script>
 </body></html>
