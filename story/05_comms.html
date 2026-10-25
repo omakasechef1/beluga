@@ -71,7 +71,7 @@ body.bare #title,body.bare #beat,body.bare #count,body.bare #cap,body.bare #foot
 
 /* section E */
 #cap p:empty{display:none}
-#hops{position:fixed;left:50%;top:84px;transform:translateX(-50%);padding:7px 14px 6px;background:rgba(0,0,0,.6);border:1px solid rgba(100,100,255,.5);font:500 15px/1.4 'JetBrains Mono',monospace;color:var(--c);text-align:center;opacity:0;pointer-events:none;white-space:nowrap}
+#hops{position:fixed;left:50%;bottom:196px;transform:translateX(-50%);padding:7px 14px 6px;background:rgba(0,0,0,.6);border:1px solid rgba(100,100,255,.5);font:500 15px/1.4 'JetBrains Mono',monospace;color:var(--c);text-align:center;opacity:0;pointer-events:none;white-space:nowrap}
 #hops b{font-weight:600;font-variant-numeric:tabular-nums;color:#fff}
 #hops .soft{display:block;font-size:12px;color:var(--body);opacity:.7;text-shadow:none}
 #final{position:fixed;z-index:20;left:50%;top:44%;transform:translate(-50%,-50%);font:600 clamp(30px,4.4vw,64px)/1.2 'JetBrains Mono','DejaVu Sans Mono',monospace;letter-spacing:.04em;color:#7df9ff;
@@ -80,6 +80,7 @@ body.bare #title,body.bare #beat,body.bare #count,body.bare #cap,body.bare #foot
 #closeTx{position:fixed;z-index:25;left:50%;top:46%;transform:translate(-50%,-50%);font:500 clamp(20px,2.95vw,42px)/1.3 'JetBrains Mono','DejaVu Sans Mono',monospace;letter-spacing:.03em;color:#e8eef0;
  text-shadow:0 0 10px rgba(232,238,240,.35),0 0 30px rgba(232,238,240,.12);text-align:center;white-space:nowrap;opacity:0;pointer-events:none}
 body.bare #hops{display:none}
+body.clean #hops{bottom:146px}
 </style></head><body>
 <canvas id="cvS"></canvas><svg id="lines"></svg>
 <div id="title"><h1>The shell talks to Earth</h1><div class="sub">story sim · section E · a question in, a mesh of laser links, the answer home</div></div>
@@ -215,8 +216,9 @@ const END_LINES_DEFAULT=['Knowledge comes home.','Abundance for all.','Still flo
 const CLOSE_DEFAULT='Nineteen years back, nineteen years forward.';
 const T=THREE;
 const Q=new URLSearchParams(location.search);
-const END_LINES=(Q.has('end')&&Q.get('end').trim())?Q.get('end').split('|').map(s=>s.trim()).filter(Boolean):END_LINES_DEFAULT;
-const CLOSE=Q.has('close')?((Q.get('close').trim()===''||Q.get('close')==='0')?null:Q.get('close').trim()):CLOSE_DEFAULT;
+const untag=x=>x.replace(/\s*\[(Physics|Speculation|Assumption)\]/gi,'').trim();   // the final lines and closing card never carry tags
+const END_LINES=(Q.has('end')&&Q.get('end').trim())?Q.get('end').split('|').map(untag).filter(Boolean):END_LINES_DEFAULT;
+const CLOSE=Q.has('close')?((Q.get('close').trim()===''||Q.get('close')==='0')?null:untag(Q.get('close'))):CLOSE_DEFAULT;
 // ---------- story clock (s) ----------
 const T_Q0=1.5,T_ENTRY=6.2;          // question: Earth pulse -> relay -> outer shell
 const T_M0=8,T_M1=21.5;              // mesh ripple, entry pod -> whole graph
@@ -423,6 +425,10 @@ SATS.forEach(s=>{const ax=V(Math.sin(s.inc)*Math.sin(s.node),-Math.sin(s.inc)*Ma
 S.wave=new T.Sprite(new T.SpriteMaterial({map:(()=>{const c=document.createElement('canvas');c.width=c.height=256;const x=c.getContext('2d');const g=x.createRadialGradient(128,128,0,128,128,128);
  g.addColorStop(0,'rgba(100,100,255,0)');g.addColorStop(.72,'rgba(100,100,255,0.05)');g.addColorStop(.9,'rgba(100,100,255,0.55)');g.addColorStop(1,'rgba(100,100,255,0)');x.fillStyle=g;x.fillRect(0,0,256,256);return new T.CanvasTexture(c);})(),
  transparent:true,depthWrite:false,blending:T.AdditiveBlending,toneMapped:false,opacity:0}));S.wave.position.copy(EP);S.scene.add(S.wave);
+// a small soft cyan marker ring around Earth for the wide views (question, pull-back); constant size on screen
+S.eRing=new T.Sprite(new T.SpriteMaterial({map:(()=>{const c=document.createElement('canvas');c.width=c.height=128;const x=c.getContext('2d');const g=x.createRadialGradient(64,64,0,64,64,64);
+ g.addColorStop(0,'rgba(125,249,255,0)');g.addColorStop(.62,'rgba(125,249,255,0)');g.addColorStop(.74,'rgba(125,249,255,.85)');g.addColorStop(.86,'rgba(125,249,255,.12)');g.addColorStop(1,'rgba(125,249,255,0)');x.fillStyle=g;x.fillRect(0,0,128,128);return new T.CanvasTexture(c);})(),
+ sizeAttenuation:false,transparent:true,depthTest:false,depthWrite:false,blending:T.AdditiveBlending,toneMapped:false,opacity:0}));S.eRing.position.copy(EP);S.eRing.renderOrder=5;S.scene.add(S.eRing);
 
 // =====================================================================
 // E · THE MESH: one node per drawn pod (501), laser links to near neighbours in the same shell + data links between shells
@@ -463,10 +469,15 @@ function buildGraph(){
   'min sun clearance',Math.min(...EDGES.map(e=>segClear(NP[e.a],NP[e.b]))).toFixed(3));
  allocMesh();}
 // mesh drawables
-const MKP=3,BLUE=[.078,.078,1],GLOW=[.392,.392,1];
+const MKP=3,BLUE=[.078,.078,1],GLOW=[.392,.392,1],CB=[.36,.66,1];   // CB: the answer's cyan-blue (between #6464ff and #7df9ff)
+const TUBE_PX=2.1,DIM_REST=.35;    // answer path half-width in px; the rest of the mesh dims to 35% while the answer travels
+let shX=0;                         // extra shimmer clock: wall-clock seconds spent held on the last frame
 let NE=0;
 function allocMesh(){NE=EDGES.length;
- if(S.mesh){S.scene.remove(S.mesh);S.scene.remove(S.mGlow);S.scene.remove(S.mHead);}
+ if(S.mesh){S.scene.remove(S.mesh);S.scene.remove(S.mGlow);S.scene.remove(S.mHead);S.scene.remove(S.rHead);S.tubes.forEach(m=>S.scene.remove(m));}
+ // the answer path: one thin open cylinder per hop (reads thicker than a 1px line), plus its travelling pulse points
+ const tg=new T.CylinderGeometry(1,1,1,10,1,true);S.tubes=PATHE.map(()=>{const m=new T.Mesh(tg,new T.MeshBasicMaterial({color:0,transparent:true,blending:T.AdditiveBlending,depthWrite:false,toneMapped:false}));m.visible=false;m.frustumCulled=false;S.scene.add(m);return m;});
+ S.rHead=makePoints(2,T.AdditiveBlending);S.scene.add(S.rHead);
  const g=new T.BufferGeometry();g.setAttribute('position',new T.BufferAttribute(new Float32Array(NE*6),3));g.setAttribute('color',new T.BufferAttribute(new Float32Array(NE*6),3));
  S.mesh=new T.LineSegments(g,new T.LineBasicMaterial({vertexColors:true,transparent:true,blending:T.AdditiveBlending,depthWrite:false,toneMapped:false}));S.mesh.frustumCulled=false;S.scene.add(S.mesh);
  S.mGlow=makePoints(NE*MKP+NN,T.AdditiveBlending);S.scene.add(S.mGlow);
@@ -524,7 +535,8 @@ const shim=(t,ph)=>.5+.5*Math.sin(t*1.25+ph);
 let litN=[0,0,0],totN=[0,0,0];
 function updateShell(tB,cs,t){updatePlanes(tB);const dpr=rS.getPixelRatio();
  const fpx=(H/2)/Math.tan(camS.fov*Math.PI/360);
- for(const p of [S.halo,S.spk,S.stars,S.linkPts,S.mGlow,S.mHead,S.ep])p.material.uniforms.uDpr.value=dpr;
+ const aq=1-.5*sm(T_H0-.8,T_H0,t)*(1-sm(T_P0,T_P0+3,t));   // the shell steps back a little while the answer travels, so its path reads
+ for(const p of [S.halo,S.spk,S.stars,S.linkPts,S.mGlow,S.mHead,S.rHead,S.ep])p.material.uniforms.uDpr.value=dpr;
  S.stars.position.copy(camS.position);
  const rw=.0074*Math.pow(cs.d/D0,.8);
  const sunR=.085*Math.pow(Math.min(1,cs.d/D0),.3);S.sunCore.scale.setScalar(sunR);S.sunGlow.scale.set(sunR*11,sunR*11,1);
@@ -534,8 +546,8 @@ function updateShell(tB,cs,t){updatePlanes(tB);const dpr=rS.getPixelRatio();
   const g=b.s*rw*2.3;
   _m.makeBasis(_x.multiplyScalar(g),_y.multiplyScalar(g),_z.multiplyScalar(g));_m.setPosition(_p);bmat[i].copy(_m);S.bel.setMatrixAt(i,_m);
   const dist=_p.distanceTo(camS.position),px=.7*g*fpx/dist;bpx[i]=px;
-  if(tintOn){const c=TINT[b.k];S.halo.set(i,_p,lerp(1,c.r,HMIX),lerp(1,c.g,HMIX),lerp(1,c.b,HMIX),.44,Math.max(2.2,px*5.6));}
-  else S.halo.set(i,_p,1,1,1,.3,Math.max(2.2,px*4.8));}
+  if(tintOn){const c=TINT[b.k];S.halo.set(i,_p,lerp(1,c.r,HMIX),lerp(1,c.g,HMIX),lerp(1,c.b,HMIX),.44*aq,Math.max(2.2,px*5.6));}
+  else S.halo.set(i,_p,1,1,1,.3*aq,Math.max(2.2,px*4.8));}
  {const near=[];for(let i=0;i<ND;i++)if(bpx[i]>7)near.push(i);near.sort((a,b)=>bpx[b]-bpx[a]);const n=Math.min(NHI,near.length);
   for(let q=0;q<n;q++){S.belHi.setMatrixAt(q,bmat[near[q]]);S.bel.setMatrixAt(near[q],ZERO);}S.belHi.count=n;S.belHi.instanceMatrix.needsUpdate=true;}
  S.bel.instanceMatrix.needsUpdate=true;S.halo.flush();
@@ -543,24 +555,25 @@ function updateShell(tB,cs,t){updatePlanes(tB);const dpr=rS.getPixelRatio();
  for(let k=0;k<2;k++)for(const pd of pods[k])for(let m=0;m<pd.length-1;m++){bodyPos(pd[m],tB,_p);bodyPos(pd[m+1],tB,_q);lp.setXYZ(li++,_p.x,_p.y,_p.z);lp.setXYZ(li++,_q.x,_q.y,_q.z);}
  lp.needsUpdate=true;
  for(let i=0;i<li/2;i++){const ax=lp.getX(2*i),ay=lp.getY(2*i),az=lp.getZ(2*i),bx=lp.getX(2*i+1),by=lp.getY(2*i+1),bz=lp.getZ(2*i+1);
-  for(let k=0;k<6;k++){const u=(k+.5)/6;_p.set(ax+(bx-ax)*u,ay+(by-ay)*u,az+(bz-az)*u);S.linkPts.set(i*6+k,_p,.078,.078,1,.85,3.0);}}
+  for(let k=0;k<6;k++){const u=(k+.5)/6;_p.set(ax+(bx-ax)*u,ay+(by-ay)*u,az+(bz-az)*u);S.linkPts.set(i*6+k,_p,.078,.078,1,.85*aq,3.0);}}
  S.linkPts.flush();
  // specks: every flock has landed by B t=60 (spw .25, gF 1, as at the end of B)
  const nearE=1-sm(.35,1.2,camS.position.distanceTo(EP));const ssz=clamp(2.1*Math.pow(D0/cs.d,.5)*1.3,1.9,4.2);
  for(let i=0;i<NS;i++){const sp=specks[i];orbitPos(sp.k,sp.j,phiAt(sp.k,sp.ph0,tB),sp.dr*.25,sp.dz*.25,_p);
-  const sc=tintOn?SPK_T[sp.k]:SPK_W;S.spk.set(i,_p,sc.r,sc.g,sc.b,.88*sp.a*(1-.6*nearE),ssz);}
+  const sc=tintOn?SPK_T[sp.k]:SPK_W;S.spk.set(i,_p,sc.r,sc.g,sc.b,.88*sp.a*(1-.6*nearE)*aq,ssz);}
  S.spk.flush();
  // orbit paths: as at the end of B, dimmed a little while the mesh speaks
  const od=1-.35*sm(T_M0,T_M0+4,t)*(1-sm(T_P0,T_P1,t))-.15*sm(T_P0,T_P1,t);
  for(let k=0;k<3;k++){S.ringMats[k].opacity=0;
   for(let j=0;j<NPL[k];j++){const b=BAS[k][j],l=S.orbits[k][j];
    l.matrix.set(b.nx*b.r,b.mx*b.r,b.ax*b.r,0, b.ny*b.r,b.my*b.r,b.ay*b.r,0, 0,b.mz*b.r,b.az*b.r,0, 0,0,0,1);l.matrixWorldNeedsUpdate=true;
-   l.material.opacity=(k===0?.075:k===1?.085:.1)*(tintOn?1.8:1)*od*(1-.6*nearE);l.material.color.copy(CYAN);if(tintOn)l.material.color.lerp(TINT[k],TMIX);}}}
+   l.material.opacity=(k===0?.075:k===1?.085:.1)*(tintOn?1.8:1)*od*(1-.6*nearE)*aq;l.material.color.copy(CYAN);if(tintOn)l.material.color.lerp(TINT[k],TMIX);}}}
 function updateMesh(tB,t,cs){
  for(let i=0;i<NN;i++)bodyPos(nodeBody[i],tB,NP[i]);
  const pa=S.mesh.geometry.attributes.position.array,ca=S.mesh.geometry.attributes.color.array;
  const calm=sm(T_P0,T_P1,t);litN=[0,0,0];totN=[0,0,0];const nodeLv=new Float32Array(NN);
- const gs=clamp(3.2*Math.pow(D0/cs.d,.35),2.2,5);
+ const gs=clamp(3.2*Math.pow(D0/cs.d,.35),2.2,5);const ts=t+shX;
+ const ans=sm(T_H0-.8,T_H0,t)*(1-sm(T_P0,T_P0+3,t)),dimR=1-(1-DIM_REST)*ans;
  for(let ei=0;ei<NE;ei++){const e=EDGES[ei];let A=NP[e.a],B=NP[e.b];
   let lv=0,f=1,head=-1,hx=0;
   // 1 ripple from the entry pod
@@ -575,18 +588,34 @@ function updateMesh(tB,t,cs){
   if(e.pi>=0&&t>=T_H0+e.pi*HH){const u=clamp((t-T_H0-e.pi*HH)/HH,0,1);const fwd=e.pS===(e.sA===e.a?e.a:e.b);
    if(u<1){head=fwd?u:1-u;hx=1.4;}lv=Math.max(lv,(u<1?.5:.75)*(1-sm(T_P0,T_P0+3,t))+.25);}
   // calm, softly alive: slow shimmer plus a rare soft pulse
-  if(f>0){const base=lerp(lv,.2,calm);const pulse=Math.pow(Math.max(0,Math.sin(t*.55+e.ph*9)),24)*.4;lv=(base+(pulse*calm))*(.86+.14*shim(t,e.ph));
+  if(f>0){const base=lerp(lv,.2,calm);const pulse=Math.pow(Math.max(0,Math.sin(ts*.55+e.ph*9)),24)*.4;lv=(base+(pulse*calm))*(.86+.14*shim(ts,e.ph));
    const k=Math.max(nodeK[e.a],nodeK[e.b]);totN[k]++;litN[k]++;nodeLv[e.a]=Math.max(nodeLv[e.a],lv);nodeLv[e.b]=Math.max(nodeLv[e.b],lv);}
   else totN[Math.max(nodeK[e.a],nodeK[e.b])]++;
   const o=ei*6;_q.copy(A).lerp(B,f);
   pa[o]=A.x;pa[o+1]=A.y;pa[o+2]=A.z;pa[o+3]=_q.x;pa[o+4]=_q.y;pa[o+5]=_q.z;
-  const br=lv*(e.x?.8:1);const rt=e.pi>=0&&t>=T_H0+e.pi*HH?(1-sm(T_P0,T_P1,t)):0;   // the answer route reads as the brighter #6464ff glow colour
+  const onR=e.pi>=0,br=lv*(e.x?.8:1)*(onR?1-ans:dimR);const rt=onR&&t>=T_H0+e.pi*HH?(1-sm(T_P0,T_P1,t)):0;   // route lines hand over to the tubes while the answer travels
   for(const oo of [o,o+3]){ca[oo]=lerp(BLUE[0]*1.4,GLOW[0]*1.5,rt)*br;ca[oo+1]=lerp(BLUE[1]*1.4,GLOW[1]*1.5,rt)*br;ca[oo+2]=BLUE[2]*br;}
   for(let k=0;k<MKP;k++){const u=(k+.5)/MKP;if(f>0&&u<=f){_p.copy(A).lerp(B,u);S.mGlow.set(ei*MKP+k,_p,GLOW[0],GLOW[1],GLOW[2],.42*br,gs);}else S.mGlow.hide(ei*MKP+k);}
+  if(onR&&ans>0)head=-1;
   if(head>=0){_p.copy(A).lerp(B,clamp(head,0,1));
    S.mHead.set(ei,_p,lerp(GLOW[0],.8,hx>1?.5:0),lerp(GLOW[1],.85,hx>1?.5:0),1,.85*Math.min(1,hx),gs*1.9*Math.min(1.3,hx));}else S.mHead.hide(ei);}
- for(let i=0;i<NN;i++){const v=nodeLv[i];if(v>0)S.mGlow.set(NE*MKP+i,NP[i],GLOW[0],GLOW[1],GLOW[2],Math.min(1,.55*v),gs*2.2);else S.mGlow.hide(NE*MKP+i);}
- S.mesh.geometry.attributes.position.needsUpdate=S.mesh.geometry.attributes.color.needsUpdate=true;S.mGlow.flush();S.mHead.flush();}
+ for(let i=0;i<NN;i++){const v=nodeLv[i]*dimR;if(v>0)S.mGlow.set(NE*MKP+i,NP[i],GLOW[0],GLOW[1],GLOW[2],Math.min(1,.55*v),gs*2.2);else S.mGlow.hide(NE*MKP+i);}
+ S.mesh.geometry.attributes.position.needsUpdate=S.mesh.geometry.attributes.color.needsUpdate=true;S.mGlow.flush();S.mHead.flush();
+ updateRoute(t,ans,gs);}
+// the answer path: tubes grow hop by hop behind a bright head; once it has arrived, a soft pulse keeps running the path hop to hop
+const _up=V(0,1,0),_qt=new T.Quaternion();
+function updateRoute(t,ans,gs){const nH=PATHE.length,hp=(t-T_H0)/HH,fpx=(H/2)/Math.tan(camS.fov*Math.PI/360);
+ const rq=t>T_H1?((t-T_H1)*1.8)%(nH+4):-9;                       // repeating pulse position, in hops
+ for(let i=0;i<nH;i++){const m=S.tubes[i],A=NP[PATH[i]],B=NP[PATH[i+1]],f=clamp(hp-i,0,1);
+  if(f<=0||ans<=0){m.visible=false;continue;}m.visible=true;
+  _x.copy(B).sub(A);const L=_x.length();_x.divideScalar(L);_p.copy(A).addScaledVector(_x,L*f/2);
+  const rad=TUBE_PX*_p.distanceTo(camS.position)/fpx;m.position.copy(_p);m.quaternion.copy(_qt.setFromUnitVectors(_up,_x));m.scale.set(rad,L*f,rad);
+  const lv=1.25*(.6+.9*Math.exp(-Math.max(0,hp-i-1)/1.3)+.8*Math.exp(-((rq-i-.5)**2)/.6))*ans;
+  m.material.color.setRGB(CB[0]*lv,CB[1]*lv,CB[2]*lv);}
+ const at=(h,o)=>{const i=Math.min(nH-1,Math.floor(h));return o.copy(NP[PATH[i]]).lerp(NP[PATH[i+1]],h-i);};
+ if(ans>0&&hp>0&&hp<nH)S.rHead.set(0,at(hp,_p),.62,.92,1,ans,gs*4.6);else S.rHead.hide(0);
+ if(ans>0&&rq>=0&&rq<nH)S.rHead.set(1,at(rq,_p),.55,.88,1,.85*ans,gs*3.6);else S.rHead.hide(1);
+ S.rHead.flush();}
 function updateEarth(t,cs){
  const de=camS.position.distanceTo(EP),close=1-sm(.35,1.2,de);
  S.hillMat.opacity=.22*close;S.moonOrbMat.opacity=.10*close;S.satOrbMat.opacity=.07*close;
@@ -605,6 +634,9 @@ function updateEarth(t,cs){
  S.ep.set(nb+2,RELAY,.91,.93,.94,.9*Math.max(close,.0),3.2);                                         // relay (only near Earth)
  for(let i=0;i<SATS.length;i++)S.ep.set(nb+3+i,satPos(i,t,_p),.91,.93,.94,.85*close,2.4);
  S.ep.set(nb+7,EP,.39,.39,1,.4*mk*(1-close),24);                                    // soft blue halo so Earth reads in the wide viewS.ep.flush();
+ // Earth marker ring: question beat and pull-back (wide views only)
+ {const rv=(sm(.8,2,t)*(1-sm(6.8,8.4,t))+sm(T_P0+3.5,T_P0+5.5,t))*(1-close);const px=34*(1+.05*Math.sin((t+shX)*1.6));
+  S.eRing.material.opacity=.6*rv*(.85+.15*Math.sin((t+shX)*1.6));S.eRing.visible=rv>0;S.eRing.scale.setScalar(px*2/(camS.projectionMatrix.elements[5]*H));}
  // question wave
  const wu=clamp((t-T_Q0)/3.6,0,1);S.wave.scale.setScalar(.02+.34*wu);S.wave.material.opacity=t<T_Q0?0:.55*Math.sin(Math.PI*wu);}
 
@@ -633,10 +665,9 @@ const CAPS=[
  [0,'A question from Earth. [Speculation]'],
  [T_M0,'Each shell thinks with its own sunlight; only data moves between them. [Physics]'],
  [T_C0,'The answer converges on the far side of the outer shell, then hops around the Sun to the Earth side. [Physics]'],
- [T_R0,'Light from the outer shell reaches Earth in up to ~17 minutes. [Physics]'],
- [T_P0,'']];
+ [T_R0,'Light from the outer shell reaches Earth in up to ~17 minutes. [Physics]']];   // no empty caption at T_P0 (it would trigger read-pace); the box fades out in updateHUD instead
 const capEl=document.getElementById('capText'),beatEl=document.getElementById('beat'),countEl=document.getElementById('count'),hopsEl=document.getElementById('hops');
-const finEl=document.getElementById('final'),closeEl=document.getElementById('closeTx'),closeBg=document.getElementById('closeBg');
+const capBox=document.getElementById('cap'),finEl=document.getElementById('final'),closeEl=document.getElementById('closeTx'),closeBg=document.getElementById('closeBg');
 let lastPh=-1;
 const phaseAt=t=>PHASES.find(p=>t>=p.t0&&t<p.t1)||PHASES[PHASES.length-1];
 const HOPS=36,MIN=26;
@@ -648,6 +679,7 @@ function updateHUD(t){
   `<div class="meta" style="margin:0 0 3px">10,000,000 Belugas · bars = links awake per shell</div>`+row(0,'outer')+row(1,'middle')+row(2,'inner')+
   `<div class="meta"><span class="pw">each shell runs on its own sunlight</span>; only data crosses between shells [Physics]<br>outer shell → Earth light time 0–16.6 min [Physics]<br>drawn: 501 pods as nodes, each link stands for many · not to scale</div>`);
  countEl.style.opacity=(1-sm(T_P0+1,T_P0+4,t)).toFixed(3);
+ capBox.style.opacity=(1-sm(T_P0,T_P0+1.2,t)).toFixed(3);capBox.style.visibility=t>=T_P0+1.2?'hidden':'';
  // hop counter
  const hv=sm(T_H0-.6,T_H0,t)*(1-sm(T_P0-1,T_P0+1.5,t));hopsEl.style.opacity=hv.toFixed(3);
  if(hv>0){const u=clamp((t-T_H0)/(T_H1-T_H0),0,1);
@@ -744,8 +776,9 @@ function loop(now){const dt=Math.min(.1,(now-last)/1000);last=now;
  const r=RP.rate(dt,speed);
  if(playing&&!RP.holding){if(tNow<DUR)tNow=Math.min(DUR,tNow+dt*r);else if(LOOP){held+=dt;if(held>2){held=0;tNow=0;}}}
  lastT=tNow;
+ const heldEnd=tNow>=DUR&&!(playing&&LOOP);if(heldEnd)shX+=dt;else shX=0;   // held on the end: shimmer keeps moving on the wall clock
  slab.textContent='speed '+speed.toFixed(2)+'x'+(Math.abs(r-speed)>.01&&playing?' · '+r.toFixed(2):'');
- const key=tNow+'|'+uc.zoom+'|'+uc.daz+'|'+uc.del+'|'+tintOn+'|'+W+'|'+H;if(key!==lastKey){lastKey=key;render(tNow);}
+ const key=tNow+'|'+shX+'|'+uc.zoom+'|'+uc.daz+'|'+uc.del+'|'+tintOn+'|'+W+'|'+H;if(key!==lastKey){lastKey=key;render(tNow);}
  RP.update(tNow);requestAnimationFrame(loop);}
 resize();buildGraph();render(tNow);RP.seek(tNow);lastT=tNow;RP.update(tNow);requestAnimationFrame(loop);
 if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>render(tNow));
