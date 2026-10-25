@@ -330,6 +330,7 @@ const camS=new T.PerspectiveCamera(42,1,.0005,200);camS.up.set(0,0,1);
 const S={scene:new T.Scene()};S.scene.background=new T.Color(0x030507);
 const RR=[1,Math.sqrt(2/3),Math.sqrt(1/3)];   // 1, 0.816, 0.577 AU: 1/r^2 light = 1x, 1.5x, 3x
 const PODN=[3,2,1],REAL=[4998,3334,1668];       // 1,666 / 1,667 / 1,668 pods -> 10,000 Belugas
+const RING_BASE_END=[0,0,0];
 const P=167;                                    // pods drawn per ring (1 in 10)
 const NK=PODN.map(n=>n*P),ND=NK[0]+NK[1]+NK[2];  // 501 + 334 + 167 = 1002 dots
 const W_ORB=.35;                                // toggle: angle = w*simT*0.35 -> 1 AU orbit in ~18 s (1 s ~ 3 weeks)
@@ -364,6 +365,7 @@ const dots=[];
    const L0=L2.map(d=>{const ns=earthAng(d.tL0)+W_ORB*DK[k]*G(k,1)-om(k)*d.tA0;return{ns,nsm:((ns%TAU)+TAU)%TAU};}).sort((a,b)=>a.nsm-b.nsm);
    let cx=0,cy=0;L0.forEach((d,j)=>{const a=d.ns-s0(j);cx+=Math.cos(a);cy+=Math.sin(a);});base=Math.atan2(cy,cx);}
   if(k===0){L2.sort((a,b)=>a.key-b.key);}  // random order around the outer ring
+  RING_BASE_END[k]=base;  // hand-off value for SectionB.setRingBase (B: phase = RING_BASE + pod offset + om*(38+t))
   L2.forEach((d,j)=>{d.j=j;d.pod=Math.floor(j/n);d.dl=wrapPi(base+s0(j)-d.ns);d.slot=d.ns+d.dl;});}}
 const pods=[[],[],[]];for(const d of dots){(pods[d.k][d.pod]=pods[d.k][d.pod]||[]).push(d);}
 for(let k=0;k<3;k++)for(const p of pods[k]){p.sort((a,b)=>a.j-b.j);p.tDone=Math.max(...p.map(d=>d.tA));}
@@ -417,8 +419,8 @@ S.laneGeo=new T.BufferGeometry();S.laneGeo.setAttribute('position',new T.BufferA
 S.laneGeo.setAttribute('color',new T.BufferAttribute(new Float32Array(LEAD.length*NLS*6),3));
 S.lanes=new T.LineSegments(S.laneGeo,new T.LineBasicMaterial({vertexColors:true,transparent:true,opacity:1,blending:T.AdditiveBlending,depthWrite:false,toneMapped:false}));S.lanes.frustumCulled=false;S.scene.add(S.lanes);
 // --- ring tint (on by default, ?tint=0 off): blue = outer (talks to Earth), lavender = middle, warm tan = inner (nearest the Sun).
-//     ~28% mixed into the cyan ring lines and lanes; halos are additive over white bodies, so they take the full pale tint colour (HMIX) to read at all. Belugas stay white.
-const TINT=[new T.Color('#9fb2ff'),new T.Color('#b4a6e6'),new T.Color('#e5c9a6')],TMIX=.28,HMIX=1,CYAN=new T.Color(0x7df9ff);
+//     ~42% mixed into the cyan ring lines and lanes; halos are additive over white bodies, so they take the full pale tint colour (HMIX) to read at all. Belugas stay white.
+const TINT=[new T.Color('#9fb2ff'),new T.Color('#b4a6e6'),new T.Color('#e5c9a6')],TMIX=.42,HMIX=1,CYAN=new T.Color(0x7df9ff);
 const LANE_BLUE=new T.Color(.078,.078,1);
 let tintOn=Q.get('tint')!=='0';
 // --- Earth + Moon markers ---
@@ -473,7 +475,7 @@ function updateSys(t,uc){const cs=sysCam(t,uc);const dpr=rS.getPixelRatio();
   const g=sm(d.tL,d.tL+.4,t)*d.s*rw;
   _m.makeBasis(_x.multiplyScalar(1.55*g),_y.multiplyScalar(.82*g),_z.multiplyScalar(.82*g));_m.setPosition(_p);S.bel.setMatrixAt(i,_m);
   const dist=_p.distanceTo(camS.position),px=g*fpx/dist;
-  if(tintOn){const w=HMIX*sm(d.tA,d.tA+.6,t),c=TINT[d.k];S.halo.set(i,_p,lerp(1,c.r,w),lerp(1,c.g,w),lerp(1,c.b,w),.3+.14*w,Math.max(2.2,px*5.6));}
+  if(tintOn){const w=HMIX*sm(d.tA,d.tA+.6,t),c=TINT[d.k];S.halo.set(i,_p,lerp(1,c.r,w),lerp(1,c.g,w),lerp(1,c.b,w),.3+.14*w,Math.max(2.2,px*(5.6+3.4*w)));}  // settled halo = Section B's on-screen halo size (B bodies draw ~1.6x larger px), so the seam matches
   else S.halo.set(i,_p,1,1,1,.3,Math.max(2.2,px*4.8));
   for(let k=0;k<NTR;k++){const tk=t-(k+1)*TRDT;const idx=i*NTR+k;
    if(tk<d.tL||t>d.tA+NTR*TRDT||!dotPos(d,tk,_q)){S.trail.hide(idx);continue;}
@@ -497,7 +499,7 @@ function updateSys(t,uc){const cs=sysCam(t,uc);const dpr=rS.getPixelRatio();
   for(let k=0;k<LKP;k++){const u=(k+.5)/LKP;_p.set(ax+(bx-ax)*u,ay+(by-ay)*u,az+(bz-az)*u);if(az<-10)S.linkPts.hide(i*LKP+k);else S.linkPts.set(i*LKP+k,_p,.078,.078,1,.85*sm(20,24,t),3.2);}}
  S.linkPts.flush();S.links.material.opacity=.95*sm(20,24,t);
  // rings: Earth's orbit visible from the start, inner rings appear as they fill
- for(let k=0;k<3;k++){const f=countBelow(arrK[k],t)/NK[k];S.ringMats[k].opacity=k===0?.2+.12*f:.03+.29*sm(0,.6,f);
+ for(let k=0;k<3;k++){const f=countBelow(arrK[k],t)/NK[k];S.ringMats[k].opacity=(k===0?.2+.12*f:.03+.29*sm(0,.6,f))*(tintOn&&k===1?1.8:1);  // lavender is dimmest under additive blend: boost the middle line
   S.ringMats[k].color.copy(CYAN);if(tintOn)S.ringMats[k].color.lerp(TINT[k],TMIX);}
  // Earth + Moon
  const ea=1-sm(29,32.5,t);earthPos(t,_p);S.earth.position.copy(_p);S.earth.scale.setScalar(Math.max(6.5*_p.distanceTo(camS.position)/fpx,.0002));S.earth.material.opacity=ea;
@@ -508,6 +510,12 @@ function updateSys(t,uc){const cs=sysCam(t,uc);const dpr=rS.getPixelRatio();
 // labels, captions, HUD
 // =====================================================================
 const svg=document.getElementById('lines');
+// outer-ring callout target: a drifting outer dot kept in the upper part of the screen (clear of the bottom caption), sticky while it stays there
+const OUT_C=dots.filter(d=>d.k===0&&d.tL>12.2&&d.dl>1.2);let outPick=null;
+function outerAnchor(){const v=V(),ok=d=>{if(!dotPos(d,tNow,v))return null;const q=project(v,camS);return q.ok&&q.y>90&&q.y<H*.62&&q.x>40&&q.x<W-40?q:null;};
+ if(outPick&&ok(outPick)){dotPos(outPick,tNow,v);return v;}
+ let best=null,bv=1e9;for(const d of OUT_C){const q=ok(d);if(q&&q.x+q.y<bv){bv=q.x+q.y;best=d;}}
+ outPick=best;if(!best)return null;dotPos(best,tNow,v);return v;}
 const T_INNER=dots.filter(d=>d.k===2&&d.tL>7.6)[0],T_OUTER=dots.filter(d=>d.k===0&&d.tL>12.2&&d.dl>1.2)[0];
 const podOn=k=>()=>{const tg=podTarget(tNow);const a=Math.atan2(tg.y,tg.x);let best=null,bd=1e9;
  for(const pd of pods[k]){const d0=pd[0];if(tNow<pd.tDone)continue;dotPos(d0,tNow,_p);const da=Math.abs(wrapPi(Math.atan2(_p.y,_p.x)-a+(k===0?.06:k===2?.14:.02)));if(da<bd){bd=da;best=pd;}}
@@ -523,7 +531,7 @@ const LABELS=[
  {t0:3.9,t1:5.4,side:'R',cam:'L',html:'the Moon, sunlit from the right (not to scale) [Physics]',anchor:()=>MOONC.clone().addScaledVector(UPY,RM*.55)},
  {t0:6.3,t1:10.4,side:'L',cam:'S',html:'Earth + Moon, 1 AU from the Sun. Earth\'s orbit becomes the outer ring',anchor:()=>earthPos(tNow,V(0,0,0))},
  {t0:10.8,t1:16.2,side:'R',cam:'S',html:'tilt the sail so sunlight pushes against the orbit: it slows, falls inward, speeds up, and spirals in [Physics]',soft:'to 0.58 AU needs ~9 km/s of Δv; at ~0.5 mm/s² that is ~6 months [Assumption]',anchor:()=>T_INNER&&dotPos(T_INNER,tNow,V())?(()=>{const v=V();dotPos(T_INNER,tNow,v);return v;})():null},
- {t0:16.4,t1:22.0,side:'L',cam:'S',html:'outer ring needs no spiral: dip a little lower to drift ahead of Earth, rise a little to fall behind, until spread out [Physics]',anchor:()=>{const v=V();return T_OUTER&&dotPos(T_OUTER,tNow,v)?v:null;}},
+ {t0:16.4,t1:22.0,side:'L',cam:'S',html:'outer ring needs no spiral: dip a little lower to drift ahead of Earth, rise a little to fall behind, until spread out [Physics]',anchor:outerAnchor},
  {t0:13.2,t1:22.0,side:'R',cam:'S',html:'sunlight per m² goes as 1/r²: 0.82 AU gets 1.5×, 0.58 AU gets 3× [Physics]',anchor:()=>{const a=earthAng(tNow)+2.2;return V(RR[2]*Math.cos(a),RR[2]*Math.sin(a),0);}},
  {t0:25.4,t1:29.6,side:'L',cam:'S',html:'OUTER · 1 AU · pods of 3',soft:'<span class="pwt">3 × 1.0 = 3 units of power</span> · <span class="heat">~42 °C</span>',anchor:podOn(0)},
  {t0:25.7,t1:29.6,side:'L',cam:'S',html:'MIDDLE · 0.82 AU · pods of 2',soft:'<span class="pwt">2 × 1.5 = 3 units of power</span> · <span class="heat">~76 °C</span>',anchor:podOn(1)},
@@ -635,7 +643,8 @@ function loop(now){const dt=Math.min(.1,(now-last)/1000);last=now;
 resize();render(tNow);RP.seek(tNow);lastT=tNow;RP.update(tNow);requestAnimationFrame(loop);
 if(Q.has('dbg')){const sp=project(MOONC.clone().addScaledVector(SUN,RM),camL),mc=project(MOONC,camL),su=project(camL.position.clone().addScaledVector(SUN,SUNDIST),camL);const pre=document.createElement('pre');pre.id='dbg';pre.textContent=JSON.stringify({cam:camL.position,mc,sp,su});document.body.appendChild(pre);}
 if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>render(tNow));
-window.__arrival={render,get t(){return tNow;},set t(v){tNow=v;},DUR,dots:ND};
+window.__arrival={render,get t(){return tNow;},set t(v){tNow=v;},DUR,dots:ND,RING_BASE_END};
+if(Q.get('log')==='1')console.log('[seam] 02 RING_BASE_END',JSON.stringify(RING_BASE_END.map(x=>+x.toFixed(5))));
 })();
 </script>
 </body></html>
