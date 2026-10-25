@@ -307,9 +307,10 @@ S.sunGlow=new T.Sprite(new T.SpriteMaterial({map:(()=>{const c=document.createEl
  g.addColorStop(0,'rgba(229,201,166,0.38)');g.addColorStop(.25,'rgba(229,201,166,0.12)');g.addColorStop(1,'rgba(229,201,166,0)');x.fillStyle=g;x.fillRect(0,0,512,512);return new T.CanvasTexture(c);})(),
  transparent:true,depthWrite:false,blending:T.AdditiveBlending,toneMapped:false}));
 S.scene.add(S.sunGlow);
-// ring tint, ON by default (?tint=0 off, ?tint=1 on), identical to 02_arrival: ~42% into the cyan lines / white halos / lanes; Belugas stay white.
+// ring tint, ON by default (?tint=0 off, ?tint=1 on), identical to 02_arrival: ~58% into the cyan lines / white halos / lanes; Belugas stay white.
 // Colours from the 13-step conveyor explainer: outer pale blue (talks to Earth), middle soft lavender, inner warm tan (nearest the Sun).
-const TINT=[new T.Color('#9fb2ff'),new T.Color('#b4a6e6'),new T.Color('#e5c9a6')],TMIX=.42,HMIX=1,CYAN=new T.Color(0x7df9ff);  // HMIX: halos are additive over white bodies, so they take the full (already pale) tint colour to read at all
+const TINT=[new T.Color('#9fb2ff'),new T.Color('#b4a6e6'),new T.Color('#e5c9a6')],TMIX=.58,HMIX=1,CYAN=new T.Color(0x7df9ff);  // HMIX: halos are additive over white bodies, so they take the full (already pale) tint colour to read at all
+const SMIX=.45,SPK_W=new T.Color(1,1,1),SPK_T=TINT.map(c=>new T.Color(1,1,1).lerp(c,SMIX));  // distant specks (stand-ins for many Belugas) take ~45% of their ring colour; the drawn Beluga bodies stay white
 let tintOn=Q.get('tint')!=='0';
 // flat ring lines (as at the end of 02: cyan .32) and per-plane orbit paths
 const circlePts=n=>{const a=new Float32Array((n+1)*3);for(let i=0;i<=n;i++){const u=i/n*TAU;a[i*3]=Math.cos(u);a[i*3+2]=Math.sin(u);}return a;};
@@ -434,7 +435,7 @@ function updateSys(t,uc){updatePlanes(t);const cs=sysCam(t,uc);const dpr=rS.getP
   const wIn=sm(.6,1,s),wForm=1-sm(.5,1,s);
   for(let i=f*FL;i<(f+1)*FL;i++){const sp=specks[i];orbitPos(sp.k,sp.j,phiAt(sp.k,sp.ph0,t),sp.dr*spw,sp.dz*spw,_p);
    if(s<1){_q.copy(L).addScaledVector(fw,-sp.back*wForm*1.0).addScaledVector(sd,sp.side*wForm);_p.lerp(_q,1-wIn);}
-   S.spk.set(i,_p,1,1,1,Math.min(1,.55*(.85+.75*gF))*sp.a*sm(0,.15,s),ssz);shownSpecks++;}}
+   const sc=tintOn?SPK_T[sp.k]:SPK_W;S.spk.set(i,_p,sc.r,sc.g,sc.b,Math.min(1,.55*(.85+.75*gF))*sp.a*sm(0,.15,s),ssz);shownSpecks++;}}
  S.spk.flush();S.laneGeo.attributes.position.needsUpdate=S.laneGeo.attributes.color.needsUpdate=true;
  // ring lines fade as lanes open; per-plane orbit paths fade in as they separate / tilt
  const st=smr(STAG_T[0],STAG_T[1],t);
@@ -452,7 +453,11 @@ const svg=document.getElementById('lines');
 const bodyAnchor=(k,pick)=>()=>{let best=-1,bv=-1e9;for(let i=0;i<ND;i++){if(bodies[i].k!==k||bodies[i].q)continue;bodyPos(i,tNow,_p);const v=pick(_p);if(v>bv){bv=v;best=i;}}return best<0?null:bodyPos(best,tNow,V(0,0,0));};
 const toCam=p=>{const c=camS.position;return -p.distanceTo(c);};
 const flockAnchor=()=>{let best=null;for(const fl of flocks){const s=(tNow-fl.t0)/FT;if(s>.25&&s<.75&&fl.k===0){best=fl;break;}}return best?leaderPos(best,(tNow-best.t0)/FT,tNow,V(0,0,0)):null;};
-const screenAnchor=(k,dir)=>()=>{let best=-1,bv=-1e9;for(let i=0;i<ND;i++){if(bodies[i].k!==k||bodies[i].q)continue;bodyPos(i,tNow,_p);const s=project(_p,camS);if(!s.ok||Math.abs(s.y-H*.45)>90||s.x<40||s.x>W-40)continue;const v=dir*s.x;if(v>bv){bv=v;best=i;}}return best<0?null:bodyPos(best,tNow,V(0,0,0));};
+const screenAnchor=(k,dir)=>()=>{  // ring-k body farthest toward `dir` near mid-height; when the camera is close and none sits in that band, any on-screen ring-k body nearest the right-hand callout
+ let best=-1,bv=-1e9,alt=-1,av=1e9;for(let i=0;i<ND;i++){if(bodies[i].k!==k||bodies[i].q)continue;bodyPos(i,tNow,_p);const s=project(_p,camS);if(!s.ok||s.x<40||s.x>W-40||s.y<90||s.y>H*.75)continue;
+  if(Math.abs(s.y-H*.45)<=90){const v=dir*s.x;if(v>bv){bv=v;best=i;}}
+  const dd=Math.hypot(s.x-(dir>0?W*.75:W*.25),s.y-H*.4);if(dd<av){av=dd;alt=i;}}
+ if(best<0)best=alt;return best<0?null:bodyPos(best,tNow,V(0,0,0));};
 const leftAnchor=k=>()=>{let best=-1,bv=1e9;for(let i=0;i<ND;i++){if(bodies[i].k!==k||bodies[i].q)continue;bodyPos(i,tNow,_p);const s=project(_p,camS);if(!s.ok)continue;if(s.x<bv){bv=s.x;best=i;}}return best<0?null:bodyPos(best,tNow,V(0,0,0));};
 const planeAnchor=(k,j,ang)=>()=>orbitPos(k,j,BAS[k][j].node+ang,0,0,V(0,0,0));
 const LABELS=[
@@ -467,7 +472,7 @@ const LABELS=[
  {t0:47.5,t1:52,side:'L',html:'no Beluga sits in another\'s shadow [Physics]',anchor:bodyAnchor(0,p=>-p.distanceTo(camS.position))}];
 // callout boxes stay at fixed screen slots (readpace.js); only the thin leader line follows the subject
 for(const Lb of LABELS){Lb.el=document.createElement('div');Lb.el.className='lab';Lb.el.innerHTML=tagify(Lb.html)+(Lb.soft?'<span class="soft">'+tagify(Lb.soft)+'</span>':'');document.body.appendChild(Lb.el);
- Lb.line=document.createElementNS('http://www.w3.org/2000/svg','line');Lb.line.setAttribute('stroke','rgba(125,249,255,.7)');Lb.line.setAttribute('stroke-width','1');svg.appendChild(Lb.line);
+ Lb.line=document.createElementNS('http://www.w3.org/2000/svg','line');Lb.line.setAttribute('stroke','rgba(125,249,255,.7)');Lb.line.setAttribute('stroke-width','1.6');svg.appendChild(Lb.line);
  Lb.dot=document.createElementNS('http://www.w3.org/2000/svg','circle');Lb.dot.setAttribute('r','3');Lb.dot.setAttribute('fill','#7df9ff');svg.appendChild(Lb.dot);
  const aw=Lb.anchor;Lb.html=Lb.html+(Lb.soft?' '+Lb.soft:'');Lb.anchor=()=>{const p=aw();if(!p)return null;const q=project(p,camS);return q.ok?q:null;};}
 function project(p,cam){const v=p.clone().project(cam);return{x:(v.x*.5+.5)*W,y:(-v.y*.5+.5)*H,ok:v.z<1&&v.z>-1};}

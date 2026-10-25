@@ -419,8 +419,8 @@ S.laneGeo=new T.BufferGeometry();S.laneGeo.setAttribute('position',new T.BufferA
 S.laneGeo.setAttribute('color',new T.BufferAttribute(new Float32Array(LEAD.length*NLS*6),3));
 S.lanes=new T.LineSegments(S.laneGeo,new T.LineBasicMaterial({vertexColors:true,transparent:true,opacity:1,blending:T.AdditiveBlending,depthWrite:false,toneMapped:false}));S.lanes.frustumCulled=false;S.scene.add(S.lanes);
 // --- ring tint (on by default, ?tint=0 off): blue = outer (talks to Earth), lavender = middle, warm tan = inner (nearest the Sun).
-//     ~42% mixed into the cyan ring lines and lanes; halos are additive over white bodies, so they take the full pale tint colour (HMIX) to read at all. Belugas stay white.
-const TINT=[new T.Color('#9fb2ff'),new T.Color('#b4a6e6'),new T.Color('#e5c9a6')],TMIX=.42,HMIX=1,CYAN=new T.Color(0x7df9ff);
+//     ~58% mixed into the cyan ring lines and lanes; halos are additive over white bodies, so they take the full pale tint colour (HMIX) to read at all. Belugas stay white.
+const TINT=[new T.Color('#9fb2ff'),new T.Color('#b4a6e6'),new T.Color('#e5c9a6')],TMIX=.58,HMIX=1,CYAN=new T.Color(0x7df9ff);
 const LANE_BLUE=new T.Color(.078,.078,1);
 let tintOn=Q.get('tint')!=='0';
 // --- Earth + Moon markers ---
