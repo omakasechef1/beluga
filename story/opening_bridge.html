@@ -124,7 +124,7 @@ A.stars=stars(1600,7,.6);A.scene.add(A.stars);
 A.hemi=new T.HemisphereLight(0xbac7d2,0x44423f,.35);A.scene.add(A.hemi);   // sim's hemisphere tint
 const LAMP=V(0,2.6,0);
 A.light=new T.PointLight(0xffefda,2.6,0,1.1);A.light.position.copy(LAMP);A.scene.add(A.light);   // sim: PointLight(0xffefda)
-A.core=new T.Mesh(new T.SphereGeometry(.75,48,32),new T.MeshBasicMaterial({color:new T.Color(0xffedbf),transparent:true}));A.core.position.copy(LAMP);A.scene.add(A.core); // sim lamp 0.75 m, 0xffedbf
+A.core=new T.Mesh(new T.SphereGeometry(.75,48,32),new T.MeshBasicMaterial({color:new T.Color(0xffedbf),transparent:true}));A.core.position.copy(LAMP);A.core.material.depthWrite=false;A.core.renderOrder=2;A.scene.add(A.core); // sim lamp 0.75 m, 0xffedbf
 A.halo=new T.Sprite(new T.SpriteMaterial({map:glowTex([[0,'rgba(255,248,236,1)'],[.12,'rgba(240,215,180,.55)'],[.4,'rgba(229,201,166,.13)'],[1,'rgba(0,0,0,0)']]),transparent:true,depthWrite:false,blending:T.AdditiveBlending}));
 A.halo.position.copy(LAMP);A.scene.add(A.halo);
 // room: floor, back + side walls, pilasters, ceiling net (same sizes and greys as the sim)
@@ -146,13 +146,14 @@ A.moonTex=(()=>{const c=document.createElement('canvas');c.width=1024;c.height=5
  for(let i=0;i<420;i++){const cx=r()*1024,cy=r()*512,cr=1.5+Math.pow(r(),3)*26;x.strokeStyle=`rgba(200,198,192,${.25+r()*.3})`;x.lineWidth=1+cr*.08;x.beginPath();x.arc(cx,cy,cr,0,7);x.stroke();
   x.fillStyle=`rgba(50,50,52,${.2+r()*.25})`;x.beginPath();x.arc(cx+cr*.12,cy+cr*.12,cr*.85,0,7);x.fill();}
  const t=new T.CanvasTexture(c);t.encoding=T.sRGBEncoding;t.anisotropy=4;return t;})();
-A.moon=new T.Mesh(new T.SphereGeometry(1,96,64),new T.MeshStandardMaterial({map:A.moonTex,roughness:1,metalness:0,transparent:true,opacity:0,color:0xd8d6d2}));
-A.moon.position.copy(LAMP);A.scene.add(A.moon);
+A.moon=new T.Mesh(new T.SphereGeometry(1,96,64),new T.MeshStandardMaterial({map:A.moonTex,roughness:1,metalness:0,transparent:true,opacity:0,color:0xd8d6d2,emissive:new T.Color(0xe5c9a6),emissiveMap:A.moonTex}));
+A.moon.position.copy(LAMP);A.moon.renderOrder=1;A.scene.add(A.moon);
 // Belugas + folded seeds (instanced, up to 1,000)
 A.mat=belugaMat();A.bel=new T.InstancedMesh(belugaGeo,A.mat,NMAX);A.bel.instanceMatrix.setUsage(T.DynamicDrawUsage);A.bel.frustumCulled=false;A.scene.add(A.bel);
 A.seedMat=new T.MeshStandardMaterial({vertexColors:true,roughness:.5,metalness:0,emissive:new T.Color(0xffffff),emissiveIntensity:.05});
 A.seeds=new T.InstancedMesh(seedGeo,A.seedMat,NMAX);A.seeds.instanceMatrix.setUsage(T.DynamicDrawUsage);A.seeds.frustumCulled=false;A.scene.add(A.seeds);
 A.led=makePoints(NMAX,T.AdditiveBlending);A.scene.add(A.led);
+A.glow=makePoints(NMAX,T.AdditiveBlending);A.scene.add(A.glow); // tan flare as each Beluga dissolves into the light
 const R0=2.3;const Rof=k=>R0*Math.sqrt(Math.max(30,k)/30);
 const LAND_DIR=V(0,.78,.62).normalize();   // patch of the Moon the pod settles on (faces the camera, up)
 let items=[];
@@ -169,7 +170,7 @@ function layoutA(){items=[];const r=rng(11),ga=Math.PI*(3-Math.sqrt(5));
   items.push({rank,n,e1:e1n,e2:e2n,ph:[r()*6.28,r()*6.28,r()*6.28,r()*6.28,r()*6.28],roll:(r()-.5)*.9,yaw:(r()-.5)*1.0,f:.8+r()*.4,
    room:V((r()-.5)*15,1.3+r()*2.9,(r()-.5)*4),head:r()*6.28,
    spawn:rank<30?-1:11+8.5*(rank-30)/Math.max(1,N-30)+r()*.25,
-   pu:rr*Math.cos(aa),pv:rr*Math.sin(aa),land:27.2+r()*1.3+.4*rr,
+   pu:rr*Math.cos(aa),pv:rr*Math.sin(aa),land:27.2+r()*1.3+.4*rr,dz:21.2+3.4*r(),
    tB:null});});
  A.e1=e1;A.e2=e2;A.count=N;A.bel.count=A.seeds.count=N;}
 // visible count during growth
@@ -189,13 +190,13 @@ function updateA(t){
  const breath=1+.03*Math.sin(t*1.3)+.02*Math.sin(t*2.1+1);
  A.core.scale.setScalar(mr/.75*breath*(1+.03*moonIn));A.core.material.opacity=1-moonIn;A.core.visible=moonIn<1;
  A.core.material.color.set(0xffedbf).lerp(new T.Color(0xe5c9a6),swell*.6);
- A.moon.scale.setScalar(mr);A.moon.material.opacity=moonIn;A.moon.visible=moonIn>0;
+ A.moon.scale.setScalar(mr);A.moon.material.emissiveIntensity=1.1*(1-sm(25.6,28.5,t));A.moon.material.opacity=moonIn;A.moon.visible=moonIn>0;
  const hs=(6+8*Rof(kOf(t))*.25)*(1+3.5*swell)*(1-.85*moonIn)*(1+.04*Math.sin(t*1.7));A.halo.scale.set(hs,hs,1);A.halo.material.opacity=(.55+.45*space)*(1-.9*moonIn);
  A.light.intensity=(1.3+1.3*space+3*swell)*(1-moonIn*.9);A.hemi.intensity=.35-.15*space+.15*moonIn;
  A.sunL.intensity=2.4*moonIn;A.sunL.position.copy(LAMP).add(V(-60,40,70));A.sunL.target.position.copy(LAMP);
  A.mat.emissiveIntensity=.08+.5*swell*(1-moonIn)+.15*space;
  // pod
- const R=Rof(kOf(t));const fold=smr(26.6,28.4,t);
+ const R=Rof(kOf(t));
  for(let i=0;i<N;i++){const it=items[i],p=it.ph,f=it.f;
   // sphere slot
   const Rs=Math.max(R,mr+1.1)+.15*Math.sin(.8*f*t+p[0])+.08*Math.sin(1.7*f*t+p[4]);
@@ -209,21 +210,17 @@ function updateA(t){
     pos=rp.lerp(sp,g);tmpQ.setFromRotationMatrix(mB);tmpQ2.setFromRotationMatrix(sB);tmpQ.slerp(tmpQ2,g);B=new T.Matrix4().makeRotationFromQuaternion(tmpQ);}
   }else{ // spawned: fade in from a little further out
    const u=smr(it.spawn,it.spawn+1.4,t);if(u<=0)vis=0;sc=u;pos=sp.clone().addScaledVector(it.n,3.5*(1-u));}
-  // fold to a seed and settle on the lunar patch
-  if(fold>0&&vis){const mrN=moonR(t);
-   const tp=LAND_DIR.clone().multiplyScalar(1).addScaledVector(A.e1,it.pu*.55).addScaledVector(A.e2,it.pv*.55).normalize();
-   const land=tp.clone().multiplyScalar(mrN+.06*mrN/Math.sqrt(N)*3).add(LAMP);
-   const u=smr(it.land-1.4,it.land+.6,t);const mid=pos.clone().lerp(land,u);mid.addScaledVector(tp,Math.sin(u*Math.PI)*.15*mrN);
-   const ss=mrN*.55*1.9/Math.sqrt(N)*.42*fold; // seed size relative to the patch
-   const sbB=basisAlong(new T.Vector3().crossVectors(tp,A.e1).normalize(),tp);
-   sbB.scale(tmpS.setScalar(Math.max(1e-4,ss)));sbB.setPosition(mid);A.seeds.setMatrixAt(i,sbB);
-   sc*=1-fold;pos=mid;}
-  else A.seeds.setMatrixAt(i,ZERO);
+  // dissolve into the swelling light (v2: no landing on the surface)
+  A.seeds.setMatrixAt(i,ZERO);
+  const du=vis?smr(it.dz,it.dz+1.4,t):0;
+  if(du>0){const toC=pos.clone().sub(LAMP),len=toC.length();pos=LAMP.clone().addScaledVector(toC.normalize(),lerp(len,mr*.92,du*du));sc*=1-du;
+   const ga=Math.sin(Math.min(1,du*1.15)*Math.PI);A.glow.set(i,pos,.9,.79,.65,.95*ga*(1-moonIn*.6),(2.2+1.6*du)*Math.max(.5,sc+du));}
+  else A.glow.hide(i);
   if(!vis||sc<=.001){A.bel.setMatrixAt(i,ZERO);A.led.hide(i);continue;}
   tmpB.copy(B);tmpB.scale(tmpS.setScalar(sc));tmpB.setPosition(pos);A.bel.setMatrixAt(i,tmpB);
   const lp=LED_LOCAL.clone().applyMatrix4(tmpB),bl=.55+.45*Math.max(0,Math.sin(1.3*t*f+p[0]*3));
   A.led.set(i,lp,.19,.38,1,bl*(1-swell)*sc,.3);}
- A.bel.instanceMatrix.needsUpdate=A.seeds.instanceMatrix.needsUpdate=true;A.led.flush();
+ A.bel.instanceMatrix.needsUpdate=A.seeds.instanceMatrix.needsUpdate=true;A.led.flush();A.glow.flush();
  A.seedMat.emissiveIntensity=.05+.1*(1-moonIn);
  // camera
  const Rc=Math.max(sceneRadius(t),moonR(t)/.78);
@@ -307,9 +304,10 @@ B.seeds=new T.InstancedMesh(seedGeo,B.seedMat,NMAX);B.seeds.castShadow=true;B.se
 B.belMat=belugaMat();B.bel=new T.InstancedMesh(belugaGeo,B.belMat,NMAX);B.bel.instanceMatrix.setUsage(T.DynamicDrawUsage);B.bel.frustumCulled=false;B.scene.add(B.bel);
 const TRL=10;B.trail=makePoints(NMAX*TRL,T.AdditiveBlending);B.scene.add(B.trail);
 B.led=makePoints(NMAX,T.AdditiveBlending);B.scene.add(B.led);
+const DPS=12;B.dust=makePoints(NMAX*DPS,T.NormalBlending);B.scene.add(B.dust); // regolith puffs as each folded pod emerges (Moon bridge look)
 let bItems=[];
 // story time tb inside scene B (same clock as the Moon launch chapter): t 31..48 -> tb 13.2..26
-const tbOf=t=>13.2+(t-31)*(26-13.2)/(DUR-31);
+const tbOf=t=>12.0+(t-31.3)*(26-12.0)/(DUR-31.3);
 function layoutB(){bItems=[];const r=rng(23),spots=[];const sp=1.75,c=sp/Math.sqrt(Math.PI),ga=Math.PI*(3-Math.sqrt(5));
  for(let j=0;spots.length<N&&j<20000;j++){const rr=c*Math.sqrt(j+.5),a=j*ga;if(rr<PADR+2.2)continue;
   const x=PADC.x+Math.cos(a)*rr,z=PADC.z+Math.sin(a)*rr;if(Math.abs(z)<2.4&&x>PADC.x-1)continue;spots.push({x:x+(r()-.5)*.4,z:z+(r()-.5)*.4});}
@@ -317,23 +315,28 @@ function layoutB(){bItems=[];const r=rng(23),spots=[];const sp=1.75,c=sp/Math.sq
  const sideA=new T.Vector3().crossVectors(D,UP).normalize(),upA=new T.Vector3().crossVectors(sideA,D).normalize();
  const spread=lerp(1,2.6,clamp(Math.log10(N/40)/1.4,0,1));
  spots.forEach((s,i)=>{const ang=r()*6.28,rad=Math.sqrt(r());const dist=Math.hypot(s.x-TA.x,s.z-TA.z);
-  bItems.push({s,tl:15.6+3.8*i/N+r()*.05,gd:.9+dist/40,tb:0,ph:r()*6.28,rise:14.2+r()*.6,
+  const dust=[];for(let k=0;k<DPS;k++){const a=r()*6.28,hv=.8+r()*3.2;dust.push({vx:Math.cos(a)*hv,vz:Math.sin(a)*hv,vy:.7+r()*2.2,d:.15+r()*.25,sz:.35+r()*.7});}
+  bItems.push({s,dust,te:13.0+1.7*i/N+r()*.15,tl:15.6+3.8*i/N+r()*.05,gd:.9+dist/40,tb:0,ph:r()*6.28,
    spread:new T.Vector3().addScaledVector(D,(r()-.5)*34*spread).addScaledVector(sideA,Math.cos(ang)*rad*24*spread).addScaledVector(upA,Math.sin(ang)*rad*15*spread),roll:(r()-.5)*.8});});
+ let mr=0;for(const s of spots)mr=Math.max(mr,Math.hypot(s.x-PADC.x,s.z-PADC.z));B.fs=Math.max(1,mr/12);
  B.bel.count=B.seeds.count=N;}
 const TT=1.0,KD=.5;
 const drift=t=>t<21.3?0:9*Math.pow(t-21.3,1.7);
 function seedState(it,t){const s=it.s,o={vis:1,bloom:0};
- const rest=V(s.x,.32,s.z),hover=V(s.x,1.15+.12*Math.sin(t*1.6+it.ph),s.z);
- const g0=it.tl-it.gd;
- if(t<g0){const u=smr(it.rise,it.rise+.8,t);o.p=rest.lerp(hover,u);o.dir=V(1,.05*Math.sin(t+it.ph),0);o.mode='hover';return o;}
+ if(t<it.te){o.vis=0;return o;}
+ const hover=V(s.x,1.15+.12*Math.sin(t*1.6+it.ph),s.z);
+ // emerge from the regolith, folded (same motion as the Moon bridge)
+ if(t<it.te+.85){const u=sm(it.te,it.te+.85,t);o.p=V(s.x,lerp(-1.1,1.15,1-Math.pow(1-u,2.2)),s.z);o.dir=V(.3,1,0);o.mode='rise';return o;}
+ const g0=Math.max(it.te+.95,it.tl-it.gd);
+ if(t<g0){o.p=hover;o.dir=V(1,.05*Math.sin(t+it.ph),0);o.mode='hover';return o;}
  if(t<it.tl){const u=smr(g0,it.tl,t);o.p=hover.clone().lerp(TA,u);o.p.y+=Math.sin(u*Math.PI)*1.4;o.dir=TA.clone().sub(hover).setY(0).normalize().lerp(D,u);o.mode='glide';return o;}
  if(t<it.tl+TT){const u=(t-it.tl)/TT;o.p=TA.clone().addScaledVector(D,LT*u*u);o.dir=D.clone();o.mode='track';o.speed=u;return o;}
  const e=t-it.tl-TT;
  o.p=TE.clone().addScaledVector(D,2*LT*KD*(1-Math.exp(-e/KD))).addScaledVector(it.spread,1-Math.exp(-e/1.1)).addScaledVector(SUN,drift(t));
  o.dir=D.clone();o.mode='fly';o.e=e;const b0=it.tl+TT+.45;o.bloom=smr(b0,b0+1.0,t);return o;}
 const KEYS=[
- [13.2,V(-46,22,44),V(-6,0,2),46],
- [14.6,V(-34,6,30),V(-4,1.2,0),44],
+ [12.0,V(-27,3.0,19),V(-6,.7,0),42],
+ [14.6,V(-27,3.6,21),V(-4,1.2,-1),42],
  [16.2,V(-25,4.2,22),V(0,2,-2),42],
  [17.8,V(40,8,66),V(52,14,0),46],
  [19.8,V(70,16,72),V(92,26,0),46],
@@ -342,12 +345,19 @@ const KEYS=[
  [26.0,V(254,63,32),V(310,76,0),46]];
 function cameraB(t){let k=0;while(k<KEYS.length-2&&t>KEYS[k+1][0])k++;const a=KEYS[k],b=KEYS[k+1];const u=smr(a[0],b[0],t);
  camera.position.copy(a[1]).lerp(b[1],u);const tg=a[2].clone().lerp(b[2],u);
+ const fz=lerp(B.fs||1,1,sm(14.6,16.4,t));if(fz>1)camera.position.sub(tg).multiplyScalar(fz).add(tg); // pull back for big fields
  const dr=drift(t);camera.position.addScaledVector(SUN,dr*.85);tg.addScaledVector(SUN,dr);
  camera.position.y+=.25*Math.sin(t*.7);camera.up.set(0,1,0);camera.lookAt(tg);camera.fov=lerp(a[3],b[3],u);camera.near=.1;camera.far=30000;}
 function updateB(t){
  B.sunL.position.copy(V(60,0,0)).addScaledVector(SUN,500);B.sunL.target.position.set(60,0,0);
  const space=sm(19.2,21.5,t);B.hemi.intensity=.05+.55*space;B.belMat.emissiveIntensity=.08+.12*space;
  for(let i=0;i<N;i++){const it=bItems[i],st=seedState(it,t);
+  for(let k=0;k<DPS;k++){const d=it.dust[k],tau=t-it.te-d.d,idx=i*DPS+k;
+   if(tau<0||tau>3.2){B.dust.hide(idx);continue;}
+   const g=2.4;let y=d.vy*tau-.5*g*tau*tau,tt=tau;if(y<0){tt=2*d.vy/g;y=0;}
+   const p=V(it.s.x+d.vx*tt*.8,.15+y,it.s.z+d.vz*tt*.8),a=.55*(1-sm(.6,3.2,tau))*sm(0,.08,tau);
+   B.dust.set(idx,p,.62,.61,.58,a*.95,d.sz*.85*(1+tau*.5));}
+  if(!st.vis){B.seeds.setMatrixAt(i,ZERO);B.bel.setMatrixAt(i,ZERO);B.led.hide(i);for(let k=0;k<TRL;k++)B.trail.hide(i*TRL+k);continue;}
   if(st.bloom<1){const ss=(st.mode==='track'||st.mode==='fly'?2.3:1.75)*(1-st.bloom*.92);const b=basisAlong(st.dir,UP);tmpE.set(it.roll*(st.mode==='hover'?1:.3)+.1*Math.sin(t*2+it.ph),0,0);tmpM.makeRotationFromEuler(tmpE);b.multiply(tmpM);
    b.scale(V(ss*(1+.15*st.bloom),ss*(1+.5*st.bloom),ss*(1+.5*st.bloom)));b.setPosition(st.p);B.seeds.setMatrixAt(i,b);}
   else B.seeds.setMatrixAt(i,ZERO);
@@ -360,7 +370,7 @@ function updateB(t){
   for(let k=0;k<TRL;k++){const idx=i*TRL+k,tk=t-k*.018;let ok=false;
    if(tk>it.tl&&tk<it.tl+TT+.35){const q=seedState(it,tk);const a=(1-k/TRL)*(q.mode==='track'?.25+.75*q.speed:1-sm(0,.35,q.e))*.7;B.trail.set(idx,q.p,.49,.85,1,Math.min(1,a*1.4),3.2-k*.15);ok=true;}
    if(!ok)B.trail.hide(idx);}}
- B.seeds.instanceMatrix.needsUpdate=B.bel.instanceMatrix.needsUpdate=true;B.trail.flush();B.led.flush();
+ B.seeds.instanceMatrix.needsUpdate=B.bel.instanceMatrix.needsUpdate=true;B.trail.flush();B.led.flush();B.dust.flush();
  cameraB(t);
  const sp=camera.position.clone().addScaledVector(SUN,6000);B.sun.position.copy(sp);
  const ss=900*(1+2.5*(1-sm(13.2,15.5,t)));B.sun.scale.set(ss,ss,1);
@@ -376,11 +386,12 @@ const pctTxt=()=>{const p=N/SEED*100;return (p>=1?p.toFixed(p%1?1:0):p.toFixed(1
 const CAPS=[
  [0,9.6,()=>'Where the sim leaves off: the room falls away, and the 30 turn to face the light'],
  [9.8,20.2,()=>N>30?`The pod grows: 30 → ${fmtN(N)} Belugas, out into the dark`:`The pod of 30 drifts out into the dark`],
- [20.4,26.6,()=>'The light swells, and becomes the Moon'],
- [26.8,31.0,()=>'The pod folds up and settles on the lunar surface'],
- [31.6,40.2,()=>'Launch: a magnetic track throws each folded pod off the Moon'],
+ [20.4,25.6,()=>'The light swells, and the pod dissolves into it'],
+ [25.8,31.0,()=>'The light becomes the Moon'],
+ [31.6,35.4,()=>'From the regolith, the pod emerges again, folded'],
+ [35.6,40.2,()=>'Launch: a magnetic track throws each folded pod off the Moon'],
  [40.4,48.1,()=>'They open in space and head for the Sun → next: the rings']];
-const BEATS=[[0,'1 · ROOM → SPHERE'],[9.8,'2 · THE POD GROWS'],[20.4,'3 · LIGHT → MOON'],[31.3,'4 · LAUNCH']];
+const BEATS=[[0,'1 · ROOM → SPHERE'],[9.8,'2 · THE POD GROWS'],[20.4,'3 · LIGHT → MOON'],[31.3,'4 · REGOLITH → LAUNCH']];
 let lastCap=-1;
 function updateCaps(t){let ci=-1,a=0;for(let i=0;i<CAPS.length;i++){const [a0,a1]=CAPS[i];if(t>=a0-.01&&t<=a1){ci=i;a=sm(a0,a0+.45,t)*(1-sm(a1-.4,a1,t));if(i===0)a=Math.max(a,t<1?1:a);}}
  if(ci!==lastCap){lineEl.textContent=ci>=0?CAPS[ci][2]():'';lastCap=ci;}
@@ -393,7 +404,7 @@ function render(t){
  const useA=t<31.3;
  if(useA)updateA(t);else updateB(tbOf(t));
  camera.aspect=W/H;camera.updateProjectionMatrix();
- const sc=H/(2*Math.tan(camera.fov*Math.PI/360));for(const p of [A.led,A.stars,B.trail,B.led,B.stars])p.material.uniforms.uScale.value=sc;
+ const sc=H/(2*Math.tan(camera.fov*Math.PI/360));for(const p of [A.led,A.glow,A.stars,B.trail,B.led,B.dust,B.stars])p.material.uniforms.uScale.value=sc;
  renderer.render(useA?A.scene:B.scene,camera);
  flash.style.opacity=(.92*smr(30.2,31.3,t)*(1-smr(31.3,32.8,t))).toFixed(3);
  updateCaps(t);scrub.value=t;tt.textContent=t.toFixed(1)+' s';}
