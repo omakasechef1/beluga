@@ -1,3 +1,1360 @@
-<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Beluga Dyson</title>
-<style>body{background:#05070a;color:#7df9ff;font-family:ui-monospace,Menlo,monospace;padding:40px;text-shadow:0 0 8px rgba(125,249,255,.55)}a{color:#7df9ff;display:block;margin:18px 0;font-size:20px}</style></head>
-<body><h1>BELUGA DYSON</h1><a href="moon_bridge.html">Moon bridge</a><a href="explainer/">Conveyor explainer</a></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#05070c">
+<title>Belugas’ Sphere / Beluga Dyson</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #05070c;
+    --bg-elev: #0a1018;
+    --ink: #d7e0ea;
+    --muted: #8a97a8;
+    --faint: #5a6678;
+    --line: rgba(180, 200, 230, 0.14);
+    --glow: #f2b9d9;
+    --glow-soft: rgba(230, 145, 197, 0.65);
+    --glow-dim: rgba(230, 145, 197, 0.25);
+    --sun: #f1a9d3;
+    --deep: #0b1c33;
+    --door: #0d1522;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  html { background-color: var(--bg); }
+  @media (prefers-reduced-motion: no-preference) {
+    html { scroll-behavior: smooth; }
+  }
+  #belugas-sphere, #moon-to-sun, #nested-intelligence {
+    scroll-margin-top: 1.5rem;
+  }
+
+  body {
+    font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    background:
+      radial-gradient(900px 480px at 50% -10%, rgba(216, 103, 177, 0.09), transparent 60%),
+      radial-gradient(700px 500px at 85% 20%, rgba(80, 120, 180, 0.08), transparent 55%),
+      var(--bg);
+    color: var(--ink);
+    line-height: 1.55;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a { color: var(--glow); text-decoration: none; border-bottom: 1px solid var(--glow-dim); transition: color .2s, border-color .2s; }
+  a:hover { color: #ffe3f5; border-bottom-color: var(--glow-soft); }
+
+  .communication-field {
+    position:fixed; inset:0; width:100%; height:100%; height:100dvh; z-index:0;
+    pointer-events:none;
+    background:
+      radial-gradient(ellipse at 36% 35%, rgba(42,59,136,.09), transparent 62%),
+      radial-gradient(ellipse at 86% 75%, rgba(36,50,118,.10), transparent 55%);
+  }
+  .wrap {
+    position: relative;
+    z-index: 1;
+    width: min(920px, calc(100% - 2.5rem));
+    max-width: calc(100% - 2 * max(env(safe-area-inset-left, 0px), env(safe-area-inset-right, 0px)));
+    margin: 0 auto;
+    padding: 1.75rem 0 4rem;
+  }
+
+  .festival-note {
+    margin: 1.25rem 0 2rem;
+    padding: .8rem 0;
+    border-top: 1px solid var(--line);
+    color: var(--muted);
+    font-size: .82rem;
+  }
+  .festival-note p { margin: 0; }
+  .festival-note p + p { margin-top: .35rem; }
+  .festival-note strong { color: #f8edf5; font-weight: 500; }
+
+  header.site {
+    margin-bottom: 1.75rem;
+  }
+  header.site .eyebrow {
+    font-size: 0.72rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--faint);
+    margin: 0 0 0.4rem;
+  }
+  header.site h1 {
+    margin: 0;
+    font-weight: 500;
+    font-size: clamp(1.35rem, 3vw, 1.75rem);
+    letter-spacing: 0.02em;
+    color: #eef3f8;
+  }
+  header.site p.lede {
+    margin: 0.65rem 0 0;
+    color: var(--muted);
+    font-size: 0.9rem;
+    max-width: 40rem;
+  }
+
+  .site-intro {
+    position:relative;
+    display:grid;
+    grid-template-columns:minmax(0,1fr) clamp(7.5rem,17vw,10rem);
+    grid-template-areas:"eyebrow controls" "title mark" "lede mark";
+    column-gap:1.25rem;
+    align-items:start;
+  }
+  .site-intro .eyebrow { grid-area:eyebrow; align-self:center; }
+  .site-intro h1 { grid-area:title; }
+  .site-intro .lede { grid-area:lede; }
+  .beluga-mark {
+    grid-area:mark;
+    position:relative;
+    display:block;
+    width:100%;
+    height:auto;
+    justify-self:end;
+    align-self:center;
+    mask-image:linear-gradient(to right,transparent,#000 9%,#000 91%,transparent),
+      linear-gradient(to bottom,transparent,#000 9%,#000 88%,transparent);
+    mask-composite:intersect;
+  }
+
+  .beluga-mark img { display:block; width:100%; height:auto; }
+  .beluga-mark::after {
+    content:"";
+    position:absolute;
+    left:57.45%; top:39.17%;
+    width:3.05%; height:2.45%;
+    border-radius:50%;
+    background:linear-gradient(#adb4c1 38%, #4f5969 46% 53%, #959ead 61%);
+    mask-image:radial-gradient(ellipse, #000 53%, transparent 77%);
+    opacity:0;
+    transform:translate(-50%,-50%) scaleY(.15);
+    pointer-events:none;
+  }
+  .dyson-symbol { color:var(--timeline-accent); font-weight:400; }
+  @media (prefers-reduced-motion: no-preference) {
+    .beluga-mark { animation:beluga-mark-twitch 8s ease-in-out infinite; }
+    .beluga-mark::after { animation:beluga-mark-blink 8s ease-in-out infinite; }
+  }
+  @keyframes beluga-mark-blink {
+    0%, 39%, 42%, 100% { opacity:0; transform:translate(-50%,-50%) scaleY(.15); }
+    40.25%, 40.85% { opacity:1; transform:translate(-50%,-50%) scaleY(1); }
+  }
+  @keyframes beluga-mark-twitch {
+    0%, 39%, 43%, 100% { transform:none; }
+    40.7% { transform:translateY(-.45px) rotate(-.2deg); }
+  }
+  .site-index {
+    grid-area:controls;
+    justify-self:end;
+    position:relative;
+    z-index:2;
+  }
+  .site-index summary {
+    cursor:pointer;
+    padding:.35rem .7rem;
+    border:1px solid #414b63;
+    border-radius:5px;
+    background:var(--bg-elev);
+    color:#c6d1ef;
+    font-size:.78rem;
+  }
+  .site-index summary:hover { border-color:#8a9fd1; }
+  .site-index summary:focus-visible, .site-index a:focus-visible {
+    outline:2px solid #a8bcf4;
+    outline-offset:3px;
+  }
+  .site-index nav {
+    position:absolute;
+    right:0;
+    top:calc(100% + .4rem);
+    width:min(17rem,calc(100vw - 2.5rem));
+    max-height:70vh;
+    overflow:auto;
+    padding:.45rem .7rem;
+    border:1px solid #414b63;
+    border-radius:7px;
+    background:var(--bg-elev);
+    box-shadow:0 12px 28px #0009;
+  }
+  .site-index a { display:block; padding:.37rem .15rem; font-size:.78rem; border-bottom-color:var(--line); }
+  .site-index a:last-child { border-bottom:0; }
+  @media(max-width:600px) {
+    .site-intro {
+      grid-template-columns:minmax(0,1fr) 4.5rem;
+      grid-template-areas:"eyebrow controls" "title mark" "lede lede";
+      gap:0 .6rem;
+    }
+    .site-intro h1 { align-self:center; }
+  }
+
+  .moon-guide {
+    position:relative;
+    width:max-content;
+    max-width:100%;
+    margin:1rem 0 -.65rem auto;
+    z-index:2;
+  }
+  .moon-guide summary {
+    display:flex;
+    align-items:center;
+    gap:.5rem;
+    width:max-content;
+    max-width:100%;
+    margin-left:auto;
+    padding:.2rem .6rem .2rem .25rem;
+    border:1px solid #414b63;
+    border-radius:5px;
+    background:var(--bg-elev);
+    color:#c6d1ef;
+    cursor:pointer;
+    font-size:.75rem;
+  }
+  .moon-guide summary::-webkit-details-marker { display:none; }
+  .moon-guide summary::after { content:"+"; color:var(--muted); }
+  .moon-guide[open] summary::after { content:"−"; }
+  .moon-guide summary:focus-visible { outline:2px solid #a8bcf4; outline-offset:3px; }
+  .moon-guide img { display:block; width:2rem; height:2rem; object-fit:cover; border-radius:50%; }
+  .moon-guide p {
+    position:absolute;
+    top:calc(100% + .45rem);
+    right:0;
+    width:min(24rem,calc(100vw - 4rem));
+    margin:0;
+    padding:.85rem 1rem;
+    border:1px solid #414b63;
+    border-radius:7px;
+    background:var(--bg-elev);
+    box-shadow:0 12px 28px #0009;
+    color:var(--ink);
+    font-size:.8rem;
+  }
+
+  /* ——— Timeline ——— */
+  .spine {
+    --timeline-blue: 76 79 255;
+    --timeline-accent: #808aff;
+    position: relative;
+    margin: 2.5rem 0 3rem;
+    padding: 0;
+    list-style: none;
+  }
+  .spine::before {
+    content: "";
+    position: absolute;
+    left: 14px;
+    top: 8px;
+    bottom: 8px;
+    width: 1px;
+    background: linear-gradient(180deg, rgb(var(--timeline-blue) / .82), rgb(var(--timeline-blue) / .49) 50%, rgb(var(--timeline-blue) / .82));
+  }
+  .stop {
+    position: relative;
+    padding: 0 0 2rem 3rem;
+  }
+  .stop:last-child { padding-bottom: 0; }
+  .stop .node {
+    position: absolute;
+    left: 7px;
+    top: 6px;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    background: var(--bg);
+    border: 1px solid rgb(var(--timeline-blue));
+    box-shadow: 0 0 12px rgb(var(--timeline-blue) / .35), inset 0 0 6px rgb(var(--timeline-blue) / .25);
+  }
+  .stop .node::after {
+    content: "";
+    position: absolute;
+    inset: 4px;
+    border-radius: 50%;
+    background: var(--timeline-accent);
+    opacity: 0.85;
+    box-shadow: 0 0 8px rgb(var(--timeline-blue) / .55);
+  }
+  .stop .year {
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--sun);
+    margin: 0 0 0.25rem;
+  }
+  .stop > .year { color: var(--timeline-accent); }
+  .stop h3 {
+    margin: 0 0 0.45rem;
+    font-size: 1.05rem;
+    font-weight: 500;
+    color: #f0f4f8;
+  }
+  .stop .caption {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.88rem;
+    max-width: 38rem;
+  }
+  .stop .links {
+    margin: 0.7rem 0 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1rem;
+    font-size: 0.78rem;
+  }
+  .ph {
+    margin-top: 0.85rem;
+    border: 1px dashed rgba(180, 200, 230, 0.22);
+    background: linear-gradient(160deg, rgba(231,136,197,0.03), rgba(10,20,35,0.5));
+    border-radius: 8px;
+    min-height: 96px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--faint);
+    font-size: 0.75rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    max-width: 28rem;
+  }
+
+  /* ——— Doors ——— */
+  .doors-label {
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--faint);
+    margin: 0 0 0.85rem;
+  }
+  .doors {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+  @media (max-width: 720px) {
+    .doors { grid-template-columns: 1fr; }
+    .wrap { width: min(920px, calc(100% - 1.5rem)); }
+  }
+  .door {
+    background: var(--door);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 1.25rem 1.2rem 1.35rem;
+    position: relative;
+    overflow: hidden;
+    box-shadow: inset 0 1px 0 rgba(255,214,241,0.04);
+  }
+  .door::after {
+    content: "";
+    position: absolute;
+    top: -40%;
+    right: -20%;
+    width: 160px;
+    height: 160px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(231,136,197,0.09), transparent 70%);
+    pointer-events: none;
+  }
+  .door .tag {
+    font-size: 0.7rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--sun);
+    margin: 0 0 0.45rem;
+  }
+  .door h3 {
+    margin: 0 0 0.7rem;
+    font-size: 1.05rem;
+    font-weight: 500;
+  }
+  .door p {
+    margin: 0 0 0.85rem;
+    color: var(--muted);
+    font-size: 0.84rem;
+  }
+  .door .door-links {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    font-size: 0.8rem;
+    margin-top: 0.5rem;
+  }
+  .door .contact {
+    margin-top: 1rem;
+    padding-top: 0.85rem;
+    border-top: 1px solid var(--line);
+    font-size: 0.8rem;
+    color: var(--faint);
+  }
+  .door .contact a { color: var(--glow); }
+
+  footer {
+    margin-top: 3rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--line);
+    color: var(--faint);
+    font-size: 0.72rem;
+    letter-spacing: 0.04em;
+  }
+  .footer-index {margin:0 0 1.5rem}
+  .footer-index h2 {font:inherit;font-size:.82rem;color:var(--ink);letter-spacing:0;margin:0 0 .8rem}
+  .footer-index ul {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.7rem 1.25rem;list-style:none;margin:0;padding:0;font-size:.76rem;letter-spacing:0}
+  .footer-index a {line-height:1.5}
+  .footer-return {display:flex;flex-wrap:wrap;gap:1rem;align-items:center;margin:0 0 1.2rem;font-size:.76rem;letter-spacing:0}
+  @media(max-width:700px) {.footer-index ul {grid-template-columns:repeat(2,minmax(0,1fr))}}
+  @media(max-width:380px) {.footer-index ul {grid-template-columns:1fr}}
+  .moon-note{margin:1.5rem 0 0;padding:.15rem 0 .15rem 1rem;border-left:2px solid rgba(231,136,197,.45)}
+  .moon-note h5{margin:0 0 .4rem;color:var(--text);font-size:1rem;font-weight:500}
+  .moon-note .caption{margin:0;max-width:66ch}
+  .moon-reference{margin:.8rem 0 .35rem;font-size:.85rem}
+  .moon-reference a,.credit-moon a{text-underline-offset:3px}
+  .credit-moon{font-size:.76rem;color:var(--muted);margin:0}
+  .credit-moon a{color:inherit}
+  .precedents{font-size:.82em;opacity:.75;margin-top:.8em}
+  .precedents a{color:inherit;text-decoration:underline;text-underline-offset:3px}
+
+  .stages {
+    margin: 0.85rem 0 0.35rem;
+    font-size: 0.78rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--sun);
+  }
+  .shells {
+    margin: 0.65rem 0 0.85rem;
+    padding: 0.85rem 1rem;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: rgba(13, 21, 34, 0.55);
+    font-size: 0.8rem;
+    color: var(--muted);
+  }
+  .shells p { margin: 0 0 0.45rem; }
+  .shells p:last-child { margin-bottom: 0; }
+  .shells strong { color: #eef3f8; font-weight: 500; }
+  .shells .tag-phys {
+    font-size: 0.68rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--faint);
+  }
+  .diagram {
+    margin: 0.85rem 0 0.35rem;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    overflow: hidden;
+    background: #000;
+  }
+  .diagram img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  .diagram-cap {
+    margin: 0.35rem 0 0.15rem;
+    font-size: 0.72rem;
+    color: var(--faint);
+  }
+
+.presentation {margin:1.5rem 0 0;padding:1.25rem;border:1px solid var(--line);border-radius:12px;background:#0a121d;}
+.presentation h4{font-size:1.3rem;font-weight:500;margin:.25rem 0 .5rem;color:#f8edf5}
+.presentation .intro{font-size:.86rem;color:var(--muted);max-width:39rem}
+.slide-frame{margin:1.2rem 0 .7rem;background:#05070c;border:1px solid var(--line);border-radius:7px;overflow:hidden}
+.slide-frame img{display:block;width:100%;height:auto;aspect-ratio:16/9;object-fit:contain}
+.slide-controls{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;font-size:.8rem}
+.presentation button{font:inherit;border:1px solid #536474;background:#162333;color:#f2b9d9;padding:.55rem .8rem;border-radius:6px;cursor:pointer}
+.presentation button:disabled{opacity:.4;cursor:default}.presentation button:focus-visible{outline:2px solid #f2b9d9;outline-offset:3px}
+#slide-count{margin-right:auto;color:var(--muted)}
+.film-block{margin-top:1.6rem;padding-top:1.2rem;border-top:1px solid var(--line)}
+.film-block h5{font-size:1rem;font-weight:500;margin:0 0 .5rem}
+.film-block video{display:block;width:100%;max-height:420px;margin-top:.8rem;background:#000;border-radius:7px}
+.presentation .links{margin-top:1rem}
+
+.hero-image{margin:1.5rem 0 2.5rem}.hero-image img{display:block;width:100%;height:auto;border-radius:8px}.hero-image figcaption{margin-top:.55rem;color:var(--muted);font-size:.75rem;letter-spacing:.04em}
+.interactive-shells{margin:1.5rem 0;padding:1rem;border:1px solid var(--line);border-radius:8px;background:#090e16}.interactive-shells h4{margin:0 0 .4rem;font-weight:500;color:#eef3f8;font-size:1rem}.interactive-shells p{font-size:.8rem;color:var(--muted);line-height:1.5}.interactive-shells iframe{width:100%;height:clamp(480px,65vw,700px);border:1px solid var(--line);border-radius:6px;background:#030507}.interactive-shells .links{margin:.8rem 0}
+.swarm-concept{margin:1.6rem 0 1.2rem;text-align:center}.swarm-concept img{display:block;width:100%;max-width:760px;height:auto;margin:auto;border-radius:8px}.swarm-concept figcaption{margin-top:.55rem;color:var(--muted);font-size:.75rem;letter-spacing:.04em}
+
+/* A quiet transition from the installation into the solar vision. */
+.swarm-concept{margin:1.2rem 0 1.5rem}.swarm-window{position:relative;overflow:hidden;background:radial-gradient(ellipse at center,rgba(129,92,183,.12),transparent 62%),#030508;border:1px solid var(--line);border-radius:10px;isolation:isolate}.swarm-window img{width:100%;max-width:780px;margin:auto;display:block;transform:translateY(var(--swarm-shift,0px)) scale(1.035);will-change:transform}.swarm-concept figcaption{text-align:center}.film-cover{position:relative;margin-top:.8rem;background:#030508;border-radius:7px;overflow:hidden}.film-cover video{margin:0;max-height:none;aspect-ratio:16/9;object-fit:contain}.film-play{position:absolute;inset:0 0 54px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.8rem;width:100%;border:0!important;border-radius:0!important;background:linear-gradient(transparent,rgba(3,5,8,.45))!important;color:#fff!important;font:inherit;font-size:.8rem!important;cursor:pointer}.film-play span:first-child{display:grid;place-items:center;width:62px;height:62px;padding-left:4px;border:1px solid rgba(255,255,255,.75);border-radius:50%;background:rgba(4,6,14,.68);font-size:20px}.film-play:hover span:first-child,.film-play:focus-visible span:first-child{background:#3f315d;border-color:#fff}.film-play[hidden]{display:none}@media(prefers-reduced-motion:reduce){.swarm-window img{transform:none;will-change:auto}}
+.swarm-window .swarm-motion{display:none;width:100%;max-width:780px;height:auto;margin:auto}.swarm-window.motion-ready img{display:none}.swarm-window.motion-ready .swarm-motion{display:block}@media(prefers-reduced-motion:reduce){.swarm-window.motion-ready img{display:block}.swarm-window.motion-ready .swarm-motion{display:none}}
+
+.journey-index{display:flex;flex-wrap:wrap;gap:.8rem 1.8rem;margin:2rem 0 3rem;padding:1rem 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);font-size:.82rem}.journey-index a{color:#d3b3dd;text-decoration:underline;text-underline-offset:5px}
+.simulation-intro{margin:2rem 0;padding-top:1.5rem;border-top:1px solid var(--line)}.simulation-intro h4,.future-intelligence>h4{font-size:1.3rem;font-weight:500;line-height:1.35;margin:.6rem 0 1rem;color:#eef3f8}.simulation-intro .primary-link{color:#e7c5eb}.future-intelligence{margin-top:3rem;padding-top:2rem;border-top:1px solid var(--line)}.vision-statement{font-size:clamp(1.05rem,2vw,1.35rem);line-height:1.7;color:#e5dce9;max-width:65ch}.model-notes{margin:1.4rem 0}.model-notes summary{cursor:pointer;color:#c8adcf;font-size:.85rem;padding:.7rem 0}.model-notes .shells{margin-top:.5rem}section[id]{scroll-margin-top:2rem}
+
+.installation-gallery{margin:2rem 0 2.5rem;padding-top:1.5rem;border-top:1px solid var(--line)}
+.installation-gallery h4{font-size:1.3rem;font-weight:500;margin:0 0 1.2rem;color:#eef3f8}
+.installation-gallery h5{margin:1.6rem 0 .6rem;font-weight:500;font-size:.82rem;color:#d3b3dd}
+.gallery-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1rem}
+.gallery-row figure{min-width:0;margin:0}
+.gallery-row a{display:block;border-radius:8px;overflow:hidden;background:#080c12}
+.gallery-row img{display:block;width:100%;height:auto}
+.gallery-row figcaption{padding-top:.45rem;font-size:.75rem;color:var(--muted)}
+@media(max-width:600px){.gallery-row{grid-template-columns:repeat(2,minmax(0,1fr));gap:.85rem}}
+  .film-cover:has(.film-play:not([hidden])) video{filter:grayscale(1)}
+
+.room-player{margin:1.1rem 0}
+.phone-simulation-note {display:none}
+.phone-simulation-view {
+  position:fixed; inset:0; box-sizing:border-box; overflow:hidden;
+  width:100vw; width:100dvw; max-width:none; height:100vh; height:100dvh;
+  max-height:none; margin:0; padding:0;
+  border:0;background:#05070c;color:var(--ink);
+}
+.phone-simulation-view[open] {display:flex;flex-direction:column}
+.phone-simulation-surface {
+  position:relative; flex:1; min-height:0; display:flex; flex-direction:column;
+  background:#05070c; color:var(--ink);
+}
+.phone-simulation-surface:fullscreen {width:100%;height:100%}
+.phone-simulation-toolbar a {font-size:.8rem}
+.phone-simulation-toolbar [data-menu] {display:none}
+.phone-simulation-view.is-solar .phone-simulation-help,
+.phone-simulation-view.is-solar .phone-simulation-toolbar h2 {display:none}
+.phone-simulation-view.is-solar .phone-simulation-toolbar {
+  position:absolute; z-index:1; top:max(4px,env(safe-area-inset-top));
+  right:max(4px,env(safe-area-inset-right)); display:flex; flex-direction:column;
+  align-items:stretch; gap:0; padding:0; border:0; background:transparent;
+}
+.phone-simulation-view.is-solar [data-menu] {
+  display:block; align-self:flex-end; width:44px; height:44px; padding:0;
+  border:0; background:transparent; color:#fff; text-shadow:0 0 4px #000;
+}
+.phone-simulation-view.is-solar [data-menu] span {
+  display:inline-block; border-radius:1rem; padding:0 .4rem; background:rgba(5,7,12,.8);
+}
+.phone-simulation-view.is-solar [data-menu][aria-expanded="false"] ~ * {display:none}
+.phone-simulation-view.is-solar .phone-simulation-toolbar:has([aria-expanded="true"]) {
+  background:#0a1018; padding:0 .4rem .4rem; border-radius:6px;
+}
+.phone-simulation-view.is-solar .phone-simulation-toolbar a:not([hidden]) {
+  text-align:center; line-height:44px;
+}
+.phone-simulation-view.is-solar [data-menu][aria-expanded="false"] ~ a {display:none}
+.phone-simulation-view::backdrop {background:#05070c}
+html:has(.phone-simulation-view[open]) {overflow:hidden}
+.phone-simulation-toolbar {display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:8px max(12px,env(safe-area-inset-right));border-bottom:1px solid var(--line)}
+.phone-simulation-toolbar h2 {font-size:.8rem;margin:0;font-weight:500}
+.phone-simulation-toolbar button {font:inherit;font-size:.8rem;min-height:44px;padding:8px 12px;color:var(--ink);background:#121a28;border:1px solid var(--line);border-radius:5px}
+.phone-simulation-view iframe {flex:1;width:100%;min-height:0;border:0;background:#030507}
+.phone-simulation-help {font-size:.7rem;line-height:1.5;margin:0;padding:8px 12px max(8px,env(safe-area-inset-bottom));color:var(--muted)}
+@media(max-width:700px) {
+  .phone-simulation-note {display:block;font-size:.75rem;color:var(--muted);line-height:1.6}
+  .interactive-shells {padding:.7rem}
+}
+.room-player [hidden]{display:none}
+.room-launch{position:relative;display:grid;place-items:center;width:100%;padding:0;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:#15171a;color:#fff;cursor:pointer;font:inherit}
+.room-launch img{display:block;width:100%;height:auto;min-height:160px;object-fit:cover}
+.room-launch span{position:absolute;padding:.6rem 1rem;border:1px solid #c7afc3;border-radius:5px;background:#0a0d15eb;font-size:.85rem}
+.room-launch:hover span{background:#282033}
+.room-launch:focus-visible,.simulation-close:focus-visible{outline:2px solid var(--glow-soft);outline-offset:3px}
+.simulation-close{margin:0 0 .6rem}
+.simulation-stage iframe{display:block;width:100%;height:clamp(420px,72vh,760px);border:1px solid var(--line);border-radius:8px;background:#15171a}
+.swarm-launch{display:block;width:100%;padding:0;color:#fff;font:inherit;cursor:pointer}
+.swarm-launch:focus-visible{outline:2px solid var(--glow-soft);outline-offset:3px}
+.swarm-launch span{position:absolute;inset:auto 1rem 1rem;margin-inline:auto;width:max-content;max-width:calc(100% - 2rem);padding:.6rem 1rem;border:1px solid #c7afc3;border-radius:5px;background:#0a0d15eb;font-size:.85rem}
+.swarm-launch:hover span{background:#282033}
+.swarm-concept:has(.simulation-stage:not([hidden])) figcaption{display:none}
+#moon-stage iframe{height:clamp(480px,80vh,900px)}
+
+
+.gallery-photo-button {
+  display:block; width:100%; padding:0; overflow:hidden; cursor:zoom-in;
+  border:1px solid transparent; border-radius:8px; background:#080c12;
+}
+.gallery-photo-button:focus-visible, .gallery-close:focus-visible {
+  outline:2px solid var(--glow-soft); outline-offset:3px;
+}
+.gallery-expanded {
+  margin:.7rem 0 .85rem; padding:.7rem;
+  border:1px solid var(--line); border-radius:10px; background:#0b111b;
+}
+.gallery-expanded[hidden] { display:none; }
+.gallery-expanded figure { margin:0; }
+.gallery-expanded img {
+  display:block; width:100%; height:auto; max-height:70vh; object-fit:contain;
+  background:#080c12; border-radius:6px;
+}
+.gallery-expanded figcaption { margin:.55rem 0 0; color:var(--muted); font-size:.82rem; }
+.gallery-close {
+  display:block; margin:0 0 .55rem auto; padding:.35rem .55rem;
+  color:var(--ink); font:inherit; font-size:.75rem; cursor:pointer;
+  border:1px solid var(--line); border-radius:5px; background:#121a28;
+}
+.gallery-row.is-previewing {
+  grid-template-columns:repeat(3,minmax(0,7.5rem));
+  gap:.6rem;
+}
+.gallery-row.is-previewing figcaption { display:none; }
+@media(prefers-reduced-motion:no-preference) {
+  .gallery-row.is-previewing { animation:gallery-thumbnails-in 260ms ease-out 100ms both; }
+  @keyframes gallery-thumbnails-in {
+    from { opacity:0; }
+    to { opacity:1; }
+  }
+}
+.gallery-photo-button[aria-expanded="true"] { border-color:var(--glow-soft); }
+.gallery-expanded .gallery-photo-button { cursor:zoom-out; }
+.gallery-expanded.is-growing { position:relative; z-index:1; }
+.gallery-expanded.is-growing .gallery-photo-button { overflow:visible; }
+.gallery-expanded img { transform-origin:top left; }
+
+.visitor-quote { margin:1.35rem 0; padding:.2rem 0 .2rem .9rem; border-left:1px solid var(--glow-soft); max-width:62ch; }
+.visitor-quote blockquote, .visitor-quote p { margin:0; }
+.visitor-quote p { color:var(--ink); font-size:.84rem; }
+.visitor-quote figcaption { margin-top:.35rem; color:var(--muted); font-size:.72rem; }
+.visitor-reflection {
+  margin:.85rem 0 1.4rem;
+  max-width:62ch;
+  color:var(--ink);
+  font-size:.84rem;
+  font-style:italic;
+  line-height:1.65;
+}
+.visitor-clips { margin:1.1rem 0 1.6rem; }
+.visitor-clips h5 { margin-bottom:.35rem; }
+.media-pending { margin:0; color:var(--muted); font-size:.8rem; max-width:62ch; }
+.installation-film { margin:2rem 0; padding-top:1.4rem; border-top:1px solid var(--line); }
+.installation-film h4 { margin:0 0 .5rem; font-size:1.3rem; font-weight:500; }
+.installation-film video {
+  display:block; width:100%; aspect-ratio:16 / 9; margin-top:1rem;
+  background:#080c12; border:1px solid var(--line); border-radius:8px;
+}
+
+.installation-film video::cue {
+  font-family:"IBM Plex Mono", ui-monospace, Menlo, monospace;
+  font-size:clamp(.72rem, 1.45vw, .9rem);
+  color:#eef3f8;
+  background-color:rgba(5,7,12,.82);
+}
+.visitor-posts {
+  display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:.65rem;
+  align-items:start; list-style:none; margin:.6rem 0 0; padding:0;
+}
+.visitor-posts li {
+  min-width:0; padding:.75rem; border:1px solid var(--line); border-radius:8px; background:#0c121c;
+}
+.visitor-posts .visitor-credit {
+  display:block; margin:.35rem 0; font-size:.72rem; color:var(--muted); overflow-wrap:anywhere;
+}
+.visitor-posts .visitor-post-action { font-size:.72rem; color:var(--glow-soft); }
+@media(max-width:700px) { .visitor-posts { grid-template-columns:1fr; } }
+
+.visitor-layout {display:grid;grid-template-columns:1fr;gap:.8rem;align-items:stretch}
+.visitor-layout .visitor-posts {grid-template-columns:repeat(2,minmax(0,1fr));margin:0;align-items:stretch}
+.visitor-layout .visitor-posts li {padding:0}
+.visitor-select {width:100%;height:100%;text-align:left;padding:.75rem;border:0;border-radius:8px;font:inherit;color:var(--ink);background:transparent;cursor:pointer}
+.visitor-select-title {display:block;font-size:.82rem}
+.visitor-select-title::before {content:'▸ ';color:var(--glow-soft)}
+.visitor-select[aria-expanded=true] {background:#182031;box-shadow:inset 0 0 0 1px var(--glow-soft)}
+.visitor-select:focus-visible {outline:2px solid var(--glow-soft);outline-offset:3px}
+.visitor-select .visitor-credit {margin-bottom:0}
+.visitor-viewer {min-width:0;padding:.75rem;border:1px solid var(--line);border-radius:8px;background:#0c121c;scroll-margin-top:1rem}
+.visitor-viewer[hidden],.visitor-viewer [hidden] {display:none!important}
+.visitor-viewer h6 {font:inherit;font-size:.85rem;margin:.5rem 0}
+.visitor-viewer video,.visitor-still {display:block;width:100%;height:clamp(300px,55vh,620px);object-fit:contain;background:#05070c;border-radius:6px}
+.visitor-viewer .visitor-credit {font-size:.72rem;overflow-wrap:anywhere;color:var(--muted)}
+.visitor-viewer .visitor-post-action {font-size:.72rem}
+.visitor-close,.visitor-carousel button {min-height:40px;font:inherit;font-size:.72rem;background:#151e2c;border:1px solid var(--line);border-radius:4px;color:var(--ink);padding:.4rem .6rem;cursor:pointer}
+.visitor-close {display:block;margin-left:auto}
+.visitor-carousel {display:flex;align-items:center;justify-content:space-between;gap:.4rem;margin-top:.5rem;font-size:.7rem;color:var(--muted)}
+@media(min-width:701px) {
+ .visitor-layout:has(.visitor-viewer:not([hidden])) {grid-template-columns:1fr 1fr}
+ .visitor-layout:has(.visitor-viewer:not([hidden])) .visitor-posts {grid-template-columns:1fr;grid-template-rows:repeat(6,1fr)}
+}
+@media(max-width:700px) {.visitor-layout .visitor-posts {grid-template-columns:1fr}}
+  .door .contact {display:flex;flex-direction:column;align-items:flex-start;gap:.65rem}
+  .handoff-launch {padding:0;background:none;border:0;border-bottom:1px solid var(--glow-dim);color:var(--glow);font:inherit;text-align:left;cursor:pointer}
+  .handoff-dialog {width:min(460px,calc(100% - 2rem));max-height:calc(100dvh - 2rem);padding:1.4rem;border:1px solid var(--line);border-radius:10px;background:var(--door);color:var(--ink);overflow:auto;font:inherit}
+  .handoff-dialog::backdrop {background:rgba(3,5,10,.8)}
+  .handoff-dialog h2 {font-size:1.05rem;font-weight:500;margin:.3rem 0 .6rem}
+  .handoff-dialog p {font-size:.8rem;color:var(--muted)}
+  .handoff-dialog label {display:block;font-size:.8rem;margin:1rem 0 .4rem}
+  .handoff-dialog input,.handoff-dialog textarea {box-sizing:border-box;width:100%;padding:.65rem;background:#080e18;border:1px solid #41506a;border-radius:4px;color:var(--ink);font:inherit;font-size:.85rem}
+  .handoff-dialog textarea {min-height:140px;resize:vertical}
+  .handoff-dialog button {min-height:42px;padding:.5rem .8rem;border:1px solid var(--line);border-radius:5px;background:#192236;color:var(--ink);font:inherit;font-size:.8rem;cursor:pointer}
+  .handoff-close {display:block;margin-left:auto}
+  .handoff-dialog :focus-visible {outline:2px solid var(--glow-soft);outline-offset:3px}
+  .handoff-send {margin-top:1rem}
+  .handoff-honey {display:none}
+
+.lineage-gallery{margin:1.3rem 0 1.5rem}.lineage-gallery .gallery-row img{aspect-ratio:4/3;object-fit:cover}
+
+@media (max-width:700px) {
+  .stop { padding-left:1.5rem }
+  .spine::before { left:5px }
+  .stop .node { left:-2px }
+  .installation-gallery, .installation-film, .simulation-intro,
+  .presentation, .future-intelligence {
+    margin:2rem 0 0; padding:1.25rem 0 0;
+    border:0; border-top:1px solid var(--line); border-radius:0; background:transparent;
+  }
+  .presentation .slide-controls button { min-height:44px }
+  .phone-simulation-note { margin:.75rem 0 0; font-size:.875rem }
+  .room-launch, .swarm-launch, .film-cover {
+    border:1px solid var(--line); border-radius:8px; overflow:hidden; background:#06090f;
+  }
+  .room-launch, .swarm-launch { display:block; text-align:left }
+  .room-launch img, .swarm-launch img, .swarm-launch .swarm-motion {
+    aspect-ratio:16/9; height:auto; min-height:0; object-fit:contain; border-radius:0; transform:none;
+  }
+  .film-cover .film-play, .room-launch span, .swarm-launch span {
+    position:static; display:flex; flex-direction:row; align-items:center; justify-content:flex-start;
+    gap:.6rem; width:100%; max-width:none; min-height:46px; margin:0; padding:.65rem .85rem;
+    border:0!important; border-top:1px solid var(--line)!important; border-radius:0!important;
+    background:#111725!important; color:#e8dfed!important; font:inherit; font-size:.9rem!important; text-align:left;
+  }
+  .film-play span:first-child { display:inline; width:auto; height:auto; padding:0; border:0; background:none; font-size:inherit }
+  .film-cover .film-play[hidden] { display:none }
+  .film-cover:has(.film-play:focus-visible) { outline:2px solid #a8bcf4; outline-offset:3px }
+  .moon-guide { margin:1rem 0 }
+  .moon-guide p { position:static; width:100%; margin:.5rem 0 0 }
+  .moon-guide[open] { width:100% }
+  .moon-guide summary { margin-left:0 }
+}
+</style>
+<meta name="robots" content="noindex, nofollow">
+</head>
+<body>
+  <div class="wrap" id="top">
+
+    <header class="site">
+      <div class="site-intro">
+        <p class="eyebrow">Jed Berk · Transitional Species</p>
+        <h1>Belugas' Sphere</h1>
+        <p class="lede">Belugas' Sphere is an immersive installation: a swarm constellation of autonomous Belugas seeking the light. Each Beluga senses and responds to light through its own movement, creating a constantly changing environment shaped by light and human interaction.</p>
+        <span class="beluga-mark" aria-hidden="true"><img src="./Images/beluga-header-mark.png" alt="" width="992" height="924"></span>
+        <details class="site-index">
+          <summary>Index</summary>
+          <nav aria-label="Portal index">
+            <a href="#moon-to-sun">Moon to Sun · simulation</a>
+            <a href="./brief-technical-memo-preview.html">Technical brief</a>
+            <a href="#nested-intelligence">Nested intelligence</a>
+            <a href="#belugas-sphere">Taipei installation</a>
+            <a href="#installation-gallery">Photo gallery</a>
+            <a href="#installation-simulation">Taipei installation · simulation</a>
+            <a href="#presentation">Presentation and film</a>
+            <a href="#work-with-jed">Work with Jed</a>
+          </nav>
+        </details>
+      </div>
+      <figure class="hero-image"><img src="./Images/installation-selection/opening-nov-02-sharpened.jpg" alt="A person stands among floating Belugas beneath the glowing central sphere." width="2358" height="1550" fetchpriority="high"><figcaption>Belugas’ Sphere · Taipei, 2026</figcaption></figure>
+    </header>
+
+    <aside class="festival-note" aria-label="Taipei exhibition">
+      <p><strong>Taipei Digital Art Festival</strong></p>
+      <p>“Gray Autonomous Entity” · Taipei Collectible Botanical Garden</p>
+      <p id="festival-visit">Shown Oct 31 – Nov 15, 2026</p>
+      <p><a href="https://festival.dac.taipei/en/work-detail/?id=main-09" rel="noopener">Festival work page</a></p>
+    </aside>
+
+
+    <nav class="journey-index" aria-label="Explore the work"><a href="#belugas-sphere">01 · The installation</a><a href="#moon-to-sun">02 · Moon to Sun</a><a href="#nested-intelligence">Beyond · Nested intelligence</a></nav>
+    <p class="doors-label" id="explore-archive">Explore the archive</p>
+    <ol class="spine" aria-label="Three-stop timeline">
+
+      <li class="stop" id="blubber-bots">
+        <span class="node" aria-hidden="true"></span>
+        <p class="year">2007</p>
+        <h3>Blubber Bots</h3>
+        <p class="caption">Light-seeking DIY helium blimps — robotic inflatables that flocked, sang, and lived among people. About 700 were built by people around the world. Beluga Pod at Brandts, Odense (2008) gathered 35 into one orchestrated swarm visitors walked into. Blubber Bots were the offspring of the ALAVs (Autonomous Light Air Vessels), first developed in 2006 and refined as ALAVs 2.0 in 2007, which were networked and communicating. The Blubber Bots sought light with no communication. Belugas inherit both instincts: connect and seek light.</p>
+<div class="lineage-gallery" id="lineage-gallery" aria-label="Earlier autonomous installations">
+<div class="gallery-row">
+<figure><a href="./Images/lineage/alavs-in-flight.jpg" target="_blank" rel="noopener" aria-label="Open photo: ALAVs 2.0 in flight"><img src="./Images/lineage/alavs-in-flight.jpg" alt="Translucent autonomous vessels float above the floor in warm light." width="4372" height="2906" loading="lazy" decoding="async"></a><figcaption>ALAVs 2.0 in flight</figcaption></figure>
+<figure><a href="./Images/lineage/blubberbot-kit-hands.svg" target="_blank" rel="noopener" aria-label="Open photo: BlubberBot DIY kit"><img src="./Images/lineage/blubberbot-kit-hands.svg" alt="Hands holding the silver BlubberBot DIY kit package, with its printed robot drawing." width="840" height="630" loading="lazy" decoding="async"></a><figcaption>BlubberBot DIY kit</figcaption></figure>
+<figure><a href="./Images/lineage/beluga-pod-visitors.jpg" target="_blank" rel="noopener" aria-label="Open photo: Visitors inside Beluga Pod"><img src="./Images/lineage/beluga-pod-visitors.jpg" alt="Visitors stand among white Belugas in the gallery." width="2149" height="1502" loading="lazy" decoding="async"></a><figcaption>Visitors inside Beluga Pod</figcaption></figure>
+</div>
+</div>
+        <div class="links">
+          <a href="./resources/blubberbot-assembly-guide-v1-2.pdf" target="_blank" rel="noopener">Build a BlubberBot · PDF guide</a>
+          <a href="https://github.com/wiseman/blubber_bot" target="_blank" rel="noopener">BlubberBot firmware · archived by John Wiseman ↗</a>
+          <a href="https://makezine.com/article/craft/escape-of-the-blubber-bots/" rel="noopener">MAKE: Escape of the Blubber Bots (Mark Allen, Nov 20, 2007)</a>
+          <a href="https://www.jedberk.com/" rel="noopener">jedberk.com</a>
+          <a href="https://www.youtube.com/watch?v=XTPzJ-lzobo" target="_blank" rel="noopener">Watch ALAVs at the Taipei Digital Art Festival, 2008 ↗</a>
+          <a href="https://web.archive.org/web/20250317120102/http://people.artcenter.edu/~berk/q_alavs.html" rel="noopener">ALAVs / ArtCenter page</a>
+        </div>
+      </li>
+
+      <li class="stop" id="belugas-sphere">
+        <span class="node" aria-hidden="true"></span>
+        <p class="year">2026</p>
+        <h3>Belugas' Sphere</h3>
+        <p class="caption">At the Taipei Digital Art Festival, “Gray Autonomous Entity”. The pod returns to the room — helium inflatables floating around you — and looks nineteen years ahead toward Beluga Dyson.</p>
+        <div class="links">
+          <a href="https://festival.dac.taipei/en/work-detail/?id=main-09" rel="noopener">Festival work page</a>
+        </div>
+        <section class="installation-gallery" id="installation-gallery" aria-labelledby="installation-gallery-title">
+<h4 id="installation-gallery-title">Inside Belugas’ Sphere</h4>
+<h5>The room</h5>
+<div class="gallery-row">
+<figure><a href="./Images/installation-selection/room-at-rest.jpg" target="_blank" rel="noopener" aria-label="Open photo: At rest"><img src="./Images/installation-selection/room-at-rest.jpg" alt="Two rows of Belugas rest on the floor beneath the central sphere." width="4032" height="3024" loading="lazy" decoding="async"></a><figcaption>At rest</figcaption></figure>
+<figure><a href="./Images/installation-selection/room-blue.jpg" target="_blank" rel="noopener" aria-label="Open photo: The Belugas light the room blue"><img src="./Images/installation-selection/room-blue.jpg" alt="Floating Belugas cast blue light across the dim room beneath the central sphere." width="4032" height="3024" loading="lazy" decoding="async"></a><figcaption>As the central sphere dims, the Belugas flash blue, lighting the room.</figcaption></figure>
+<figure><a href="./Images/installation-selection/room-floating-belugas.jpg" target="_blank" rel="noopener" aria-label="Open photo: Belugas in flight"><img src="./Images/installation-selection/room-floating-belugas.jpg" alt="Floating Belugas fill the room around the glowing sphere." width="4032" height="3024" loading="lazy" decoding="async"></a><figcaption>Belugas in flight</figcaption></figure>
+</div>
+<h5>Visitors</h5>
+<p class="visitor-reflection">Unfamiliar, yet inviting, the Belugas draw people closer with delight and curiosity. Their fragile bodies and unexpected movements encourage people to move gently, pay attention and consider how their own actions shape the encounter.</p>
+<div class="gallery-row">
+<figure><a href="./Images/installation-selection/visitor-floor-level.jpg" target="_blank" rel="noopener" aria-label="Open photo: A visitor at floor level"><img src="./Images/installation-selection/visitor-floor-level.jpg" alt="A visitor crouches among floating Belugas beneath the central sphere." width="4032" height="3024" loading="lazy" decoding="async"></a><figcaption>A visitor at floor level</figcaption></figure>
+<figure><a href="./Images/installation-selection/visitors-blue.jpg" target="_blank" rel="noopener" aria-label="Open photo: Visitors in the blue room"><img src="./Images/installation-selection/visitors-blue.jpg" alt="Silhouettes of visitors stand among the Belugas in blue light." width="4032" height="3024" loading="lazy" decoding="async"></a><figcaption>Visitors in the blue room</figcaption></figure>
+<figure><a href="./Images/installation-selection/visitors-among-belugas.jpg" target="_blank" rel="noopener" aria-label="Open photo: Visitors among the Belugas"><img src="./Images/installation-selection/visitors-among-belugas.jpg" alt="Visitors look up at floating Belugas around the glowing sphere." width="4032" height="3024" loading="lazy" decoding="async"></a><figcaption>Visitors among the Belugas</figcaption></figure>
+</div>
+<figure class="visitor-quote">
+  <blockquote><p>“I shone a flashlight on them, but they still didn’t wake up. I also loved their beautiful, unique sounds.”</p></blockquote>
+  <figcaption>Benjamin · exhibition visitor</figcaption>
+</figure>
+<section class="visitor-clips" id="visitor-clips" aria-labelledby="visitor-clips-title">
+  <h5 id="visitor-clips-title">Filmed by visitors</h5>
+<div class="visitor-layout"><ul class="visitor-posts"><li><button type="button" class="visitor-select" aria-expanded="false" aria-controls="visitor-viewer" data-title="Walking among the Belugas" data-poster="./visitor-clips/lifefunfun-renjie-poster.jpg" data-source="./visitor-clips/lifefunfun-renjie.mp4" data-credit="Video by LAB. RJ 倫杰的生活實驗室 · @lifefunfun_renjie" data-url="https://x.com/omakase_chef/status/2119181063893479453"><span class="visitor-select-title">Walking among the Belugas</span><span class="visitor-credit">Video by LAB. RJ 倫杰的生活實驗室 · @lifefunfun_renjie</span></button></li><li><button type="button" class="visitor-select" aria-expanded="false" aria-controls="visitor-viewer" data-title="A visitor tries a flashlight" data-source="./visitor-clips/jeanlife.mp4" data-credit="Video by Jean / 靜 · @jeanlife11" data-url="https://x.com/omakase_chef/status/2119956226624962649"><span class="visitor-select-title">A visitor tries a flashlight</span><span class="visitor-credit">Video by Jean / 靜 · @jeanlife11</span></button></li><li><button type="button" class="visitor-select" aria-expanded="false" aria-controls="visitor-viewer" data-title="Inside a Beluga" data-source="./visitor-clips/windpic.mp4" data-credit="Video by Wind_Tsai · @wind.pic" data-url="https://x.com/omakase_chef/status/2120690759053746687"><span class="visitor-select-title">Inside a Beluga</span><span class="visitor-credit">Video by Wind_Tsai · @wind.pic</span></button></li><li><button type="button" class="visitor-select" aria-expanded="false" aria-controls="visitor-viewer" data-title="Drifting toward the light" data-source="./visitor-clips/dearno3.mp4" data-credit="Video by 三號｜展覽紀錄 · @dearno.3" data-url="https://x.com/omakase_chef/status/2121278203880968488"><span class="visitor-select-title">Drifting toward the light</span><span class="visitor-credit">Video by 三號｜展覽紀錄 · @dearno.3</span></button></li><li><button type="button" class="visitor-select" aria-expanded="false" aria-controls="visitor-viewer" data-title="Responding to light" data-source="./visitor-clips/beagledonut.mp4" data-credit="Video by BeagleDonut_Papa · @beagledonut_papa on Threads" data-url="https://x.com/omakase_chef/status/2122511322592292900" data-images="./visitor-clips/beagledonut-1.webp,./visitor-clips/beagledonut-2.webp" data-photo-url="https://x.com/omakase_chef/status/2122512037909811608"><span class="visitor-select-title">Responding to light</span><span class="visitor-credit">Video by BeagleDonut_Papa · @beagledonut_papa on Threads</span></button></li><li><button type="button" class="visitor-select" aria-expanded="false" aria-controls="visitor-viewer" data-title="Under the glowing sphere" data-source="./visitor-clips/eunice.mp4" data-credit="Video by Eunice · @eunicehuang0817 on Instagram" data-url="https://x.com/omakase_chef/status/2122742352041357643"><span class="visitor-select-title">Under the glowing sphere</span><span class="visitor-credit">Video by Eunice · @eunicehuang0817 on Instagram</span></button></li></ul>
+<section class="visitor-viewer" id="visitor-viewer" aria-labelledby="visitor-viewer-title" hidden>
+<button type="button" class="visitor-close">Close</button>
+<h6 id="visitor-viewer-title"></h6>
+<video controls playsinline preload="metadata"></video>
+<img class="visitor-still" hidden alt="">
+<div class="visitor-carousel" hidden><button type="button" data-step="-1" aria-label="Previous media">← Previous</button><span aria-live="polite"></span><button type="button" data-step="1" aria-label="Next media">Next →</button></div>
+<p class="visitor-credit"></p><a class="visitor-post-action" target="_blank" rel="noopener">View on X ↗</a>
+</section></div>
+</section>
+<h5>Materials and mechanisms</h5>
+<div class="gallery-row">
+<figure><a href="./Images/installation-selection/flight-mechanism.jpg" target="_blank" rel="noopener" aria-label="Open photo: Flight hardware"><img src="./Images/installation-selection/flight-mechanism.jpg" alt="The flight hardware hangs from a Beluga silhouetted against the central light." width="4032" height="3024" loading="lazy" decoding="async"></a><figcaption>Flight hardware</figcaption></figure>
+<figure><a href="./Images/installation-selection/membrane.jpg" target="_blank" rel="noopener" aria-label="Open photo: Feelers and bump switches"><img src="./Images/installation-selection/membrane.jpg" alt="Tipped feelers extend from a row of inflatable Belugas." width="4032" height="3024" loading="lazy" decoding="async"></a><figcaption>Feelers and bump switches</figcaption></figure>
+<figure><a href="./Images/installation-selection/beluga-flight-assemblies.jpg" target="_blank" rel="noopener" aria-label="Open photo: Beluga carriage systems with PCBs and sensor packages"><img src="./Images/installation-selection/beluga-flight-assemblies.jpg" alt="Circuit boards, small propellers and colored feelers stand together on a white table." width="2560" height="1920" loading="lazy" decoding="async"></a><figcaption>Beluga carriage systems with PCBs and sensor packages</figcaption></figure>
+</div>
+<h5>Build-out</h5>
+<div class="gallery-row">
+<figure><a href="./Images/installation-selection/rigging.jpg" target="_blank" rel="noopener" aria-label="Open photo: Rigging the central light"><img src="./Images/installation-selection/rigging.jpg" alt="A person on a lift works beside the suspended light sphere." width="4032" height="3024" loading="lazy" decoding="async"></a><figcaption>Rigging the central light</figcaption></figure>
+<figure><a href="./Images/installation-selection/assembly.jpg" target="_blank" rel="noopener" aria-label="Open photo: Preparing components"><img src="./Images/installation-selection/assembly.jpg" alt="People work beside a long table of components during the installation build." width="4032" height="3024" loading="lazy" decoding="async"></a><figcaption>Preparing components</figcaption></figure>
+<figure><a href="./Images/installation-selection/room-bright.jpg" target="_blank" rel="noopener" aria-label="Open photo: The room ready, with the staging door open"><img src="./Images/installation-selection/room-bright.jpg" alt="Two rows of Belugas rest beneath the lit sphere, with the backstage door open at the far end." width="4032" height="3024" loading="lazy" decoding="async"></a><figcaption>The room ready, with the staging door open</figcaption></figure>
+</div>
+</section>
+
+<section class="installation-film" id="installation-film" aria-labelledby="installation-film-title">
+  <h4 id="installation-film-title">Belugas’ Sphere · Installation film</h4>
+  <p class="caption">The room over time, as the light changes and visitors move among the Belugas.</p>
+  <video controls playsinline preload="metadata" poster="./installation-media/at-rest-film-poster.jpg" aria-label="Belugas’ Sphere installation film">
+    <source src="./installation-media/riley-cut-web.mp4" type="video/mp4">
+    <track kind="subtitles" src="./installation-media/riley-cut-en.vtt" srclang="en" label="English captions" default>
+  </video>
+  <div class="links"><a href="./installation-media/riley-cut-web.mp4">Open film separately</a></div>
+</section>
+<section class="simulation-intro" id="installation-simulation" aria-labelledby="installation-sim-title">
+<p class="year">Simulation 01 · The installation</p>
+<h4 id="installation-sim-title">Belugas’ Sphere · The room</h4>
+<p class="caption">Explore the space, light and individual behaviors behind the installation. The exhibition-to-orbit view opens a passage from the room to the imagined solar swarm.</p>
+<div class="room-player" data-simulation="./installation-room.html" data-title="Belugas’ Sphere room simulation">
+  <button type="button" class="room-launch" id="room-launch" aria-expanded="false" aria-controls="room-stage" hidden>
+    <img src="./Images/installation-room-preview.jpg" alt="" width="1974" height="794" loading="lazy">
+    <span>▶ Play the room simulation</span>
+  </button>
+  <div class="simulation-stage" id="room-stage" hidden>
+    <button type="button" class="simulation-close">Close simulation</button>
+    <div class="simulation-frame"></div>
+  </div>
+</div>
+<div class="links"><a class="primary-link" href="https://belugas-spheres.syuzique.chatgpt.site/" target="_blank" rel="noopener">Open the full simulation ↗</a></div>
+<p class="phone-simulation-note">Opens in a larger viewer on your phone. Turn your phone sideways for more room to explore.</p>
+</section>
+<section class="presentation" id="presentation" aria-labelledby="presentation-title">
+<p class="year">The presentation · Taipei, 2026</p>
+<h4 id="presentation-title">From sea to space.</h4>
+<p class="intro">Jed Berk’s presentation connects the installation in Taipei with the longer evolution of the Belugas and the imagined Beluga Dyson future. Browse the slides, then watch the accompanying film.</p>
+<div class="slide-frame"><img id="presentation-slide" src="./presentation/slide-01.png" alt="Presentation slide 1 of 10: From sea to space" width="1400" height="788"></div>
+<div class="slide-controls" aria-label="Slide navigation"><span id="slide-count" aria-live="polite">Slide 1 / 10</span><button id="slide-prev" disabled aria-label="Previous slide">← Previous</button><button id="slide-next" aria-label="Next slide">Next →</button></div>
+<div class="links"><a href="./presentation/deck.pdf" target="_blank">Open slide deck (PDF)</a><a href="./presentation/deck.pdf" download="Belugas-Sphere-From-Sea-to-Space.pdf">Download deck</a></div>
+<div class="film-block"><h5>Sphere to Dyson · presentation film</h5><p class="intro">Created for the November 1, 2026 presentation, with Traditional Chinese subtitles.</p><div class="film-cover"><video id="presentation-film" controls preload="metadata" playsinline poster="./Images/Belugas-Sphere-soft-AI-enhancement.png" aria-label="Sphere to Dyson presentation film"><source src="./talk_film_sphere_to_dyson_v6_zhsub_timer720.mp4" type="video/mp4">Your browser cannot play this film. Use the link below to open it.</video><button class="film-play" type="button" aria-label="Play Sphere to Dyson presentation film"><span aria-hidden="true">▶</span><span>Play presentation film</span></button></div><div class="links"><a href="./talk_film_sphere_to_dyson_v6_zhsub_timer720.mp4">Open film separately</a></div></div>
+</section>
+
+      </li>
+
+      <li class="stop" id="dyson-2045">
+        <span class="node" aria-hidden="true"></span>
+        <p class="year">2045</p>
+        <h3>Beluga <span class="dyson-symbol" aria-hidden="true">⊙</span> Dyson</h3>
+        <section class="simulation-intro" id="moon-to-sun" aria-labelledby="moon-to-sun-title">
+        <p class="year">Simulation 02 · The solar journey</p>
+        <h4 id="moon-to-sun-title">Beluga Dyson · Moon to Sun</h4>
+        <p class="caption">Moon to Sun traces a speculative path from the light-seeking robots in the Taipei installation to an autonomous swarm around the Sun. The simulation follows the Belugas from lunar manufacturing and launch into solar orbit, where they operate as solar-powered compute nodes and transmit their results back to Earth.</p>
+        <details class="moon-guide">
+          <summary><img src="./Images/beluga-header-mark.png" alt="" width="32" height="32">Beluga guide</summary>
+          <p>In Taipei, I followed a light in a room. Now, imagine me built on the Moon. Once we reach solar orbit, we use sunlight to power our computers. Each of us does a little of the work, and together we send what we learn back to Earth.</p>
+        </details>
+        <figure class="swarm-concept room-player" data-simulation-link="moon-full-view" data-title="Beluga Dyson · Moon to Sun simulation">
+          <button type="button" class="swarm-window swarm-launch" aria-expanded="false" aria-controls="moon-stage" hidden>
+            <img src="./Images/beluga-swarm-concept.png" alt="" loading="lazy"><video class="swarm-motion" muted loop playsinline preload="none" aria-hidden="true" tabindex="-1"><source src="./Images/beluga-swarm-motion.mp4" type="video/mp4"></video>
+            <span>▶ Launch simulation</span>
+          </button>
+          <div class="simulation-stage" id="moon-stage" hidden>
+            <button type="button" class="simulation-close">Close simulation</button>
+            <div class="simulation-frame"></div>
+          </div>
+          <figcaption>Beluga Dyson · a swarm around the Sun · concept</figcaption>
+        </figure>
+        <p class="stages">Moon launch → Solar swarm → Knowledge comes home</p>
+        <div class="links"><a class="primary-link" id="moon-full-view" href="https://omakasechef1.github.io/beluga/story/full/" target="_blank" rel="noopener">Open simulation in a new tab ↗</a><a href="./conveyor-layout-preview.html">Follow the process · 13-step conveyor guide</a></div>
+        <p class="phone-simulation-note">Launch Moon to Sun in portrait or landscape. Tap ••• for viewer options. You can also <a href="#presentation-film">watch the presentation film</a>.</p>
+        <aside class="moon-note" aria-labelledby="moon-note-title">
+          <h5 id="moon-note-title">Made on the Moon</h5>
+          <p class="caption">In this scenario, lunar soil supplies aluminium for the Belugas’ envelopes and silicon for their solar cells. The Moon’s weaker gravity makes it easier for them to leave the surface and begin the journey into orbit around the Sun.</p>
+          <p class="moon-reference"><a href="./brief-technical-memo-preview.html#made-on-the-moon">Lunar manufacturing and launch · technical brief</a></p>
+          <p class="credit-moon">Inspired by <a href="https://ethos-space.com/wp-content/uploads/2026/07/Ethos_LunarSilicon.pdf" rel="noopener">lunar manufacturing research from Ethos Space</a> and Brogan BamBrogan.</p>
+        </aside>
+        </section>
+        <section class="future-intelligence" id="nested-intelligence" aria-labelledby="nested-title">
+        <p class="year">Beyond the swarm · A possible evolution</p>
+        <h4 id="nested-title">Toward a nested intelligence</h4>
+        <p class="vision-statement">The Belugas turn sunlight into computation and send knowledge home. Intelligence emerges through the coordination of millions of individual Belugas, each contributing to a larger whole. Over time, the swarm could evolve into a nested intelligence—a speculative Matrioshka brain.</p>
+        <p class="caption">The shell study below explores the geometry of that possibility. In the sparse model, Belugas at three orbital distances receive sunlight directly. A later Matrioshka brain imagines nested layers of computation, with outer layers using energy released as heat by inner ones.</p>
+        <section class="interactive-shells" aria-label="Interactive 3D Matrioshka shells">
+          <h4>Explore rings and shells in 3D</h4>
+          <p>Watch the rings open into shells and shift into the speculative 2045 view. Drag or use the controls to take over.</p>
+          <iframe src="./matrioshka_shells_3d_v3.html?demo=1" title="Interactive three-dimensional Matrioshka shells" loading="lazy" allow="fullscreen"></iframe>
+          <div class="links"><a href="./matrioshka_shells_3d_v3.html" target="_blank" rel="noopener">Open the interactive shells full screen</a></div>
+          <p class="diagram-cap">The shells are a conceptual model shown without scale, and the 2045 view is speculative.</p>
+        </section>
+        <details class="model-notes"><summary>Model notes · orbital distances, energy and heat</summary><div class="shells" aria-label="Per-shell physics">
+          <p><strong>Outer shell, 1.0 AU.</strong> The model uses this radius as its baseline. At 1× sunlight, each Beluga generates about 270 W of electricity with 1 m² of solar cells at 20% efficiency. The estimated temperature is 315 K and depends on how much radiation the surface absorbs and emits. One orbit takes a year.</p>
+          <p><strong>Middle shell, 0.82 AU.</strong> At approximately √(2/3) AU, sunlight is 1.5× the baseline. With the same solar cells, each Beluga generates about 410 W. The estimated temperature is 350 K and one orbit takes about 270 days.</p>
+          <p><strong>Inner shell, 0.58 AU.</strong> At approximately √(1/3) AU, sunlight is 3× the baseline. With the same solar cells, each Beluga generates about 820 W. The estimated temperature is 415 K and one orbit takes about 160 days.</p>
+          <p>Solar flux follows 1/r² and orbital period scales as r^1.5, where r is the orbital radius. The seed model assumes the Belugas are spaced far enough apart for every shell to receive direct sunlight. Denser shells could shade one another.</p>
+          <p>In the proposed Matrioshka brain, outer shells could use waste heat once inner shells grow dense enough to block direct sunlight.</p>
+        </div></details>
+        </section>
+        
+      </li>
+
+    </ol>
+
+    <p class="doors-label" id="work-with-jed">Work with Jed</p>
+    <section class="doors" aria-labelledby="work-with-jed">
+
+      <article class="door" id="the-research">
+        <p class="tag">Systems · collaborations</p>
+        <h3>Systems collaboration and funding</h3>
+        <p>I’m seeking technical collaborators and funding partners to develop the next phase of Beluga Dyson through research, engineering and working prototypes.</p>
+        <p>I welcome conversations with researchers, engineers, startups and funding partners interested in robotics, autonomous systems and space.</p>
+        <p>The project explores machines that gather energy, make other machines and share what they learn—from installations on Earth to an evolving artwork around the Sun. It asks how these machines could improve what they build and how they work, expanding what becomes possible and what can be shared.</p>
+        <p>The research may also lead to robotics technologies, products and commercial partnerships. An autonomous artwork at orbital scale is, of course, my idea of a practical application.</p>
+        <div class="door-links">
+          <a href="./brief-technical-memo-preview.html">Beluga Dyson · technical brief for collaborators</a>
+          <a href="https://omakasechef1.github.io/beluga/story/full/" rel="noopener">Beluga Dyson · Moon to Sun simulation</a>
+        </div>
+        <p class="precedents">Precedents: <a href="https://www.caltech.edu/about/news/in-a-first-caltechs-space-solar-power-demonstrator-wirelessly-transmits-power-in-space" rel="noopener">Caltech MAPLE</a> (power beamed in space, 2023) &middot; <a href="https://www.media.mit.edu/projects/tesserae-self-assembling-space-architecture/overview/" rel="noopener">MIT TESSERAE</a> (self-assembling space tiles) &middot; <a href="https://www.nasa.gov/mission/starling/" rel="noopener">NASA Starling</a> (CubeSat swarm autonomy)</p>
+        <p class="contact"><a href="mailto:omakase@mail.grokbot.com">Talk to Agent Ray ↗</a><button class="handoff-launch" type="button">Request a human handoff → Jed</button></p>
+      </article>
+
+      <article class="door" id="the-work">
+        <p class="tag">Art · institutions</p>
+        <h3>Institutional inquiries</h3>
+        <p>Belugas’ Sphere and the wider Transitional Species body of work explore how people and autonomous machines share an environment. Through sculpture, movement, sound and collective behavior, each installation brings these relationships into public experience.</p>
+        <p>I welcome conversations with curators, museums, cultural centers, foundations and commissioning organizations interested in supporting new installations, exhibitions and public presentations. These partnerships can help the work grow into new places, forms and scales.</p>
+        <p class="contact"><a href="mailto:omakase@mail.grokbot.com">Talk to Agent Ray ↗</a><button class="handoff-launch" type="button">Request a human handoff → Jed</button></p>
+      </article>
+
+    </section>
+
+    <footer>
+      <nav class="footer-index" aria-labelledby="site-index-title">
+        <h2 id="site-index-title">Site index</h2>
+        <ul>
+          <li><a href="#top">Introduction</a></li>
+          <li><a href="#blubber-bots">Blubber Bots and ALAVs</a></li>
+          <li><a href="./resources/blubberbot-assembly-guide-v1-2.pdf" target="_blank" rel="noopener">BlubberBot assembly guide (PDF)</a></li>
+          <li><a href="https://github.com/wiseman/blubber_bot" target="_blank" rel="noopener">BlubberBot firmware (GitHub)</a></li>
+          <li><a href="#belugas-sphere">Taipei installation</a></li>
+          <li><a href="#installation-gallery">Photo gallery</a></li>
+          <li><a href="#visitor-clips">Visitor films</a></li>
+          <li><a href="#installation-film">Installation film</a></li>
+          <li><a href="#installation-simulation">Room simulation</a></li>
+          <li><a href="#presentation">Presentation and film</a></li>
+          <li><a href="#moon-to-sun">Moon to Sun</a></li>
+          <li><a href="./conveyor-layout-preview.html">Conveyor guide</a></li>
+          <li><a href="#nested-intelligence">Nested intelligence</a></li>
+          <li><a href="./matrioshka_shells_3d_v3.html">Interactive shells</a></li>
+          <li><a href="./brief-technical-memo-preview.html">Technical brief</a></li>
+          <li><a href="#the-research">Systems collaboration and funding</a></li>
+          <li><a href="#the-work">Institutional inquiries</a></li>
+        </ul>
+      </nav>
+      <div class="footer-return"><a href="#top">Back to top ↑</a><a href="https://x.com/omakase_chef" target="_blank" rel="noopener">X ↗</a></div>
+      Jed Berk · Belugas’ Sphere / Beluga Dyson
+    </footer>
+  </div>
+
+<script>
+(() => {
+  const preview = new URLSearchParams(location.search).get('preview');
+  const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
+  if (preview !== 'scroll-intro' || location.hash || reducedMotion.matches) return;
+
+  const travelDown = 740;
+  const travelUp = 660;
+  let startTime;
+  let interrupted = false;
+  const inputs = ['wheel', 'pointerdown', 'touchstart', 'keydown'];
+
+  function stop() {
+    interrupted = true;
+    inputs.forEach(type => window.removeEventListener(type, stop));
+  }
+
+  function sweep(now) {
+    if (interrupted || reducedMotion.matches) {
+      stop();
+      return;
+    }
+    startTime ??= now;
+    const elapsed = now - startTime;
+    if (elapsed >= travelDown + travelUp) {
+      window.scrollTo({ top: 0, behavior: 'instant' });
+      stop();
+      return;
+    }
+    const bottom = document.documentElement.scrollHeight - window.innerHeight;
+    const progress = elapsed <= travelDown
+      ? elapsed / travelDown
+      : 1 - (elapsed - travelDown) / travelUp;
+    const eased = (1 - Math.cos(Math.PI * progress)) / 2;
+    window.scrollTo({ top: Math.round(bottom * eased), behavior: 'instant' });
+    requestAnimationFrame(sweep);
+  }
+
+  inputs.forEach(type => window.addEventListener(type, stop, { passive: true }));
+  requestAnimationFrame(() => {
+    if (window.scrollY > 0) stop();
+    requestAnimationFrame(sweep);
+  });
+})();
+</script>
+
+<script>
+(() => {
+  const index = document.querySelector('.site-index');
+  index.addEventListener('click', event => {
+    if (event.target.closest('a')) index.open = false;
+  });
+  document.addEventListener('click', event => {
+    if (index.open && !index.contains(event.target)) index.open = false;
+  });
+  index.addEventListener('keydown', event => {
+    if (event.key === 'Escape' && index.open) {
+      index.open = false;
+      index.querySelector('summary').focus();
+    }
+  });
+})();
+</script>
+<script>
+(function(){let slide=1;const total=10;const img=document.getElementById('presentation-slide');const prev=document.getElementById('slide-prev');const next=document.getElementById('slide-next');function update(){img.src='./presentation/slide-'+String(slide).padStart(2,'0')+'.png';img.alt='Presentation slide '+slide+' of '+total;document.getElementById('slide-count').textContent='Slide '+slide+' / '+total;prev.disabled=slide===1;next.disabled=slide===total}prev.addEventListener('click',()=>{if(slide>1){slide--;update()}});next.addEventListener('click',()=>{if(slide<total){slide++;update()}})})();
+</script>
+<script>
+(function(){const img=document.querySelector('.swarm-window img');const reduced=window.matchMedia('(prefers-reduced-motion: reduce)');if(img){let pending=false;function draw(){pending=false;if(reduced.matches){img.style.removeProperty('--swarm-shift');return}const rect=img.parentElement.getBoundingClientRect();const amount=Math.max(-12,Math.min(12,(window.innerHeight/2-(rect.top+rect.height/2))*.035));img.style.setProperty('--swarm-shift',amount.toFixed(1)+'px')}function request(){if(!pending){pending=true;requestAnimationFrame(draw)}}window.addEventListener('scroll',request,{passive:true});window.addEventListener('resize',request);if(reduced.addEventListener)reduced.addEventListener('change',request);request()}})();
+</script>
+<script>(function(){const box=document.querySelector('.swarm-window'),video=box&&box.querySelector('.swarm-motion'),reduce=matchMedia('(prefers-reduced-motion: reduce)');if(!video)return;let visible=false;function update(){if(reduce.matches||!visible){video.pause();if(reduce.matches)box.classList.remove('motion-ready');return}let result=video.play();if(result&&result.then)result.then(()=>box.classList.add('motion-ready')).catch(()=>box.classList.remove('motion-ready'))}video.addEventListener('error',()=>box.classList.remove('motion-ready'));if('IntersectionObserver'in window){new IntersectionObserver(e=>{visible=e[0].isIntersecting;update()},{threshold:.15}).observe(box)}else{visible=true;update()}if(reduce.addEventListener)reduce.addEventListener('change',update)})();</script>
+
+<script>
+const phoneSimulationView = document.createElement('dialog');
+phoneSimulationView.className = 'phone-simulation-view';
+phoneSimulationView.innerHTML = `
+  <div class="phone-simulation-surface">
+    <div class="phone-simulation-toolbar">
+      <h2 id="phone-simulation-title"></h2>
+      <button type="button" data-menu aria-label="Viewer options" aria-expanded="false"><span aria-hidden="true">•••</span></button>
+      <button type="button" data-fullscreen hidden>Full screen</button>
+      <a data-standalone target="_blank" rel="noopener" hidden>Open separately</a>
+      <button type="button" data-close autofocus>Close</button>
+    </div>
+    <p class="phone-simulation-help">Turn your phone sideways for a wider view.</p>
+  </div>`;
+phoneSimulationView.setAttribute('aria-labelledby','phone-simulation-title');
+document.body.append(phoneSimulationView);
+const surface = phoneSimulationView.querySelector('.phone-simulation-surface');
+const fullButton = surface.querySelector('[data-fullscreen]');
+const standalone = surface.querySelector('[data-standalone]');
+const viewerMenu = surface.querySelector('[data-menu]');
+viewerMenu.addEventListener('click', () => {
+  viewerMenu.setAttribute('aria-expanded', String(viewerMenu.getAttribute('aria-expanded') !== 'true'));
+});
+let phoneLauncher;
+function syncFullscreen() {
+  const active = document.fullscreenElement === surface;
+  fullButton.hidden = !phoneSimulationView.classList.contains('is-solar') || !document.fullscreenEnabled;
+  fullButton.textContent = active ? 'Exit full screen' : 'Full screen';
+}
+function enterFullscreen() {
+  if (!document.fullscreenEnabled || !surface.requestFullscreen) return;
+  surface.requestFullscreen().catch(syncFullscreen);
+}
+document.addEventListener('fullscreenchange',syncFullscreen);
+fullButton.addEventListener('click',()=>{
+  if (document.fullscreenElement === surface) document.exitFullscreen().catch(syncFullscreen);
+  else enterFullscreen();
+});
+surface.querySelector('[data-close]').addEventListener('click',()=>phoneSimulationView.close());
+phoneSimulationView.addEventListener('close',()=>{
+  if (document.fullscreenElement === surface) document.exitFullscreen().catch(syncFullscreen);
+  surface.querySelector('iframe')?.remove();
+  phoneLauncher?.setAttribute('aria-expanded','false');
+  phoneLauncher?.focus({preventScroll:true});
+  phoneLauncher = null;
+});
+document.querySelectorAll('.room-player').forEach(player => {
+  const launch = player.querySelector('[aria-controls]');
+  const stage = document.getElementById(launch.getAttribute('aria-controls'));
+  const frameContainer = stage.querySelector('.simulation-frame');
+  const close = stage.querySelector('.simulation-close');
+  const source = player.dataset.simulation ||
+    document.getElementById(player.dataset.simulationLink).href;
+  launch.hidden = false;
+
+  launch.addEventListener('click', () => {
+    const frame = document.createElement('iframe');
+    frame.title = player.dataset.title;
+    const url = new URL(source,location.href);
+    const phone = matchMedia('(max-width:700px), (pointer:coarse) and (max-height:500px)').matches;
+    const solar = player.dataset.simulationLink === 'moon-full-view';
+    if (phone && solar) url.searchParams.set('clean','1');
+    frame.src = url.href;
+    frame.allowFullscreen = true;
+    if (phone || solar) {
+      viewerMenu.setAttribute('aria-expanded','false');
+      phoneSimulationView.querySelector('h2').textContent = player.dataset.title;
+      phoneSimulationView.classList.toggle('is-solar',solar);
+      standalone.href = url.href;
+      standalone.hidden = !solar;
+      phoneLauncher = launch;
+      launch.setAttribute('aria-expanded','true');
+      surface.append(frame);
+      phoneSimulationView.showModal();
+      syncFullscreen();
+      if (solar) {
+        viewerMenu.focus({preventScroll:true});
+        enterFullscreen();
+      }
+      return;
+    }
+    frameContainer.replaceChildren(frame);
+    stage.hidden = false;
+    launch.hidden = true;
+    launch.setAttribute('aria-expanded', 'true');
+    close.focus({preventScroll: true});
+    if (close.getBoundingClientRect().top < 0) close.scrollIntoView({block:'center'});
+  });
+  close.addEventListener('click', () => {
+    frameContainer.replaceChildren();
+    stage.hidden = true;
+    launch.hidden = false;
+    launch.setAttribute('aria-expanded', 'false');
+    launch.focus();
+  });
+});
+</script>
+
+<script>
+(() => {
+  const gallery = document.querySelector('.spine');
+  let active = null;
+  const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  function growPhoto(image, origin, panel) {
+    if (motion.matches || !image.animate || !origin.width || !origin.height) return;
+    const destination = image.getBoundingClientRect();
+    if (!destination.width || !destination.height) return;
+    const start = `translate(${origin.left - destination.left - window.scrollX}px, ${origin.top - destination.top - window.scrollY}px) scale(${origin.width / destination.width}, ${origin.height / destination.height})`;
+    panel.classList.add('is-growing');
+    const animation = image.animate([
+      { transform: start },
+      { transform: 'none' }
+    ], { duration: 440, easing: 'cubic-bezier(.22,.65,.3,1)' });
+    const finish = () => {
+      if (active?.animation === animation) panel.classList.remove('is-growing');
+    };
+    animation.finished.then(finish, finish);
+    return animation;
+  }
+
+  function closePhoto(restoreFocus) {
+    if (!active) return;
+    const { row, panel, button, animation } = active;
+    active = null;
+    animation?.cancel();
+    panel.classList.remove('is-growing');
+    panel.hidden = true;
+    row.classList.remove('is-previewing');
+    button.setAttribute('aria-expanded', 'false');
+    if (restoreFocus) button.focus();
+  }
+  gallery.querySelectorAll('.gallery-row').forEach((row, index) => {
+    const panel = document.createElement('div');
+    panel.className = 'gallery-expanded';
+    panel.id = 'gallery-expanded-' + (index + 1);
+    panel.hidden = true;
+    const close = document.createElement('button');
+    close.className = 'gallery-close';
+    close.type = 'button';
+    close.textContent = 'Close large view';
+    close.addEventListener('click', () => closePhoto(true));
+    panel.append(close);
+    row.before(panel);
+
+    row.querySelectorAll('figure').forEach(figure => {
+      const link = figure.querySelector('a');
+      const photo = link.querySelector('img');
+      const caption = figure.querySelector('figcaption');
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'gallery-photo-button';
+      button.setAttribute('aria-label', 'Enlarge photo: ' + caption.textContent);
+      button.setAttribute('aria-controls', panel.id);
+      button.setAttribute('aria-expanded', 'false');
+      button.append(photo);
+      link.replaceWith(button);
+      button.addEventListener('click', () => {
+        if (active?.button === button) {
+          closePhoto(true);
+          return;
+        }
+        const rect = photo.getBoundingClientRect();
+        const origin = { left: rect.left + window.scrollX, top: rect.top + window.scrollY,
+          width: rect.width, height: rect.height };
+        closePhoto(false);
+        const enlarged = document.createElement('figure');
+        const image = photo.cloneNode();
+        image.loading = 'eager';
+        const dismiss = document.createElement('button');
+        dismiss.type = 'button';
+        dismiss.className = 'gallery-photo-button';
+        dismiss.setAttribute('aria-label', 'Collapse large photo');
+        dismiss.append(image);
+        dismiss.addEventListener('click', () => closePhoto(true));
+        enlarged.append(dismiss, caption.cloneNode(true));
+        panel.replaceChildren(close, enlarged);
+        active = { row, panel, button };
+        button.setAttribute('aria-expanded', 'true');
+        row.classList.add('is-previewing');
+        panel.hidden = false;
+        if (panel.getBoundingClientRect().top < 0) {
+          panel.scrollIntoView({block:'start', behavior:'instant'});
+        }
+        active.animation = growPhoto(image, origin, panel);
+        close.focus({preventScroll:true});
+      });
+    });
+  });
+  document.addEventListener('keydown', event => {
+    if (event.key === 'Escape' && active && gallery.contains(document.activeElement)) {
+      event.preventDefault();
+      closePhoto(true);
+    }
+  });
+})();
+</script>
+
+<script>
+(() => {
+ const cards=[...document.querySelectorAll('.visitor-select')];
+ const viewer=document.getElementById('visitor-viewer');
+ const video=viewer.querySelector('video'), image=viewer.querySelector('img');
+ const carousel=viewer.querySelector('.visitor-carousel'), link=viewer.querySelector('a');
+ let active=null, slide=0;
+ function showSlide(){
+  const images=(active.dataset.images||'').split(',').filter(Boolean);
+  video.pause();video.hidden=slide!==0;image.hidden=slide===0;
+  if(slide){image.src=images[slide-1];image.alt=active.dataset.title+' · visitor photo '+slide;}
+  carousel.hidden=!images.length;
+  carousel.querySelector('span').textContent=(slide+1)+' / '+(images.length+1);
+  carousel.querySelector('[data-step="-1"]').disabled=slide===0;
+  carousel.querySelector('[data-step="1"]').disabled=slide===images.length;
+  link.href=slide&&active.dataset.photoUrl?active.dataset.photoUrl:active.dataset.url;
+ }
+ function close(){
+  video.pause();video.removeAttribute('src');video.load();viewer.hidden=true;
+  if(active){active.setAttribute('aria-expanded','false');active.focus({preventScroll:true});}
+  active=null;
+ }
+ function open(card,focus=true){
+  active?.setAttribute('aria-expanded','false');active=card;slide=0;
+  card.setAttribute('aria-expanded','true');viewer.hidden=false;
+  viewer.querySelector('h6').textContent=card.dataset.title;
+  viewer.querySelector('.visitor-credit').textContent=card.dataset.credit;
+  video.poster=card.dataset.poster||'';
+  video.src=card.dataset.source;video.setAttribute('aria-label',card.dataset.title);
+  showSlide();
+  if(focus){
+   viewer.querySelector('.visitor-close').focus({preventScroll:true});
+   if(matchMedia('(max-width:700px)').matches)viewer.scrollIntoView({block:'start',behavior:matchMedia('(prefers-reduced-motion:reduce)').matches?'instant':'smooth'});
+  }
+ }
+ for(const card of cards)card.addEventListener('click',()=>{
+  if(card===active){close();return;}
+  open(card);
+ });
+ // Offer a visible, paused example without moving the page or taking keyboard focus.
+ if(cards[0])open(cards[0],false);
+ viewer.querySelector('.visitor-close').addEventListener('click',close);
+ carousel.querySelectorAll('button').forEach(button=>button.addEventListener('click',()=>{slide+=Number(button.dataset.step);showSlide();}));
+ viewer.addEventListener('keydown',event=>{if(event.key==='Escape')close();});
+})();
+</script>
+<dialog class="handoff-dialog" aria-labelledby="handoff-title">
+  <button type="button" class="handoff-close" aria-label="Close contact form">Close</button>
+  <h2 id="handoff-title">A human handoff</h2>
+  <p>Send Jed a message about collaboration, funding or an exhibition.</p>
+  <form id="handoff-form" action="https://formsubmit.co/ajax/e4c7057e2e948928822f84e83caefd82" method="post">
+    <label for="handoff-name">Name</label>
+    <input id="handoff-name" name="name" autofocus autocomplete="name" maxlength="120" required>
+    <label for="handoff-email">Email</label>
+    <input id="handoff-email" name="email" type="email" autocomplete="email" maxlength="254" required>
+    <label for="handoff-message">Message</label>
+    <textarea id="handoff-message" name="message" maxlength="5000" required></textarea>
+    <div class="handoff-honey" aria-hidden="true"><label for="handoff-company">Leave this field empty</label><input id="handoff-company" name="_honey" tabindex="-1" autocomplete="off"></div>
+    <input type="hidden" name="_subject" value="Beluga Dyson · Human handoff">
+    <input type="hidden" name="_template" value="table">
+    <input type="hidden" name="_url" value="https://beluga-dyson-portal-review.syuzique.chatgpt.site/">
+    <button class="handoff-send" type="submit">Send to Jed</button>
+    <p role="status" id="handoff-status" aria-live="polite"></p>
+    <p>Messages are delivered through <a href="https://formsubmit.co/privacy.pdf" target="_blank" rel="noopener">FormSubmit</a>.</p>
+  </form>
+</dialog>
+<script>
+(() => {
+  const dialog=document.querySelector('.handoff-dialog');
+  const form=document.getElementById('handoff-form');
+  document.querySelectorAll('.handoff-launch').forEach(button=>button.addEventListener('click',()=>dialog.showModal()));
+  dialog.querySelector('.handoff-close').addEventListener('click',()=>dialog.close());
+  let sending=false;
+  form.addEventListener('submit',async event=>{
+    event.preventDefault();
+    if(sending)return;
+    sending=true;
+    const button=form.querySelector('[type="submit"]');
+    const status=document.getElementById('handoff-status');
+    button.disabled=true;
+    form.setAttribute('aria-busy','true');
+    status.textContent='Sending your message…';
+    try {
+      const response=await fetch(form.action,{
+        method:'POST',
+        headers:{'Content-Type':'application/json','Accept':'application/json'},
+        body:JSON.stringify(Object.fromEntries(new FormData(form)))
+      });
+      const result=await response.json();
+      if(!response.ok||String(result.success)!=='true')throw new Error('Delivery failed');
+      form.reset();
+      status.textContent='Thank you. Your message has been sent to Jed.';
+    } catch {
+      status.textContent='Your message could not be sent. Please try again.';
+    } finally {
+      sending=false;
+      button.disabled=false;
+      form.removeAttribute('aria-busy');
+    }
+  });
+})();
+</script>
+<script src="./communication-wave-pair.js?v=orbital-shell-4" data-default-drift="follow"></script>
+<script src="./presentation-film.js?v=phone-controls-1"></script>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a5d0a64909c12fe3',t:'MTc5NTEwNjM1MQ=='};var l=window.parent.location,o;try{o=new URL(l.origin).origin}catch(e){try{o=new URL(new URL(l.href).origin).origin}catch(e){o=''}}var u='/cdn-cgi/challenge-platform/scripts/jsd/main.js?ray=a5d0a64909c12fe3',a=document.createElement('script');a.src=o?new URL(u,o).href:u;document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

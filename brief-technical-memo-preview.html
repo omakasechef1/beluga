@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>Beluga Dyson · Technical brief</title>
+<style>
+  @page { size: letter; margin: 0.65in 0.7in 0.65in 0.7in; }
+  html { font-size: 10pt; }
+  body {
+    font-family: "Helvetica Neue", Helvetica, Arial, "Noto Sans", "DejaVu Sans", sans-serif;
+    line-height: 1.28;
+    color: #111;
+    max-width: none;
+    margin: 0;
+  }
+  h1 { font-size: 14.5pt; font-weight: 700; margin: 0 0 0.35em 0; line-height: 1.2; }
+  h2 { font-size: 11pt; font-weight: 700; margin: 0.85em 0 0.28em 0; border-bottom: 0.5pt solid #333; padding-bottom: 0.1em; page-break-after: avoid; }
+  p { margin: 0.28em 0; }
+  ul, ol { margin: 0.2em 0 0.35em 1.1em; padding: 0; }
+  li { margin: 0.12em 0; }
+  table { width: 100%; border-collapse: collapse; margin: 0.35em 0 0.5em 0; font-size: 9pt; }
+  th, td { border: 0.4pt solid #555; padding: 0.22em 0.4em; vertical-align: top; text-align: left; }
+  th { background: #f0f0f0; font-weight: 600; }
+  strong { font-weight: 600; }
+  a { color: #0645ad; text-decoration: none; word-break: break-all; }
+  .meta { font-size: 9pt; margin: 0.15em 0; }
+  .credit { font-size: 9pt; margin: 0.4em 0 0.6em 0; font-style: italic; }
+  .note { font-size: 9pt; margin: 0.2em 0 0.5em 0; }
+  hr { border: none; border-top: 0.4pt solid #999; margin: 0.55em 0; }
+
+/* Restrained typography preview for the technical handout. */
+@media screen { html { background:#eceeed; } body { box-sizing:border-box; background:#fff; max-width:920px; margin:32px auto; padding:55px 65px; box-shadow:0 6px 24px rgba(0,0,0,.08); } }
+@media screen and (max-width:650px) { body { margin:0; padding:28px 22px; } }
+body {font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;line-height:1.42;color:#17191c;}
+h1 {font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;font-size:19pt;line-height:1.17;letter-spacing:-.015em;margin-bottom:.65em;}
+h2 {font-family:"SFMono-Regular",Menlo,Monaco,monospace;font-size:10.5pt;font-weight:600;letter-spacing:.01em;color:#30343a;border-bottom:.5pt solid #b8bdc2;padding-bottom:.3em;margin:1.25em 0 .5em;}
+p {margin:.38em 0;} li {margin:.22em 0;} hr {border-top:.4pt solid #d1d4d7;margin:.8em 0;} th {background:#f1f2f3;} a{color:#334a70;}
+@media print {body{line-height:1.3} h1{font-size:17pt} h2{margin:.9em 0 .4em}}
+
+/* Elevated technical handout: restrained ink, hierarchy, and spacing. */
+body{color:#1e2228;line-height:1.48;}
+h1{font-size:20pt;line-height:1.18;letter-spacing:-.02em;max-width:22em;margin:0 0 .8em;}
+h1::before{content:"TECHNICAL BRIEF  /  2026";display:block;font:600 8pt/1.4 "SFMono-Regular",Menlo,monospace;letter-spacing:.12em;color:#665d79;margin-bottom:1em;}
+h2{font-size:10.3pt;letter-spacing:.025em;color:#39404b;border-bottom:1px solid #cdd0d5;padding-bottom:.42em;margin:1.45em 0 .65em;}
+.meta{color:#454b54;font-size:9pt;margin:.25em 0}.meta strong{color:#252b33}.credit{color:#555d67;margin:.7em 0}.note{color:#454b54;line-height:1.48}
+table{font-size:9pt;margin:.65em 0 1em}th,td{border-color:#c1c6cb;padding:.4em .55em}th{background:#f1f2f4;color:#29313b}a{color:#49557c}li{padding-left:.12em;margin:.38em 0}hr{border-color:#d8dbdf;margin:1em 0}
+@media print{h1::before{margin-bottom:.65em}h1{font-size:17pt}h2{margin:.95em 0 .4em}li{margin:.2em 0}body{line-height:1.32}}
+
+/* Technical memorandum typography preview. */
+body{font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;font-stretch:normal;color:#20252b;line-height:1.48;}
+h1{font-family:"SFMono-Regular",Menlo,Monaco,monospace;font-weight:600;font-size:18pt;letter-spacing:-.035em;line-height:1.2;max-width:25em;}
+h1::before{font-family:"SFMono-Regular",Menlo,monospace;font-size:7.6pt;font-weight:500;letter-spacing:.14em;color:#6c7180;}
+h2{display:flex;gap:1.2em;align-items:baseline;font-family:"SFMono-Regular",Menlo,Monaco,monospace;text-transform:uppercase;font-size:9.3pt;font-weight:600;letter-spacing:.035em;color:#343b46;border-bottom:1px solid #cfd3d8;padding-bottom:.55em;margin:1.5em 0 .7em;}
+.section-number{flex:0 0 2.3em;color:#8b929b;font-weight:500;letter-spacing:.02em}.claim-label{font-family:"SFMono-Regular",Menlo,monospace;font-size:.9em;font-weight:600;letter-spacing:-.02em;color:#343d49;}
+th{font-family:"SFMono-Regular",Menlo,monospace;font-size:.94em;letter-spacing:-.025em}table{break-inside:auto}tr{break-inside:avoid}h2{break-after:avoid}
+@media print{h1{font-size:16pt}h2{margin:.95em 0 .45em;font-size:9pt}body{line-height:1.32}}
+
+.brief-subtitle{font-family:"SFMono-Regular",Menlo,Monaco,monospace;font-size:9pt;letter-spacing:.025em;color:#68717d;margin:-.7em 0 1.5em;line-height:1.4}
+</style>
+<meta name="robots" content="noindex, nofollow">
+</head>
+<body>
+<h1>Beluga Dyson</h1>
+<p class="brief-subtitle">A technical brief for collaborators</p>
+<p class="meta"><strong>Artist:</strong> Jed Berk  </p>
+<p class="meta"><strong>Audience:</strong> Engineers and startups in robotics and space</p>
+<p class="meta"><strong>Date:</strong> November 4, 2026 · Power totals corrected November 5, 2026</p>
+<p class="credit">Physics notes: Kepler (Beluga Dyson team) for Jed Berk, Nov 4, 2026.</p>
+<p class="note">Claims are tagged <strong class="claim-label">[Physics]</strong> (established physics, with equation or source), <strong class="claim-label">[Assumption]</strong> (a modelling choice), or <strong class="claim-label">[Speculation]</strong> (design or story not yet tested).</p>
+<hr/>
+<h2><span class="section-number">01</span><span>What this is</span></h2>
+<p>Belugas&#x27; Sphere was shown at the Taipei Digital Art Festival (&quot;Gray Autonomous Entity&quot;) in 2026. Its lineage is Jed Berk&#x27;s earlier work: the ALAVs (networked and communicating, shown around 2007) and the Blubber Bots (light-seekers that flock with no communication). The Belugas inherit both instincts.</p>
+<p>The Beluga Dyson story projects nineteen years ahead to 2045. A seed of 10,000 sail-and-solar Belugas occupies three heliocentric rings. This sparse seed swarm receives direct sunlight and is the basis for the power estimates below. In the later growth scenario depicted in <em>Moon to Sun</em>, the swarm reaches 10 million as the rings tilt into three nested shells. <strong class="claim-label">[Speculation]</strong> The sims check orbits, sail times, film heat limits, and light delays against real physics. That rigor is what makes the work unusual as art: the fiction is labelled, and the numbers are not invented.</p>
+<ul><li><strong class="claim-label">[Assumption]</strong> Seed size and power scale (model arithmetic on stated choices): with 1 m² collectors and a nominal 1,360 W/m² at 1 AU, about 10,000 m² of collecting area takes about <strong>20.4 MW incident</strong> sunlight across the three rings (ideal counts N = [5,000, 10,000/3, 10,000/6] at r = [1, √(2/3), √(1/3)] AU). At <strong>20% cell efficiency</strong> that is about <strong>4.08 MW electrical</strong>. (Rounded radii 0.82 / 0.58 AU and counts 5,000 / 3,333 / 1,667 give nearly the same totals.) A full sphere at 1 AU would need about 2.8 × 10²³ m².</li><li><strong class="claim-label">[Assumption]</strong> Each Beluga presents about 1 m² to the Sun (about 1.1 m across, roughly 1.2 to 1.5 kg for the whole craft, including chip, laser and radiator).</li><li><strong class="claim-label">[Speculation]</strong> Growth from that seed into a true swarm, lunar factory, and the swarm &quot;thinking&quot; as a story beat.</li></ul>
+<hr/>
+<h2><span class="section-number">02</span><span>Swarm architecture</span></h2>
+<p>Three rings sit at about 1 AU, 0.82 AU, and 0.58 AU, with orbit periods of 365, 270, and 160 days. Belugas group in pods that shrink inward so power per pod stays roughly even.</p>
+<ul><li><strong class="claim-label">[Physics]</strong> At seed scale, about 1,667 pods per ring give roughly 5,000 / 3,333 / 1,667 Belugas from outer ring to inner. Along-orbit capacity at 3 m spacing is about 3.1 × 10¹¹ Belugas per ring, so 10,000 is sparse.</li><li><strong class="claim-label">[Physics]</strong> Same-radius orbits in different planes cross at two nodes. The shell design staggers radii and phases (Walker-style) so neighbours do not meet. One story-sim build used 36 staggered planes with the inner ring tilting first.</li><li><strong class="claim-label">[Assumption]</strong> Equal pod counts per ring and pod sizes 3 / 2 / 1 (outer to inner) are bookkeeping choices that keep ring power balanced.</li><li><strong class="claim-label">[Speculation]</strong> Tilting flat rings into shells is growth-triggered in the story, not forced by crowding at 10,000.</li></ul>
+<hr/>
+<h2><span class="section-number">03</span><span>Propulsion and orbit</span></h2>
+<p>Sunlight pushes a sail. A flat ideal reflector tilted near 35° gets the strongest sideways force, which lets a Beluga change orbital plane or spiral without propellant.</p>
+<ul><li><strong class="claim-label">[Physics]</strong> For the bare 50 g/m² sheet as an ideal mirror (sheet only, an upper bound), side acceleration at 1 AU is about 7.0 × 10⁻⁵ m/s² (∝ 1/r²). Edelbaum plane-change times at 1 AU for 30° / 45° / 90° are about 11 / 17 / 33 years; at 0.58 AU about 5 / 7 / 15 years. A real absorbing collector is slower. Tilt the inner ring first.</li><li><strong class="claim-label">[Physics]</strong> Spiral-in from 0.58 AU to 0.1 AU takes about 1.8 years under the same sail model. Spiral to the Mylar failure distance (~0.36 AU) takes about 1 year from the inner ring.</li><li><strong class="claim-label">[Assumption]</strong> Areal density ~50 g/m² for the collector sheet alone (the light-push mass model). The whole craft, at 1.2–1.5 kg per m², is about 25–30× heavier per m², so its real light-steering is that much slower. Either way it is far too heavy to hover: a statite needs under about 1.5 g/m².</li></ul>
+<hr/>
+<h2><span class="section-number">04</span><span>Materials and thermal</span></h2>
+<p>Each Beluga has a moon aluminium envelope: thin aluminium film made on the Moon, with the solar skin built onto it. Lunar soil has aluminium, silicon, iron, and oxygen; it has almost no carbon or hydrogen, so plastic film such as Mylar is a poor Moon-native choice. The shine on classic Mylar sails was always the aluminium coating.</p>
+<ul><li><strong class="claim-label">[Physics]</strong> 5 µm of aluminium is about 13.5 g/m² (density 2,700 kg/m³), well under the 50 g/m² mass model. Temperature scales as T ≈ 315 K · (1 AU / r)^(½). Failure distances: Mylar (fails near 527 K) about 0.36 AU; Kapton about 0.22 AU; aluminium (melts at 933 K) about 0.11 AU.</li><li><strong class="claim-label">[Physics]</strong> For the aluminium envelope, the burn-up band runs about 0.15 AU (glow and strength loss near the Draper point) to about 0.10 AU (melted, pieces fade).</li><li><strong class="claim-label">[Assumption]</strong> Film that thin is fragile, so it would be made and unfolded in space on a light frame. The drawn band assumes a solar-skinned envelope.</li><li><strong class="claim-label">[Speculation]</strong> Glass or basalt fibre cloth from moon rock where a non-metal layer is needed.</li></ul>
+<hr/>
+<h2 id="made-on-the-moon"><span class="section-number">05</span><span>Made on the Moon</span></h2>
+<p>The Belugas are built on the Moon, not on Earth. Leaving the Moon takes far less energy, and lunar soil already holds the metals and silicon the skin and cells need. What it lacks are carbon and hydrogen, so a few parts still come from Earth.</p>
+<ul><li><strong class="claim-label">[Physics]</strong> Launch energy: escape speeds are 2.38 km/s for the Moon vs 11.19 km/s for Earth (NASA Planetary Fact Sheet [1]). The minimum energy ½v² is about 2.8 vs 63 MJ/kg, roughly 22× less. Earth&#x27;s air drag and the rocket equation widen the real gap.</li><li><strong class="claim-label">[Physics]</strong> With no atmosphere, a solar-powered electric launcher (a mass driver) can throw parts off the surface without rockets.</li><li><strong class="claim-label">[Physics]</strong> Feedstock: highland regolith is mostly anorthite, a calcium-aluminium silicate (CaAl₂Si₂O₈; the lunar highlands are dominated by plagioclase [2]), so aluminium, silicon and oxygen are abundant. Carbon and hydrogen are nearly absent, so the Moon can make foil, solar cells, glass and basalt fibre, but not plastics.</li><li><strong class="claim-label">[Assumption]</strong> What the factory must make: the 5 µm aluminium envelope (≈13.5 g/m²), thin-film silicon solar skin on it, aluminium frames and struts, and wiring. Chips, gas and anything needing C or H are shipped from Earth at first.</li><li><strong class="claim-label">[Speculation]</strong> The factory itself: its builder, throughput, and whether it ever makes chips.</li><li><strong class="claim-label">[Speculation]</strong> Ethos Space's concept is a "flywheel": lunar silicon is "used to make thin-film solar cells, whose power is then used to extract yet more silicon," and the panels are eventually launched "off the surface to create megascale arrays around the Earth and eventually inward toward Mercury." Its estimated energy cost is 55–90 kWh/kg of 6N (99.9999%) silicon: about 75–90 from average regolith, 55–75 from a quartz-rich deposit [5].</li></ul>
+<p class="credit">Inspired by Ethos Space (Brogan BamBrogan, Ross Centers).</p>
+<hr/>
+<h2><span class="section-number">06</span><span>Power and onboard compute</span></h2>
+<p>The whole membrane works like a solar cell. Light the skin absorbs becomes electrical power. Light it reflects pushes the craft like a sail. Each Beluga trades sailing against thinking on the same square metre. Power cannot usefully be beamed between rings (a 1 m aperture at 1,550 nm over tens of millions of km makes a spot about 135 km wide), so each ring computes on its own sunlight and only messages travel. Sunlight becomes thought.</p>
+<ul><li><strong class="claim-label">[Physics]</strong> Absorber push is about half a perfect mirror&#x27;s: about 4.5 versus 9.1 µN/m² at 1 AU.</li><li><strong class="claim-label">[Assumption]</strong> 1 m² of 20% efficient skin: about 270 W electrical at 1 AU and about 820 W electrical on the inner ring (0.58 AU; middle ≈410 W). Seed <strong>electrical</strong> total about <strong>4.08 MW</strong>; seed <strong>incident</strong> total about <strong>20.4 MW</strong> (three-ring layout; ideal N and r as in §1). Do not treat 20.4 MW as electrical under these assumptions.</li><li><strong class="claim-label">[Physics]</strong> Precedent: Caltech&#x27;s Space Solar Power Demonstrator (SSPD-1), launched January 2023, carried MAPLE, which wirelessly transmitted power in space and beamed detectable power to Earth, using flexible lightweight transmitter arrays [3].</li></ul>
+<hr/>
+<h2><span class="section-number">07</span><span>Communications</span></h2>
+<p>Data hops neighbour to neighbour on a laser mesh around the Sun, then home to Earth or the Moon. Small questions stay local because a swarm-wide round trip is slow.</p>
+<ul><li><strong class="claim-label">[Physics]</strong> On a 1 AU shell, neighbour spacing is about 13.0 million km at 1,666 nodes, or about 7.5 million km at 5,000 nodes. Far side to Earth around the Sun is about π AU (~470 million km), about 36 hops, about 26 minutes of light travel.</li><li><strong class="claim-label">[Physics]</strong> One-way light delay from the swarm geometry spans 0 to 16.6 minutes (up to 2 AU). A relay just outside Earth&#x27;s Hill sphere (~1.5 million km) is about 5 light-seconds from Earth. A 1 m optic at 1,550 nm puts a beam spot of about 2.3 km at that range; Earth-orbit endpoints must track and hand off around occultations.</li><li><strong class="claim-label">[Speculation]</strong> How a question is split across Belugas, and where an answer &quot;gathers,&quot; are story beats, not a protocol design.</li><li><strong class="claim-label">[Physics]</strong> Precedent: NASA&#x27;s Starling mission (2023) flies four CubeSats in low-Earth orbit to test technologies that let spacecraft operate as a swarm in a synchronized manner without resources from the ground [4].</li></ul>
+<hr/>
+<h2><span class="section-number">08</span><span>Lifecycle</span></h2>
+<p>Worn Belugas retire by sailing sunward while they can still steer. Burn-up is the physics default. A recycler on an inner orbit is a story element.</p>
+<ul><li><strong class="claim-label">[Physics]</strong> Spiral from the inner ring (0.58 AU) toward 0.1 AU takes about 1.8 years. With an aluminium envelope, failure is near 0.11 AU inside the 0.15–0.10 AU burn-up band. Retire while steerable.</li><li><strong class="claim-label">[Speculation]</strong> A recycler at about 0.46 AU (just inside the inner ring) remakes frames, struts, foil, and wiring with concentrated sunlight (about 4.7× Earth intensity; parts near 460 K, so radiators are required). Fresh film substitutes, chips, and gas still come from the Moon. Who maintains the recycler is not modelled.</li></ul>
+<hr/>
+<h2><span class="section-number">09</span><span>Where the real world already is</span></h2>
+<p>ESA Φ-lab, with a consortium led by CS Group, issued an open call for collaborators on Sep 21, 2026 to expand the Earth Observation Virtual Constellation (EOVC):   https://philab.esa.int/esa-%cf%86-lab-calls-for-collaborators-to-expand-the-earth-observation-virtual-constellation/</p>
+<ul><li>Per Volt&#x27;s note (Nov 3, 2026): satellites, commercial constellations, and ground IoT sensors are coordinated by onboard AI and multi-agent software so they act as one federated swarm and task themselves in near real time. The call is for collaborators, not a procurement. The first demo is flood monitoring on the Danube and French rivers. Later phases named include disaster response, maritime, extreme weather, and infrastructure resilience.</li><li>Beluga Dyson shares the coordination idea (autonomous agents that reason and task as a swarm) at solar-system scale and in fiction. The EOVC work is the nearest operational analogue on record for this brief.</li></ul>
+<hr/>
+<h2><span class="section-number">10</span><span>What a first pilot could test</span></h2>
+<p>From the Kepler × Iris synthesis (Oct 2026), two concrete next steps:</p>
+<p><strong>Small simulation experiment.</strong> Three runs, same seed, band-local coverage τ = 0.5, N ≈ 200 discs, 50 orbits, overlap-free start with grading errors |δβ| ~ 10⁻⁷ so overlaps enter through penumbra:</p>
+<table>
+<tr><th>Run</th><th>Rule</th><th>β₀</th><th>Prediction</th></tr>
+<tr><td>A</td><td>R0 passive</td><td>10⁻⁴</td><td>Clean: no approaches under collector size D (below the escape-before-contact threshold ≈ 7.4 × 10⁻⁴)</td></tr>
+<tr><td>B</td><td>R0 passive</td><td>10⁻³</td><td>Grinds: victims fall onto casters within about 1.5 days of first overlap</td></tr>
+<tr><td>C</td><td>R4 backlight + radially neutral sidestep</td><td>10⁻³</td><td>Clean: residuals ≤ 1 cm/s; better worst-case exposure than B; total power within a few % of A</td></tr>
+</table>
+<p><strong>Focused pilot.</strong> Reproduce those runs, then sweep β₀, band coverage, switchable-panel fraction, and grading error; add a ghost (dead) element. Candidate control is R4: backlight handshake plus a closed push–brake sidestep near 28°, with caster β regrade and a victim recovery burn after any umbral start. Sanity checks: zero shear on a perfect grade; 4π·δβ rad of drift per orbit under constant shade; ~11 h to contact for a passive overlap at β₀ = 10⁻².</p>
+<hr/>
+<h2><span class="section-number">11</span><span>Invitation</span></h2>
+<p>Open to collaborations and advisory work with robotics and space teams on swarm control, sail and membrane materials, onboard compute, and laser mesh links. Contact: [contact]</p>
+<hr/>
+<h2><span class="section-number">—</span><span>Claim map</span></h2>
+<table>
+<tr><th>Kind</th><th>What it covers in this brief</th></tr>
+<tr><td><strong>Established [Physics]</strong></td><td>Ring radii and periods; sail plane-change and spiral times; aluminium / Mylar / Kapton failure distances and T ≈ 315 K · (1 AU/r)^(½); absorber vs reflector push; mesh hop count and light delays; Hill-sphere relay and 2.3 km spot; escape-before-contact threshold and sidestep residual budget; lunar vs Earth escape speed and launch energy; highland regolith feedstock (Al, Si, O; little C or H)</td></tr>
+<tr><td><strong>Assumed [Assumption]</strong></td><td>1 m² / 20% cells / ~50 g/m² sheet, 1.2–1.5 kg whole craft; equal pods and 3/2/1 pod sizes; fragile thin film on a light frame; solar-skinned burn-up band</td></tr>
+<tr><td><strong>Speculative [Speculation]</strong></td><td>Lunar factory itself (builder, throughput, whether it makes chips); growth to a dense shell; recycler at 0.46 AU and its upkeep; question/answer protocol; learning across generations</td></tr>
+</table>
+<p class="note"><strong>Sources:</strong> [1] NASA Planetary Fact Sheet, https://nssdc.gsfc.nasa.gov/planetary/factsheet/<br/>[2] J. Edmunson and D. L. Rickman, &quot;A Survey of Geologic Resources&quot; (NASA NTRS 20120015479): &quot;the lunar highlands are dominated by plagioclase&quot;; anorthite is CaAl₂Si₂O₈. https://ntrs.nasa.gov/api/citations/20120015479/downloads/20120015479.pdf<br/>[3] Caltech, &quot;In a First, Caltech&#x27;s Space Solar Power Demonstrator Wirelessly Transmits Power in Space&quot; (Jun 1, 2023), https://www.caltech.edu/about/news/in-a-first-caltechs-space-solar-power-demonstrator-wirelessly-transmits-power-in-space<br/>[4] NASA, &quot;Starling&quot;, https://www.nasa.gov/mission/starling/<br/>[5] Ethos Space, &quot;Lunar Silicon&quot; (2025; no authors listed in the PDF), https://ethos-space.com/wp-content/uploads/2026/07/Ethos_LunarSilicon.pdf</p>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a5d0a5df0d358250',t:'MTc5NTEwNjMzNA=='};var l=window.parent.location,o;try{o=new URL(l.origin).origin}catch(e){try{o=new URL(new URL(l.href).origin).origin}catch(e){o=''}}var u='/cdn-cgi/challenge-platform/scripts/jsd/main.js?ray=a5d0a5df0d358250',a=document.createElement('script');a.src=o?new URL(u,o).href:u;document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body></html>
